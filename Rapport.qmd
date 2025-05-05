@@ -73,13 +73,27 @@ kable(df_Q6_prop, captation = "Taux de réquentation en fonction des lieux d'ach
 
 ### 2.Nombre de lieux fréquentés très régulièrement (réponses 1/2) en moyenne
 
+#### Usage de R natif
+
+- (1)On sélectionne les données qui nous intéressent avec la fonction `select()` dans le dataframe de base ( On sélectionne les données de la colonne Q6_1 à Q6_12 ). 
+
+- (2)On regarde pour chaque individu pour chaque lieu si il  est très fréquenté ( = 1 ou = 2). cela nous retourne le dataframe de booléens (0 = False ou 1 = True) . Il nous reste à sommer par ligne à l'aide de la fonction `rowSums()`
+
+- (3)Pour afficher notre résultat on utilise la fontion `print()` à laquel on donne comme argument notre collage de à de la fonction `paste()` pour intégrer la moyenne arrondi à un chiffre après la virgule de notre moyenne du nombre de lieux très fréquenté
 ```{r}
-dt_nb_moy <- data %>% # selection des bonnes colonnes
-  select(Q6_1:Q6_12)
 
-nb_tres_freq <- rowSums(dt_nb_moy == 1 | dt_nb_moy == 2) # On compte le nombre de lieu très fréquenté par individu
+#(1)
 
-print(paste("Les répondants fréquentent en moyenne ",round(mean(nb_tres_freq),1)," lieux très régulièrement (au moins une fois par semaine)"))
+dt_nb_moy <- select(data, Q6_1:Q6_12)
+
+#(2)
+
+nb_tres_freq <- rowSums(dt_nb_moy == 1 | dt_nb_moy == 2)
+
+#(3)
+
+print(paste("Les répondants fréquentent en moyenne ",round(mean(nb_tres_freq),1),
+            " lieux très régulièrement (au moins une fois par semaine)"))
 ```
 
 ### 3.Répartition des répondants selon le nombre de lieux fréquentés très régulièrement
