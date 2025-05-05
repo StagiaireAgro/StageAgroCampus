@@ -58,5 +58,55 @@ nb_tres_freq <- rowSums(dt_nb_moy == 1 | dt_nb_moy == 2) # On compte le nombre d
 print(paste("Les répondants fréquentent en moyenne ",round(mean(nb_tres_freq),1)," lieux très régulièrement (au moins une fois par semaine)"))
 ```
 
+### 3.Répartition des répondants selon le nombre de lieux fréquentés très régulièrement
+
+```{r}
+
+df_nb_tres_freq <- as.data.frame(table(nb_tres_freq)) # On compte le nombre d'occurence par nb de lieux très fréquenté
+
+dt_nb_tres_freq_pourcent <- round(prop.table(table(nb_tres_freq))*100,2) # On tranforme la fréquence en %
+
+names(dimnames(dt_nb_tres_freq_pourcent)) <- "Nombre de lieux très fréquenté"
+
+kable(dt_nb_tres_freq_pourcent)  #  mise en forme du tableau
+
+
+
+ggplot(df_nb_tres_freq, aes(x = nb_tres_freq, y = Freq)) +
+  geom_bar(stat = "identity")+
+  labs(title = "fréquence par nombre lieux très fréquenté", x = "Nombre de lieux très fréquenté")
+  
+```
+
+### 4.Nombre de lieux fréquentés régulièrement (réponses 1/2/3/4) en moyenne
+
+```{r}
+dt_nb_moy <- data %>% # selection des bonnes colonnes
+  select(Q6_1:Q6_12)
+
+nb_rgl_freq <- rowSums(dt_nb_moy == 1 | dt_nb_moy == 2 | dt_nb_moy == 3 | dt_nb_moy == 4) # On compte le nombre de lieu régulièrement fréquenté par individu
+
+print(paste("Les répondants fréquentent en moyenne ",round(mean(nb_rgl_freq),1)," lieux régulièrement (au moins une fois par mois)"))
+```
+
+### 5. Répartition des répondants selon le nombre de lieux fréquentés régulièrement
+
+```{r}
+
+df_nb_rgl_freq <- as.data.frame(table(nb_rgl_freq)) # On compte le nombre d'occurence par nb de lieux régulièrement fréquenté
+
+dt_nb_rgl_freq_pourcent <- round(prop.table(table(nb_rgl_freq))*100,2) # On tranforme la fréquence en %
+
+names(dimnames(dt_nb_rgl_freq_pourcent)) <- "Nombre de lieux régulièrement fréquenté"
+
+kable(dt_nb_rgl_freq_pourcent)  #  mise en forme du tableau
+
+
+
+ggplot(df_nb_rgl_freq, aes(x = nb_rgl_freq, y = Freq)) +
+  geom_bar(stat = "identity")+
+  labs(title = "fréquence par nombre lieux régulièrement fréquenté", x = "Nombre de lieux régulièrement fréquenté")
+
+```
 
 
