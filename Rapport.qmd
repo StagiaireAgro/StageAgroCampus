@@ -23,6 +23,8 @@ data <- read_excel("24407_Export.xlsx")
 ## Questions :
 
 ### 1.Pour chaque lieu. Expression des fréquences des courses (Q6)
+#### Avec usage de library
+
 -   (1)On sélectionne les données qui nous intéressent avec la fonction `select()` dans le dataframe de base ( On sélectionne les données de la colonne Q6_1 à Q6_12 ). Pour travailler faire une action sur notre dataframe on l'outil `%>%` de la library dplyr
 
 -   (2)On fait une mise au format long de notre nouveau dataframe à l’aide de la fonction `pivot_longer()` de la library tidyverse.
