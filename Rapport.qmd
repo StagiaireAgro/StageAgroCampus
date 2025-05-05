@@ -5,6 +5,8 @@ editor: visual
 ---
 ## Packages
 
+Commençons par l’importation. Il n’existe pas de manière à notre connaissance d'importer le fichier Excel sans utiliser de librairie R. Il faut donc, charger la librairie readxl. Vous remarquerez que dans le bout de code ci-dessous, vous trouverez également l’import d’un autre package nommé kableExtra qui sera utilisé et expliqué à la fin de la procédure.
+
 ```{r, message=FALSE, warning=FALSE}
 library(readxl)
 library(dplyr)
@@ -13,6 +15,8 @@ library(kableExtra)
 ```
 
 ## Imporation des données
+
+Puis, on importe le fichier à l’aide de la commande read_excel() spécifique au fichier Excel.
 
 ```{r}
 
@@ -25,6 +29,120 @@ data <- read_excel("24407_Export.xlsx")
 ### 1.Pour chaque lieu. Expression des fréquences des courses (Q6)
 
 #### Avec R natif
+
+Dans cette option, nous utiliserons exclusivement les commandes basiques de R sans importer aucune librairie.
+
+#### Renommage des variables
+
+Dans cette option, il est possible de renommer immédiatement après avoir importé le jeu de données, à l’aide de la fonction names().
+
+1.  La commande names() permet de sélectionner le nom des variables du jeu de données
+
+2.  \[17:28\] permet de ne garder que les colonnes numéro 17 jusqu'au numéro 28
+
+3.  L'opérateur \<- est celui de l'affectation c() est l'opérateur de concaténation. Dedans, on précise le nouveau nom des colonnes
+
+```{r}
+# On crée une copie de data 
+
+data1 = data
+
+# On renomme le nom des colonnes de la question 6 de l'enquête
+
+names(data1)[17:28] <- c("Hypermarché", "Hard discount","Epiceries indépendante",
+                            "Magains de surgelé","Magasins spécialisés Bio", "Marché","Directement aux agriculteur",
+                            "Paniers en ligne", "Artisans et commerçants spécialisés", "Epicerie participative",
+                            "Magasin alimentaire spécialisé dans le vrac", "Magasin d'aide alimentaire")
+```
+
+#### Renommage des modalités
+
+Poursuivons avec le bon renommage des lignes des colonnes de la question 6. Etant donné qu'il faudra répéter exactement la même opération de renommage sur 13 colonnes, nous nous servirons d'une boucle for pour optimiser et éviter les copier-coller qui prend beaucoup de temps.
+
+```{r}
+# Vecteur de correspondance
+modifications <- c("1" = "Plusieurs fois par semaine",
+                   "2" = "1 fois par semaine",
+                   "3" = "2 à 3 fois par mois",
+                   "4" = "1 fois par mois",
+                   "5" = "Moins d’une fois par mois",
+                   "6" = "Seulement pour des événements particuliers",
+                   "7" = "Jamais")
+
+# Noms des colonnes à modifier
+colonnes_a_modifier <- c("Hypermarché", "Hard discount","Epiceries indépendante",
+                          	"Magains de surgelé","Magasins spécialisés Bio", "Marché","Directement aux agriculteur",
+                          	"Paniers en ligne", "Artisans et commerçants spécialisés", "Epicerie participative",
+                          	"Magasin alimentaire spécialisé dans le vrac", "Magasin d'aide alimentaire")
+
+# Appliquer les modifications à chaque colonne
+for (col in colonnes_a_modifier) {
+  data1[[col]] <- modifications[as.character(data1[[col]])]
+}
+
+```
+
+#### Sélection des colonnes d'intérêt
+
+Ensuite, pour cette question, nous n'avons besoin que des colonnes portant sur la question 6 de l'enquête. Pour ce faire, nous exploitons la fonction subset(). Elle a pour objectif de renvoyer des sous-ensembles de vecteurs, de matrices ou de trames de données qui répondent à certaines conditions.
+
+1.  Le premier argument obligatoire de subset() est le jeu de données. Ici, il s'agit de data1.
+
+2.  Le deuxième atgument obligatoire de subset() est la condition appliquée. Ici, il s'agit d'une sélection des colonnes 17 à 28 (qui sont celles de la question 6). D'où l'écriture, select = c(17:28) qui permet de le faire.
+
+```{r}
+data1_question_6 <- subset(data1, select = c(17:28))
+```
+
+#### Calcul des fréquences
+
+Maintenant, passons au calcul des fréquences avec la fonction lapply() Pour un jeu de données fourni, lapply() appliquera une ou des fonctions sur ce dernier. Nous entendons fonctions au sens large, c’est-à-dire que cela peut autant être des fonctions comme le type des variables, la somme etc. Les résultats renvoyés par la fonction lapply() seront au format liste.
+
+1.  On renseigne les données qui nous intéressent dans l’argument X. Ici, c'est data1_question_6
+
+2.  On remplit la ou les fonctions qu’on souhaite appliquer sur les données d’intérêt dans l'argument FUN. Ici, on utilisera round() pour arrondi les résultats à 2 décimales puis prop.table() pour calculer les fréquences et on multiplie par 100 pour obtenir des pourcentages.
+
+```{r}
+table_propr_courses_option_1 <- lapply(data1_question_6, function(x) round(prop.table(table(x)),2)*100)
+```
+
+#### Transformation en tableau de résultats explooitable et interprétable
+
+Le format liste n’est pas des plus appropriés pour lire des résultats dans un rapport. C’est pourquoi, nous décidons de métamorphoser les résultats listes en tableau de résultat grâce à la fonction as.data.frame() de R de base. Au sien de la fonction as.data.frame(), nous introduisons la fonction do.call() qui construit et exécute un appel de fonction à partir d’un nom ou d’une fonction et une liste d’arguments à lui transmettre.
+
+1.  Le premier argument de do.call() est le nom de la fonction. Ici, il s'agit de rbind() qui permet de combiner toutes nos listes par lignes. Attention, il faut s'assurer d'avoir exactement le même nombre de colonnes pour que rbind() marche. Sinon, une erreur sera renvoyée. Cette condition est bien vérifiée ici.
+
+2.  Le deuxième argument est la liste. Dans notre cas, il s'agit de table_propr_courses_option_1.
+
+```{r,message=FALSE,warning=FALSE}
+# Tableau présentable des donénes
+table_propr_courses_option_1 <- as.data.frame(do.call(rbind, table_propr_courses_option_1))
+```
+
+#### Mise en forme du tableau
+
+Nous allons crééer et ajouter une colonne pour le libellé du lieu d'achat à l'aide de la fonction de concaténation c() et le \$. Par défaut, R place automatyiquement la nouvelle colonne créée en dernière position. Il est plus naturel et logique d'avoir le libellé du lieu d'achat en première position. Ainsi, grâce à la sélection, la concaténation et le nombre de colonnes (ncol()), nous exécutons cela. De plus, nous ajoutons le symbole % dans chaque cellule de notre tableau avec une boucle for et de la fonction paste0() qui permet de concaténer.
+
+```{r}
+# Création de la nouvelle colonne Type et de ses modalités
+
+Type=c("Hypermarché", "Hard discount", "Epiceries indépendantes", "Magains de surgelés", "Magasins spécialisés Bio", "Marché", "Directement aux agriculteurs", "Paniers en ligne", 
+                                         "Artisans et commerçants spécialisés", "Epicerie participative", "Magasin alimentaire spécialisé dans le vrac", "Magasin d'aide alimentaire")
+
+# Ajoutons la colonne Type dans noytre tableau de résultats
+
+table_propr_courses_option_1$Type <- Type
+
+# Plaçons la dernière colonne Type à la première position 
+
+table_propr_courses_option_1 <- table_propr_courses_option_1[, c(ncol(table_propr_courses_option_1), 1:(ncol(table_propr_courses_option_1)-1))]
+```
+
+```{r}
+# Affichons le tableau final
+table_propr_courses_option_1
+```
+
 
 #### Avec usage de library
 
