@@ -85,6 +85,9 @@ kable(df_Q6_prop, captation = "Taux de réquentation en fonction des lieux d'ach
 - (3)Pour afficher notre résultat on utilise la fontion `print()` à laquel on donne comme argument notre collage de à de la fonction `paste()` pour intégrer la moyenne arrondi à un chiffre après la virgule de notre moyenne du nombre de lieux très fréquenté
 ```{r}
 
+#### Avec usage de library
+
+
 #(1)
 
 dt_nb_moy <- select(data, Q6_1:Q6_12)
