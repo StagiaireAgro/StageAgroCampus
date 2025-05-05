@@ -23,19 +23,20 @@ data <- read_excel("24407_Export.xlsx")
 ## Questions :
 
 ### 1.Pour chaque lieu. Expression des fréquences des courses (Q6)
+
 #### Avec usage de library
 
--   (1)On sélectionne les données qui nous intéressent avec la fonction `select()` dans le dataframe de base ( On sélectionne les données de la colonne Q6_1 à Q6_12 ). Pour travailler faire une action sur notre dataframe on l'outil `%>%` de la library dplyr
+-   (1) On sélectionne les données qui nous intéressent avec la fonction `select()` dans le dataframe de base (On sélectionne les données de la colonne Q6_1 à Q6_12). Pour travailler faire une action sur notre dataframe on l'outil `%>%` de la library dplyr
 
--   (2)On fait une mise au format long de notre nouveau dataframe à l’aide de la fonction `pivot_longer()` de la library tidyverse.
+-   (2) On fait une mise au format long de notre nouveau dataframe à l’aide de la fonction `pivot_longer()` de la library tidyverse.
 
--   (3)On passe toute les données en type facteur à l'aide de la fonction `factor()` où l'on définit les levels et les labels associés.
+-   (3) On passe toute les données en type facteur à l'aide de la fonction `factor()` où l'on définit les levels et les labels associés.
 
--   (4)A l’aide de la fonction `table()` on fait un tableau de fréquence en fonction des catégories croisés ( le lieux d’achat croisé avec sa régularité de fréquentation ).
+-   (4) A l’aide de la fonction `table()` on fait un tableau de fréquence en fonction des catégories croisés (le lieux d’achat croisé avec sa régularité de fréquentation).
 
--   (5)A partir de ce tableau on calcul les proportion d'individu en fonction des catégories croisés que l'on multipli par 100 pour avoir des pourcentages à l'aide de la fonction `prop.table()`. On arrondi à deux chiffres après la virgule avec la fonction `round()`.
+-   (5) A partir de ce tableau on calcul les proportion d'individu en fonction des catégories croisés que l'on multipli par 100 pour avoir des pourcentages à l'aide de la fonction `prop.table()`. On arrondi à deux chiffres après la virgule avec la fonction `round()`.
 
--   (6)Avec la fonction `kable()` du package KableExtra on met en forme ce tableau. On lui ajoute un style avec la fonction `kable_styling()` et on ajoute une note de fin de page avec la fonction `footnote()` qu l'on applique à kable à l'aide la `%>%`.
+-   (6) Avec la fonction `kable()` du package KableExtra on met en forme ce tableau. On lui ajoute un style avec la fonction `kable_styling()` et on ajoute une note de fin de page avec la fonction `footnote()` qu l'on applique à kable à l'aide la `%>%`.
 
 ```{r}
 #(1)
@@ -57,7 +58,7 @@ df_Q6_L$value <- factor(df_Q6_L$value, levels = 1:7, labels = c("Plusieurs fois 
 
 #(4)
 
-df_Q6_freq <- table(df_Q6_L$Q6, fc$value)
+df_Q6_freq <- table(df_Q6_L$Q6, df_Q6_L$value)
 
 #(5)
 
