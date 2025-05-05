@@ -3,20 +3,49 @@ title: "PLAT4TERFOOD"
 format: pdf
 editor: visual
 ---
-
-## Quarto
-
-
-## Running Code
+## Packages
 
 ```{r}
-1 + 1
+library(readxl)
+library(dplyr)
+library(tidyverse)
+library(kableExtra)
 ```
 
-You can add options to executable code like this
+## Imporation des données
 
 ```{r}
-#| echo: false
-2 * 2
+
+data <- read_excel("24407_Export.xlsx")
+
 ```
+
+## Questions :
+
+### 1.Pour chaque lieu. Expression des fréquences des courses (Q6)
+
+```{r}
+  
+fc <- data %>%
+  select(Q6_1:Q6_12) %>%
+  pivot_longer(
+    cols = Q6_1:Q6_12,
+    names_to = "Q6",
+    values_to = "value")
+
+# On transforme avec les bon nom poiur une meilleur lisibilité
+
+fc$Q6 <- factor(fc$Q6, levels = paste("Q6_", seq(1:12), sep = ""), labels = c("Hypermarché, Supermarché","Hard discount","Epiceries indépendantes, de quartier, épiceries fines","Magasins de surgelés","Magasins spécialisés Bio","Marché","Directement aux agriculteurs","Paniers en ligne réalisés par un intermédiaire","Artisans et commerçants spécialisés","Epicerie participative, associative, supermarché coopératif","Magasin alimentaire spécialisé dans le vrac ou les produits locaux","Magasin d’aide alimentaire"))
+
+fc$value <- factor(fc$value, levels = 1:7, labels = c("Plusieurs fois par semaine","1 fois par semaine","2 à 3 fois par mois","1 fois par mois","Moins d’une fois par mois","Seulement pour des événements particuliers","Jamais"))
+
+
+fc_prop <- round(prop.table(table(fc$Q6, fc$value),1)*100, 2)
+
+kable(fc_prop, captation = "Taux de réquentation en fonction des lieux d'achat" ) %>% # mise en forme du tableau
+  kable_styling(latex_options = "striped") %>%
+  footnote(general = "Format des données en pourcentage" )
+```
+
+
 
