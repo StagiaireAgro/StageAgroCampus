@@ -47,5 +47,16 @@ kable(fc_prop, captation = "Taux de réquentation en fonction des lieux d'achat"
   footnote(general = "Format des données en pourcentage" )
 ```
 
+### 2.Nombre de lieux fréquentés très régulièrement (réponses 1/2) en moyenne
+
+```{r}
+dt_nb_moy <- data %>% # selection des bonnes colonnes
+  select(Q6_1:Q6_12)
+
+nb_tres_freq <- rowSums(dt_nb_moy == 1 | dt_nb_moy == 2) # On compte le nombre de lieu très fréquenté par individu
+
+print(paste("Les répondants fréquentent en moyenne ",round(mean(nb_tres_freq),1)," lieux très régulièrement (au moins une fois par semaine)"))
+```
+
 
 
