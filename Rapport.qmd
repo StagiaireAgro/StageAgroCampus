@@ -1,6 +1,7 @@
 ---
 title: "PLAT4TERFOOD"
 format: pdf
+number-sections: true
 editor: visual
 ---
 ## Packages
