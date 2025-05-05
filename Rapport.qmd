@@ -34,7 +34,7 @@ data <- read_excel("24407_Export.xlsx")
 
 Dans cette option, nous utiliserons exclusivement les commandes basiques de R sans importer aucune librairie.
 
-#### Renommage des variables
+##### Renommage des variables
 
 Dans cette option, il est possible de renommer immédiatement après avoir importé le jeu de données, à l’aide de la fonction names().
 
@@ -57,7 +57,7 @@ names(data1)[17:28] <- c("Hypermarché", "Hard discount","Epiceries indépendant
                             "Magasin alimentaire spécialisé dans le vrac", "Magasin d'aide alimentaire")
 ```
 
-#### Renommage des modalités
+##### Renommage des modalités
 
 Poursuivons avec le bon renommage des lignes des colonnes de la question 6. Etant donné qu'il faudra répéter exactement la même opération de renommage sur 13 colonnes, nous nous servirons d'une boucle for pour optimiser et éviter les copier-coller qui prend beaucoup de temps.
 
@@ -84,7 +84,7 @@ for (col in colonnes_a_modifier) {
 
 ```
 
-#### Sélection des colonnes d'intérêt
+##### Sélection des colonnes d'intérêt
 
 Ensuite, pour cette question, nous n'avons besoin que des colonnes portant sur la question 6 de l'enquête. Pour ce faire, nous exploitons la fonction subset(). Elle a pour objectif de renvoyer des sous-ensembles de vecteurs, de matrices ou de trames de données qui répondent à certaines conditions.
 
@@ -96,7 +96,7 @@ Ensuite, pour cette question, nous n'avons besoin que des colonnes portant sur l
 data1_question_6 <- subset(data1, select = c(17:28))
 ```
 
-#### Calcul des fréquences
+##### Calcul des fréquences
 
 Maintenant, passons au calcul des fréquences avec la fonction lapply() Pour un jeu de données fourni, lapply() appliquera une ou des fonctions sur ce dernier. Nous entendons fonctions au sens large, c’est-à-dire que cela peut autant être des fonctions comme le type des variables, la somme etc. Les résultats renvoyés par la fonction lapply() seront au format liste.
 
@@ -108,7 +108,7 @@ Maintenant, passons au calcul des fréquences avec la fonction lapply() Pour un 
 table_propr_courses_option_1 <- lapply(data1_question_6, function(x) round(prop.table(table(x)),2)*100)
 ```
 
-#### Transformation en tableau de résultats explooitable et interprétable
+##### Transformation en tableau de résultats explooitable et interprétable
 
 Le format liste n’est pas des plus appropriés pour lire des résultats dans un rapport. C’est pourquoi, nous décidons de métamorphoser les résultats listes en tableau de résultat grâce à la fonction as.data.frame() de R de base. Au sien de la fonction as.data.frame(), nous introduisons la fonction do.call() qui construit et exécute un appel de fonction à partir d’un nom ou d’une fonction et une liste d’arguments à lui transmettre.
 
@@ -121,7 +121,7 @@ Le format liste n’est pas des plus appropriés pour lire des résultats dans u
 table_propr_courses_option_1 <- as.data.frame(do.call(rbind, table_propr_courses_option_1))
 ```
 
-#### Mise en forme du tableau
+##### Mise en forme du tableau
 
 Nous allons crééer et ajouter une colonne pour le libellé du lieu d'achat à l'aide de la fonction de concaténation c() et le \$. Par défaut, R place automatyiquement la nouvelle colonne créée en dernière position. Il est plus naturel et logique d'avoir le libellé du lieu d'achat en première position. Ainsi, grâce à la sélection, la concaténation et le nombre de colonnes (ncol()), nous exécutons cela. De plus, nous ajoutons le symbole % dans chaque cellule de notre tableau avec une boucle for et de la fonction paste0() qui permet de concaténer.
 
@@ -205,9 +205,6 @@ kable(df_Q6_prop, captation = "Taux de réquentation en fonction des lieux d'ach
 - (3)Pour afficher notre résultat on utilise la fontion `print()` à laquel on donne comme argument notre collage de à de la fonction `paste()` pour intégrer la moyenne arrondi à un chiffre après la virgule de notre moyenne du nombre de lieux très fréquenté
 ```{r}
 
-#### Avec usage de library
-
-
 #(1)
 
 dt_nb_moy <- select(data, Q6_1:Q6_12)
@@ -221,6 +218,7 @@ nb_tres_freq <- rowSums(dt_nb_moy == 1 | dt_nb_moy == 2)
 print(paste("Les répondants fréquentent en moyenne ",round(mean(nb_tres_freq),1),
             " lieux très régulièrement (au moins une fois par semaine)"))
 ```
+#### Avec usage de library
 
 ### 3.Répartition des répondants selon le nombre de lieux fréquentés très régulièrement
 
