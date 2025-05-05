@@ -5,7 +5,8 @@ editor: visual
 ---
 ## Packages
 
-Commençons par l’importation. Il n’existe pas de manière à notre connaissance d'importer le fichier Excel sans utiliser de librairie R. Il faut donc, charger la librairie readxl. Vous remarquerez que dans le bout de code ci-dessous, vous trouverez également l’import d’un autre package nommé kableExtra qui sera utilisé et expliqué à la fin de la procédure.
+Commençons par l’importation. Il n’existe pas de manière à notre connaissance d'importer le fichier Excel sans utiliser de librairie R. Il faut donc, charger la librairie readxl. 
+Vous remarquerez que dans le bout de code ci-dessous, vous trouverez également l’import d’un autre package nommé kableExtra qui sera utilisé et expliqué à la fin de la procédure.
 
 ```{r, message=FALSE, warning=FALSE}
 library(readxl)
