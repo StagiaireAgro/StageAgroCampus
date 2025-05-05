@@ -5,7 +5,7 @@ editor: visual
 ---
 ## Packages
 
-```{r, echo = FALSE}
+```{r, message=FALSE, warning=FALSE}
 library(readxl)
 library(dplyr)
 library(tidyverse)
