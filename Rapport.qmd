@@ -5,7 +5,7 @@ editor: visual
 ---
 ## Packages
 
-```{r}
+```{r, echo = FALSE}
 library(readxl)
 library(dplyr)
 library(tidyverse)
@@ -77,7 +77,7 @@ kable(df_Q6_prop, captation = "Taux de réquentation en fonction des lieux d'ach
 
 - (1)On sélectionne les données qui nous intéressent avec la fonction `select()` dans le dataframe de base ( On sélectionne les données de la colonne Q6_1 à Q6_12 ). 
 
-- (2)On regarde pour chaque individu pour chaque lieu si il  est très fréquenté ( = 1 ou = 2). cela nous retourne le dataframe de booléens (0 = False ou 1 = True) . Il nous reste à sommer par ligne à l'aide de la fonction `rowSums()`
+- (2)On regarde pour chaque individu pour chaque lieu si il  est très fréquenté ( = 1 ou = 2). cela nous retourne le dataframe de booléens (0 = FALSE ou 1 = TRUE) . Il nous reste à sommer par ligne à l'aide de la fonction `rowSums()`
 
 - (3)Pour afficher notre résultat on utilise la fontion `print()` à laquel on donne comme argument notre collage de à de la fonction `paste()` pour intégrer la moyenne arrondi à un chiffre après la virgule de notre moyenne du nombre de lieux très fréquenté
 ```{r}
