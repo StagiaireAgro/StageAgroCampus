@@ -4,10 +4,8 @@ format: pdf
 number-sections: true
 editor: visual
 ---
-## Packages
 
-Commençons par l’importation. Il n’existe pas de manière à notre connaissance d'importer le fichier Excel sans utiliser de librairie R. Il faut donc, charger la librairie readxl. 
-Vous remarquerez que dans le bout de code ci-dessous, vous trouverez également l’import d’un autre package nommé kableExtra qui sera utilisé et expliqué à la fin de la procédure.
+## Packages
 
 ```{r, message=FALSE, warning=FALSE}
 library(readxl)
@@ -18,9 +16,7 @@ library(kableExtra)
 
 ## Imporation des données
 
-Puis, on importe le fichier à l’aide de la commande read_excel() spécifique au fichier Excel.
-
-```{r}
+```{r,}
 
 data <- read_excel("24407_Export.xlsx")
 
@@ -145,7 +141,6 @@ table_propr_courses_option_1 <- table_propr_courses_option_1[, c(ncol(table_prop
 table_propr_courses_option_1
 ```
 
-
 #### Avec usage de library
 
 -   (1) On sélectionne les données qui nous intéressent avec la fonction `select()` dans le dataframe de base (On sélectionne les données de la colonne Q6_1 à Q6_12). Pour travailler faire une action sur notre dataframe on l'outil `%>%` de la library dplyr
@@ -236,6 +231,10 @@ moyenne_freq
 
 ### 3.Répartition des répondants selon le nombre de lieux fréquentés très régulièrement
 
+#### Avec usage de library 
+
+- (1)On récupère les données `nb_tres_freq` qui sont le nombre de lieu d'achat très fréquenté par individu et 
+
 ```{r}
 
 df_nb_tres_freq <- as.data.frame(table(nb_tres_freq)) # On compte le nombre d'occurence par nb de lieux très fréquenté
@@ -248,11 +247,14 @@ kable(dt_nb_tres_freq_pourcent)  #  mise en forme du tableau
 
 
 
-ggplot(df_nb_tres_freq, aes(x = nb_tres_freq, y = Freq)) +
+ggplot(data = df_nb_tres_freq, mapping = aes(x = nb_tres_freq, y = Freq)) +
   geom_bar(stat = "identity")+
   labs(title = "fréquence par nombre lieux très fréquenté", x = "Nombre de lieux très fréquenté")
   
 ```
+
+
+
 
 ### 4.Nombre de lieux fréquentés régulièrement (réponses 1/2/3/4) en moyenne
 
@@ -285,4 +287,12 @@ ggplot(df_nb_rgl_freq, aes(x = nb_rgl_freq, y = Freq)) +
 
 ```
 
+### 6.Pour ceux qui n’ont qu’1 lieu régulier (au moins une fois par mois): lequel ? part des répondants concernés
+
+```{r}
+df_un_lieu_freq <- dt_nb_moy[rowSums(dt_nb_moy == 1 | dt_nb_moy == 2 | dt_nb_moy == 3 | dt_nb_moy == 4) == 1,]
+
+un_seul_lieu <- df_un_lieu_freq[df_un_lieu_freq == 1 | df_un_lieu_freq == 2 | df_un_lieu_freq == 3 | df_un_lieu_freq == 4]
+
+```
 
