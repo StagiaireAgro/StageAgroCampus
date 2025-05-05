@@ -226,7 +226,7 @@ print(paste("Les répondants fréquentent en moyenne ",round(mean(nb_tres_freq),
 4.  Faire une moyenne du nombre de lieux `mean()`
 
 ```{r}
-moyenne_freq <- df %>%
+moyenne_freq <- data %>%
   select(Q6_1:Q6_12) %>%
   mutate(across(everything(), ~ .x == 1 | .x == 2)) %>%
   rowSums() %>%
