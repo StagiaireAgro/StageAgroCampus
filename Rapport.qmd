@@ -220,6 +220,20 @@ print(paste("Les répondants fréquentent en moyenne ",round(mean(nb_tres_freq),
 ```
 #### Avec usage de library
 
+1.  Sélectionner les variables ou colonnes qui répondent à la question dans le jeu de données avec `select()`
+2.  Vérifier que toutes les colonnes vérifient la condition via `accross()`
+3.  Pour chaque individu, il faut compter le nombre de lieux qu'il a visité `rowSums()`
+4.  Faire une moyenne du nombre de lieux `mean()`
+
+```{r}
+moyenne_freq <- df %>%
+  select(Q6_1:Q6_12) %>%
+  mutate(across(everything(), ~ .x == 1 | .x == 2)) %>%
+  rowSums() %>%
+  mean()
+moyenne_freq
+```
+
 ### 3.Répartition des répondants selon le nombre de lieux fréquentés très régulièrement
 
 ```{r}
