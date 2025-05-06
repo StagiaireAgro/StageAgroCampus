@@ -430,7 +430,7 @@ library(magrittr) # %T>%
 (Frequence_regulier <- data %>% 
   select(Q6_1:Q6_12) %>%
   mutate(freq = rowSums(across(everything(), ~ .x==1 | .x==2 | .x==3 | .x==4))) %T>%
-  {{nombre_francais <- count(.)}} %>%
+  {{nombre_francais <<- count(.)}} %>%
   filter(freq==1) %>%
   summarise(round((count(.)/nombre_francais)*100,2)))
 ```
