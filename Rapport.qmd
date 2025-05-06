@@ -1,6 +1,6 @@
 ---
 title: "PLAT4TERFOOD"
-format: pdf
+format: html
 number-sections: true
 editor: visual
 ---
