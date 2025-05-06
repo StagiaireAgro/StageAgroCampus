@@ -393,10 +393,45 @@ ggplot(df_nb_rgl_freq, aes(x = nb_rgl_freq, y = Freq)) +
 
 ### 6.Pour ceux qui n’ont qu’1 lieu régulier (au moins une fois par mois): lequel ? part des répondants concernés
 
+#### Avec R natif
+
+(1) Création d'un vecteur qui sincrémente de 1 jusqu'à 12 via le symbole `:` 
+(2) Concatener deux expressions avec `paste()` notez que `sep=` précise le séparateur entre les expressions
+(3) Selection de colonnes en utilisant les crochets `[ligne, variables]`
+(4) Faire la somme par ligne des cellules qui vérifie la ou les condition(s) dans `rowSums()`, 
+En effet si la cellule vérifie alors elle vaut 1 sinon 0
+(5) Realiser un filtre en spécifiant la colonne et la condition
+(6) Arroundir la proportion calculé à deux chiffres après la virgule `round()`
+
 ```{r}
-df_un_lieu_freq <- dt_nb_moy[rowSums(dt_nb_moy == 1 | dt_nb_moy == 2 | dt_nb_moy == 3 | dt_nb_moy == 4) == 1,]
+num_var <- 1:12
+noms_var <- paste("Q6_", num_var, sep="")
+df_vars <- data[,noms_var]
+df_vars$freq <- rowSums(df_vars==1 | df_vars==2 | df_vars==3 | df_vars==4)
+df_vars_filter <- df_vars[df_vars$freq==1,]
+proportion <- (count(df_vars_filter)/count(df_vars))*100
+arrondir_proportion <- round(proportion, 2)
+```
 
-un_seul_lieu <- df_un_lieu_freq[df_un_lieu_freq == 1 | df_un_lieu_freq == 2 | df_un_lieu_freq == 3 | df_un_lieu_freq == 4]
+#### Avec usage de library
 
+(1) Sélection des variables spécifiques à la question : `select()`
+(2) Appliquer à toutes les cellules des variables une ou des condition(s) : `across(everything(), ~ condition)`
+(3) Pour chaque ligne ou individu faire la somme des cellules qui respectent le ou les conditions `rowSums()` 
+puis la stocker dans une nouvelle variable qu'on ajoutera à la base de donnée
+(4) Compter le nombre de français disponible dans la base via `count()` puis la stocker dans une 
+variable intermédiaire qui sera definie à l'intérieur de `{{}}`. L'opérateur utilisé avant doit être "%T>%"
+(5) Filtrer le jeu de donné avec `filter()` pour ne retenir que les individus ayant qu'un lieu régulier
+(6) Utiliser summarise pour calculer la proportion et ne garder qu'elle
+
+
+```{r}
+library(magrittr) # %T>% 
+(Frequence_regulier <- data %>% 
+  select(Q6_1:Q6_12) %>%
+  mutate(freq = rowSums(across(everything(), ~ .x==1 | .x==2 | .x==3 | .x==4))) %T>%
+  {{nombre_francais <- count(.)}} %>%
+  filter(freq==1) %>%
+  summarise(round((count(.)/nombre_francais)*100,2)))
 ```
 
