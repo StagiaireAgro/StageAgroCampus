@@ -271,7 +271,7 @@ barplot(tb_nb_tres_freq_pourcent)
 max_val <- max(tb_nb_tres_freq_pourcent)
 
 barplot(tb_nb_tres_freq_pourcent, 
-        main = "Répartition selon le nombre de lieux fréquentés très régulièremen",
+        main = "Répartition selon le nombre de lieux fréquentés très régulièrement",
         ylab = "pourcentage",
         xlab = "nombre de lieux très fréquenté",
         ylim = c(0,max_val+5))
@@ -282,14 +282,14 @@ coul[max_id] <- "cyan1"
 
 
 barplot(tb_nb_tres_freq_pourcent, 
-        main = "Répartition selon le nombre de lieux fréquentés très régulièremen",
+        main = "Répartition selon le nombre de lieux fréquentés très régulièrement",
         ylab = "pourcentage",
         xlab = "nombre de lieux très fréquenté",
         ylim = c(0,max_val+5),
         col = coul)
 
 barplot(tb_nb_tres_freq_pourcent, 
-        main = "Répartition selon le nombre de lieux fréquentés très régulièremen",
+        main = "Répartition selon le nombre de lieux fréquentés très régulièrement",
         ylab = "pourcentage",
         xlab = "nombre de lieux très fréquenté",
         ylim = c(0,max_val+5),
