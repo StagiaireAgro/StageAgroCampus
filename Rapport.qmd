@@ -233,23 +233,68 @@ moyenne_freq
 
 #### Avec usage de library 
 
-- (1)On récupère les données `nb_tres_freq` qui sont le nombre de lieu d'achat très fréquenté par individu et 
+1. On récupère les données `nb_tres_freq` qui sont le nombre de lieu d'achat très fréquenté par individu
+
+2. On transforme nos données en tableeau avec la fonction `table()`, puis on calcule la proportion de chaque variable (1 à 12) avec `prop.table()` que l'on va multiplier par cent pour avoir un pourcentage. On peutarrondir à deux chiffres après la virgule avec `round`
+
+3. On récupère le nom des dimenssions avec la fonction `dimnames()` et on récupère le nom du tableau avec `names` que l'on va réaffecter par son nouveau nom.
+
+4. On fait la mise en forme de notre tableau avec `kable()` 
+
+5. On fait le graphique a partir de notre tableau avec `barplot`
+- On ajoute le titre et le nom des axes et on ajuste la limite de l'axe y en fonction de la valeur maximale
+- On change la couleur des barres et on met en évidence la valeur maximale
+- On ajoute la valeur maximal au dessus de la barre à l'aide de la fonction `text()`
 
 ```{r}
 
-df_nb_tres_freq <- as.data.frame(table(nb_tres_freq)) # On compte le nombre d'occurence par nb de lieux très fréquenté
+#(1)
 
-dt_nb_tres_freq_pourcent <- round(prop.table(table(nb_tres_freq))*100,2) # On tranforme la fréquence en %
+head(nb_tres_freq)
 
-names(dimnames(dt_nb_tres_freq_pourcent)) <- "Nombre de lieux très fréquenté"
+#(2)
 
-kable(dt_nb_tres_freq_pourcent)  #  mise en forme du tableau
+tb_nb_tres_freq_pourcent <- round(prop.table(table(nb_tres_freq))*100,2) 
+
+#(3)
+
+names(dimnames(tb_nb_tres_freq_pourcent)) <- "Nombre"
+
+#(4)
+
+print(tb_nb_tres_freq_pourcent)
+
+#(5)
+
+barplot(tb_nb_tres_freq_pourcent)
+
+max_val <- max(tb_nb_tres_freq_pourcent)
+
+barplot(tb_nb_tres_freq_pourcent, 
+        main = "Répartition selon le nombre de lieux fréquentés très régulièremen",
+        ylab = "pourcentage",
+        xlab = "nombre de lieux très fréquenté",
+        ylim = c(0,max_val+5))
+
+coul <- rep("cyan3", length(tb_nb_tres_freq_pourcent))
+max_id <- which.max(tb_nb_tres_freq_pourcent)
+coul[max_id] <- "cyan1"
 
 
+barplot(tb_nb_tres_freq_pourcent, 
+        main = "Répartition selon le nombre de lieux fréquentés très régulièremen",
+        ylab = "pourcentage",
+        xlab = "nombre de lieux très fréquenté",
+        ylim = c(0,max_val+5),
+        col = coul)
 
-ggplot(data = df_nb_tres_freq, mapping = aes(x = nb_tres_freq, y = Freq)) +
-  geom_bar(stat = "identity")+
-  labs(title = "fréquence par nombre lieux très fréquenté", x = "Nombre de lieux très fréquenté")
+barplot(tb_nb_tres_freq_pourcent, 
+        main = "Répartition selon le nombre de lieux fréquentés très régulièremen",
+        ylab = "pourcentage",
+        xlab = "nombre de lieux très fréquenté",
+        ylim = c(0,max_val+5),
+        col = coul)
+text(x = max_id, y = max_val, labels = max_val, pos = 3, cex = 1.3)
   
 ```
 
