@@ -301,6 +301,64 @@ text(x = max_id, y = max_val, labels = max_val, pos = 3, cex = 1.3)
 
 #### Avec usage de library
 
+Voici la version avec usage de librairies R. Pour ce faire, nous utilsierons la librairie dplyr() (déjà vue et présentée lors de la question 1) pour générer les tableaux de contingences et de pourcentages des lieux fréquentés régulièrement par les consommateurs. Puis, nous nous appuyerons sur la fonction kable() de la librairie kableExtra() déjà rencontrée plus haut dans le rapport. Enfin, nous terminerons par une représentation graphique des lieux fréquentés régulièrement par les clients.
+
+```{r}
+# Tableau de contingence
+df_nb_tres_freq <- data.frame(nb_tres_freq) %>%
+  count(nb_tres_freq, name = "Effectif")
+
+# Tableau de pourcentages 
+dt_nb_tres_freq_pourcent <- data.frame(nb_tres_freq) %>%
+  count(nb_tres_freq) %>%
+  mutate(Pourcentage = round(n / sum(n) * 100, 2))
+
+# Mise en forme du tableau des pourcentages
+kable(dt_nb_tres_freq_pourcent) 
+
+```
+
+Voici, les différentes étapes à suivre pour construire un diagramme en barres avec la librairie ggplot2().
+
+**Etape 1 : Renseigner le jeu de données**
+
+La première des choses à faire est de rensigner sur quel jeu de données on travaille et le remplir dans l'argument ggplot(). Pour le moment, rien ne s'affiche et cela est tout à fait normal puisque nous n'avons pas encore précisé les variables pour construire le graphique et ni le type de graphique souhaité.
+
+```{r}
+ggplot(df_nb_tres_freq) #rien
+```
+
+**Etape 2 : Indiquer les variables retenues pour les axes des abscisses et des ordonnées**
+
+Maintenant, il faut indiquer les variables retenues pour les axes des abscisses et de ordonnées dans l'argument aes(). Ici, il faut remplir *nb_tres_freq* pour x et *Effectif* pour y. Pour le moment, toujours rien ne s'affiche puisqu'il manque d'informer le type de graphique à dessiner.
+
+```{r}
+ggplot(df_nb_tres_freq)+aes(x=nb_tres_freq,y=Effectif) #rien
+```
+
+**Etape 3 : Indiquer les variables retenues pour les axes des abscisses et des ordonnées**
+
+A l'aide de l'argument geom_bar() nous traçons le diagramme en barres. Par défaut, dans geom_bar(stat = "bin"), cela signifie que pour chaque valeur de x, les barres seront toutes dessinées à la même hauteur. De plus, le "bins" est incompatible avec des valeurs présentes sur l'axe des y, ce qui est notre cas ici. Il faut donc remplacer "bins" par le bon argument adéquate à savoir "identity". En effet, cela répond à notre besoin de représenter les hauteurs des barres qui prennent en compte les valeurs de y. Ainis, nous obtenons le premier diagramme en barres qui s'affiche à l'écran.
+
+```{r}
+ggplot(df_nb_tres_freq)+aes(x=nb_tres_freq,y=Effectif)+geom_bar(stat = "identity") # Bon
+```
+
+**Etape 4 : Personnalisation du graphique**
+
+Le graphique de l'étape précédente est correcte mais pas "complet". En fonction des besoin de l'utilisateurs, il est tout à fait possible par exemple d'ajouter un titre, changer le nom des axes x et y de colorier les barres, de changer le fond d'écran et pleins d'autres choses encore. Il existe différentes manières de procéder. En ce lieu, nous proposerons une façon de personnaliser le diagramme en barres.
+
+1.  Ajouter un titre : Avec labs(title = "")
+
+2.  Changer le nom des axes x et y : Avec labs(x="", y ="")
+
+3.  Colorier les barres : Avec geom_bar(fill = ""). On peut soit écrire le nom de couleurs en brut comme red, orange ou bien encore plus personnalisé le graphique en utilisant le code hexadéciamal des couleurs. Pour trouver les codes hexadéciamux des couleurs, on peut se rendre par exemple sur le site internet suivant : [**https://htmlcolorcodes.com/**]{.underline}
+
+```{r}
+ggplot(df_nb_tres_freq)+aes(x=nb_tres_freq,y=Effectif)+geom_bar(stat = "identity",fill = "#FF6666") + 
+  labs(title = "Répartition des lieux très fréquentés par les consommateurs", 
+       x = "Nombre de lieux très fréquentés",y = "Effectif")
+```
 
 ### 4.Nombre de lieux fréquentés régulièrement (réponses 1/2/3/4) en moyenne
 
