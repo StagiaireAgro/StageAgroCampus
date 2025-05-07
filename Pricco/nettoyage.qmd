@@ -1,1 +1,15 @@
+convert_kg <- function(data, num_unit, num_qt, tx_kg){
+  
+  data[[num_unit]] <- as.factor(data[[num_unit]])
+  levels(data[[num_unit]]) <- 1:length(levels(data[[num_unit]])) # on transorme les facteur en niveau 1:n
+  
+  convert_unit <- tx_kg[seq(1,length(tx_kg), by = 2)] #On selectionne la bonne convertion pour chaque observation grace au facteur
+  vecteur_convert <- convert_unit[data[[num_unit]]]   #On fait le vecteur de convertion pour chaque observation
+  
+  data$poidsenkg <- data[[num_qt]]/vecteur_convert #
+  
+  data_NaN <- data[is.nan(data$poidsenkg),]
+  
+  return(c(data,data_NaN))
 
+}
