@@ -74,7 +74,9 @@ data_conv <- data_conv_kg[[1]]
 
 data_NaN <- data_conv_kg[[2]]
 
+temps <- system.time(data_conv_kg <- convert_kg(data,num_unit,num_qt,tx_kg))
 
+temps
 
 ```
 ## Non calculable directement
@@ -127,6 +129,13 @@ data_conv_non_calc <- convert_non_calc(data = data_NaN,5,7,tx_kg_qt)
 data_NaN2 <- data_conv_non_calc[[2]]
 
 data_conv2 <- data_conv_non_calc[[1]]
+
+temps2 <- system.time(data_conv_non_calc <- convert_non_calc(data = data_NaN,5,7,tx_kg_qt))
+temps2
+
+```
+### Fonction cumulé
+```{r}
 
 ```
 
