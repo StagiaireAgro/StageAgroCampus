@@ -13,3 +13,20 @@ convert_kg <- function(data, num_unit, num_qt, tx_kg){
   return(c(data,data_NaN))
 
 }
+
+convert_non_calc <- function(data, num_name, num_qt, tx_kg_qt){
+  
+  data[[num_name]] <- as.factor(data[[num_name]])
+  levels(data[[num_name]]) <- 1:length(levels(data[[num_name]])) # on transorme les facteur en niveau 1:n
+  
+  convert_unit <- tx_kg_qt[seq(1,length(tx_kg_qt), by = 3)] #On selectionne la bonne convertion pour chaque observation grace au facteur
+  convert_qt <- tx_kg_qt[seq(2,length(tx_kg_qt), by = 3)]
+  
+  vecteur_convert_unit <- convert_unit[data[[num_name]]]
+  
+  vecteur_convert_qt <- convert_qt[data[[num_name]]]
+  
+  data$poidsenkg <- vecteur_convert_qt/vecteur_convert_unit*data$productConditioningQuantity
+
+
+}
