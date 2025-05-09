@@ -1,6 +1,6 @@
 remplissage_csv <- function(list_nom_csv,nom_fich_csv,Nom_indiv){
   
-  data_nom_fich_csv <- read.csv(paste("data/",nom_fich_csv, sep = ""))
+  data_nom_fich_csv <- read.csv(nom_fich_csv)
   
   for( nom_csv in list_nom_csv){
     
@@ -41,7 +41,7 @@ tests <- data.frame(nom_fich = nom_fich,
                     t_utilisateur = rep(NaN,length(nom_fich)),
                     nom = rep(NaN,length(nom_fich))
                     )
-write.csv(tests, "data/tests_cagette.csv",row.names = F)
+write.csv(tests, "tests_cagette.csv",row.names = F)
 
 ### Recuperer liste des fichier csv
 
