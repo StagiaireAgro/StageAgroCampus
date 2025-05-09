@@ -82,10 +82,6 @@ data_conv <- data_conv_kg[[1]]
 
 data_NaN <- data_conv_kg[[2]]
 
-temps <- system.time(data_conv_kg <- convert_kg(data,num_unit,num_qt,tx_kg))
-
-temps
-
 ```
 ## Non calculable directement
 
