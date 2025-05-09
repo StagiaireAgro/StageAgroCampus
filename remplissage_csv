@@ -1,0 +1,31 @@
+remplissage_csv <- function(list_nom_csv,nom_fich_csv,Nom_indiv){
+  
+  data_nom_fich_csv <- read.csv(paste("data/",nom_fich_csv, sep = ""))
+  
+  for( nom_csv in list_nom_csv){
+    
+    data <- read.csv(paste("data/",nom_csv,sep = ""))
+    
+    result <- calcul_kg(data, nom_csv)
+    
+    data_nom_fich_csv[data_nom_fich_csv[[1]] == nom_csv,2] <- nrow(result[[1]])
+    
+    data_nom_fich_csv[data_nom_fich_csv[[1]] == nom_csv,3] <- nrow(result[[2]])
+    
+    data_nom_fich_csv[data_nom_fich_csv[[1]] == nom_csv,4] <- result[[3]]
+    
+    data_nom_fich_csv[data_nom_fich_csv[[1]] == nom_csv,5] <- result[[4]]
+    
+    data_nom_fich_csv[data_nom_fich_csv[[1]] == nom_csv,6] <- Nom_indiv
+    
+    oui_non <- as.integer(readline(prompt = "voulez vous continuer ? (1 = oui/ 0 = non)"))
+    
+    if(!as.logical(oui_non)){
+      
+      return(data_nom_fich_csv)
+      
+      stop()
+      
+    } 
+    
+  }
