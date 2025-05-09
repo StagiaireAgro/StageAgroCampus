@@ -16,6 +16,8 @@ data <- read.csv("cagette_Abricot_2021_2022_2023.csv")
 ```{r}
 data$productConditioningUnit <- as.factor(data$productConditioningUnit)
 
+levels(data$productConditioningUnit)
+
 levels(data$productConditioningUnit) <- 1:length(levels(data$productConditioningUnit))
 
 levels(data$productConditioningUnit)
