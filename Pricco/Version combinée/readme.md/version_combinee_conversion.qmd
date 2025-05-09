@@ -115,7 +115,7 @@ calcul_kg <- function(data, nom_csv){
   
   t <- t2-t1
   
-  return(list(data_conv,l2[[2]],t))
+  return(list(data_conv,l2[[2]],l1[[3]]+l2[[3]],t))
   
 }
 ```
