@@ -29,3 +29,15 @@ remplissage_csv <- function(list_nom_csv,nom_fich_csv,Nom_indiv){
     } 
     
   }
+
+## Creation fichier csv
+
+nom_fich <- list.files(path = "data")
+tests <- data.frame(nom_fich = nom_fich,
+                    nb_valeurs_c = rep(NaN,length(nom_fich)),
+                    nb_valeur_nc = rep(NaN,length(nom_fich)),
+                    t_machine = rep(NaN,length(nom_fich)),
+                    t_utilisateur = rep(NaN,length(nom_fich)),
+                    nom = rep(NaN,length(nom_fich))
+                    )
+write.csv(tests, "data/tests_cagette.csv",row.names = F)
