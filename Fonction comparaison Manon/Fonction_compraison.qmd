@@ -1,10 +1,21 @@
 ```{r}
+# Comparaison des 2 fichiers 
+data_comparaison <- inner_join(data_ok, data_calculable, by = "idOrder")
+
+# Vérification aucune valeur manquante dans idOrder 
+sum(is.na(data_comparaison$idOrder))
+
+# Filtrons les lignes où le prix de la table de Manon et la notre est correct
+data_comparaison <- data_comparaison |> filter(prixKilo.x == prixKilo.y)
+```
+
+```{r}
 # Fonction : Comparaison aux résultats Manon 
 
 comparaison_prix_kg <- function(data_test,data_Manon){
 
   # Créons une nouvelle variable pour calculer le prix au kg 
-  data_test <- data_sortie[[1]]
+  data_test <- data_sortie[[1]] 
   data_test <- data_test |> mutate(prixKilo = orderProductPrice *poidsenkg)
   
   # Si c'est un facteur, on le transforme en caractère d'abord
@@ -17,12 +28,12 @@ comparaison_prix_kg <- function(data_test,data_Manon){
   data_Manon$prixKilo <- as.numeric(data_Manon$prixKilo)
   
   # Comparaison des 2 fichiers 
-  data_comparison <- inner_join(data_test, data_Manon, by = "idOrder")
+  data_comparaison <- inner_join(data_test, data_Manon, by = "idOrder")
 
   # Filtrons les lignes où le prix de la table de Manon et la notre est correct
-  data_comparison <- data_comparison |> filter(prixKilo.x == prixKilo.y)
+  data_comparaison <- data_comparaison |> filter(prixKilo.x == prixKilo.y)
   
-  return(data_comparison)
+  return(data_comparaison)
     
 }
 ```
@@ -31,4 +42,3 @@ comparaison_prix_kg <- function(data_test,data_Manon){
 # Test de la fonction comparaison aux résultats Manon
 data_comparaison <- comparaison_prix_kg(data_sortie,data_ok_courgettes)
 ```
-
