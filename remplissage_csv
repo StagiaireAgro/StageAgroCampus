@@ -42,3 +42,7 @@ tests <- data.frame(nom_fich = nom_fich,
                     nom = rep(NaN,length(nom_fich))
                     )
 write.csv(tests, "data/tests_cagette.csv",row.names = F)
+
+### Recuperer liste des fichier csv
+
+list_nom_fich <- list.files(path = "data/")
