@@ -112,7 +112,7 @@ temps
       
       vecteur_convert_qt <- convert_qt[data[[num_name]]] #On fait le vecteur de convertion de quantité
       
-      data$poidsenkg <- vecteur_convert_qt/vecteur_convert_unit*data$productConditioningQuantity #On utilise nos vecteur pour avoir le poids net en kg
+      data$poidsenkg <- vecteur_convert_qt/vecteur_convert_unit*data[[num_qt]]#On utilise nos vecteur pour avoir le poids net en kg
       
       data_NaN2 <- data[is.nan(data$poidsenkg),] 
       
