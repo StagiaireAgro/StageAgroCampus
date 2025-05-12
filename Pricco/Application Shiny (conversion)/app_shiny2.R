@@ -24,7 +24,8 @@ ui <- fluidPage(
                  
                  
                  numericInput("group_value", "3. Combien de cette unité pour 1kg :", value = 0),
-                 actionButton("apply_group", "Associer aux modalités sélectionnées")
+                 actionButton("apply_group", "Associer aux modalités sélectionnées"),
+                 uiOutput("quant_var_selector")
                  
                  
     ),
@@ -133,6 +134,7 @@ server <- function(input, output, session) {
     data.frame(Modalité = all_modalities, Valeur = assigned_values)
   })
 
+
   output$filtered_with_values <- renderDT({
     req(input$select_var_categ)
     var <- input$select_var_categ
@@ -144,17 +146,30 @@ server <- function(input, output, session) {
       valeurs_facteurs$data[[mod]] %||% NA
     })
     
-    # Tout sécurisé de la colonne Taux_conversion
     df$Taux_conversion <- ifelse(!is.na(df$valeur_associee) & df$valeur_associee != 0,
                                  1 / df$valeur_associee,
                                  NA)
     
-    # Nettoyage colonne temporaire
+    # jout colonne Proidskg si variable quantité sélectionnée
+    if (!is.null(input$quant_var) && input$quant_var %in% names(df)) {
+      df$Proidskg <- df$Taux_conversion * df[[input$quant_var]]
+    } else {
+      df$Proidskg <- NA
+    }
+    
     df$modalite <- NULL
     
-    # On affiche Taux_conversion dans le tableau final
-    df[, c(var, "valeur_associee", "Taux_conversion", setdiff(colnames(df), c(var, "valeur_associee", "Taux_conversion")))]
+    df[, c(var, "valeur_associee", "Taux_conversion", "Proidskg",
+           setdiff(colnames(df), c(var, "valeur_associee", "Taux_conversion", "Proidskg")))]
   }, rownames = TRUE, options = list(scrollX = TRUE))
+  
+
+  # Étape 4 - Sélection de la variable de quantité
+  output$quant_var_selector <- renderUI({
+    req(data_select())
+    choices <- names(data_select())
+    selectInput("quant_var", "4. Sélection de la variable quantité :", choices = choices)
+  })
   
 
   
