@@ -31,8 +31,12 @@ ui <- fluidPage(
     mainPanel(
       h4("Jeu de données"),
       dataTableOutput("file_csv"),
+      
       h4("Affectations actuelles :"),
       tableOutput("valeurs_associees"),
+      
+      h4("Jeu de données avec valeurs associées :"),
+      tableOutput("filtered_with_values")
     )
     
   )
@@ -123,17 +127,23 @@ server <- function(input, output, session) {
     dt <- data_select()
     all_modalities <- levels(dt[[input$select_var_categ]])
     assigned_values <- sapply(all_modalities, function(mod) {
-      valeurs_facteurs$data[[mod]] %||% NaN
+      valeurs_facteurs$data[[mod]] %||% NA
       })
     data.frame(Modalité = all_modalities, Valeur = assigned_values)
     })
-  
-  
-  
- 
-
-  
-  
+  observeEvent(input$apply_group,{
+    req(input$select_var_categ)
+    var <- input$select_var_categ
+    all_modalities <- levels(mtcars[[var]])
+    
+    df <- data_select()
+    df$modalite <- df[[var]]
+    
+    df$valeur_associee <- sapply(as.character(df$modalite), function(mod) {
+      valeurs_facteurs$data[[mod]] %||% NA
+    })
+    data_select(df)
+    })  
 }
 
 shinyApp(ui, server)
