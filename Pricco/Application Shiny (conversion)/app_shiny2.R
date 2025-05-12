@@ -13,20 +13,33 @@ ui <- fluidPage(
                  
                  actionButton("valide_file", "Valider le fichier selectione"),
                  textOutput("file_valide"),
+                 uiOutput("quant_var_selector"),
+                 uiOutput("price_var_selector"),
                  # Transformation de valeurs en facteur
                  uiOutput("trans_factor"),
                  
                  actionButton("apply_trans_factor", "Transformer"),
-                 # Parti affection valeur pour le facteurs 
+                 
+                 # Partie affection valeur pour le facteurs 
                  uiOutput("var_categ"),
                  
                  uiOutput("mod_selector"),
                  
                  
-                 numericInput("group_value", "3. Combien de cette unité pour 1kg :", value = 0),
+                 numericInput("group_value", " Combien de cette unité pour 1kg :", value = 0),
                  actionButton("apply_group", "Associer aux modalités sélectionnées"),
-                 uiOutput("quant_var_selector"),
-                 uiOutput("price_var_selector")
+                 
+                 
+                 # Partie 2 affection valeur pour le facteurs 
+                 uiOutput("trans_factor2"),
+                 actionButton("apply_trans_factor2", "Transformer"),
+                 
+                 uiOutput("var_categ2"),
+                 uiOutput("mod_selector2"),
+                 
+                 numericInput("group_value2", " Combien de cette unité pour 1kg :", value = 0),
+                 numericInput("group_qt2", " Quantité de cette unité :", value = 0),
+                 actionButton("apply_group2", "Associer aux modalités sélectionnées")
                  
     ),
     mainPanel(
@@ -36,7 +49,11 @@ ui <- fluidPage(
         
         tabPanel("jeu de données filtré",h4("Affectations actuelles :"),
                  tableOutput("valeurs_associees"),
-                 dataTableOutput("filtered_with_values"))
+                 dataTableOutput("filtered_with_values")),
+        
+        tabPanel("Non calculable directement",
+                 tableOutput("valeurs_associees2"),
+                 dataTableOutput("filtered_with_values2"))
       )
       
     )
@@ -100,6 +117,7 @@ server <- function(input, output, session) {
   # Parti affection valeur pour le facteurs 
   
   valeurs_facteurs <- reactiveValues(data = list())
+  data_c_direct <- reactiveVal()
   
   output$var_categ <- renderUI({
     req(input$choices_trans_factor)
@@ -133,8 +151,8 @@ server <- function(input, output, session) {
     })
     data.frame(Modalité = all_modalities, Valeur = assigned_values)
   })
-
-
+  
+  
   output$filtered_with_values <- renderDT({
     req(input$select_var_categ)
     var <- input$select_var_categ
@@ -175,30 +193,85 @@ server <- function(input, output, session) {
       df$prixKilo <- NA
     }
     
+    data_c_direct(df[!is.na(df$Proids_en_kg), c(var, "valeur_associee", "Taux_conversion", "Proids_en_kg", "prixKilo",
+                                                setdiff(colnames(df), c(var, "valeur_associee", "Taux_conversion", "Proids_en_kg", "prixKilo")))])
     
-    df[, c(var, "valeur_associee", "Taux_conversion", "Proids_en_kg", "prixKilo",
-           setdiff(colnames(df), c(var, "valeur_associee", "Taux_conversion", "Proids_en_kg", "prixKilo")))]
+    data_nc_direct(df[is.na(df$Proids_en_kg),])
     
-    
+    return(df[!is.na(df$Proids_en_kg), c(var, "valeur_associee", "Taux_conversion", "Proids_en_kg", "prixKilo",
+           setdiff(colnames(df), c(var, "valeur_associee", "Taux_conversion", "Proids_en_kg", "prixKilo")))])
+
   }, rownames = TRUE, options = list(scrollX = TRUE))
   
-
-  # Étape 4 - Sélection de la variable de quantité
   output$quant_var_selector <- renderUI({
     req(data_select())
     choices <- names(data_select())
-    selectInput("quant_var", "4. Sélection de la variable quantité :", choices = choices)
+    selectInput("quant_var", "Sélection de la variable quantité :", choices = choices)
   })
-  
-  # Étape 5 - Sélection de la variable de prix
   output$price_var_selector <- renderUI({
     req(data_select())
     choices <- names(data_select())
-    selectInput("price_var", "5. Sélection de la variable prix :", choices = choices)
+    selectInput("price_var", "Sélection de la variable prix :", choices = choices)
+  })
+  
+  # partie 2
+  valeurs_facteurs2 <- reactiveValues()
+  data_nc_direct <- reactiveVal()
+  
+  output$trans_factor2 <- renderUI({
+    req(input$apply_group)
+    
+    dt <- data_nc_direct()
+    choices <- names(dt)
+    selectInput("choices_trans_factor2", "Sélectionnez la variable à transformer en facteur", choices = names(dt))
+  })
+  observeEvent(input$apply_trans_factor2,{
+    req(input$choices_trans_factor2)
+    
+    dt <- data_nc_direct()
+    
+    var_factor <- input$choices_trans_factor2
+    
+    dt[[var_factor]] <- as.factor(dt[[var_factor]])
+    
+    data_nc_direct(dt)
+  })
+  
+  output$var_categ2 <- renderUI({
+    req(input$apply_group)
+    
+    dt <- data_nc_direct()
+    
+    choices <- names(dt)[sapply(dt, is.factor)]
+    
+    selectInput("select_var_categ2", "3. Choisissez une variable catégorielle :", choices = choices)
+  })
+  output$mod_selector2 <- renderUI({
+    req(input$select_var_categ2)
+    dt <- data_nc_direct()
+    choices <- levels(dt[[input$select_var_categ2]])
+    
+    selectInput("selected_mods2", "Sélectionnez un sous-ensemble de modalités :",
+                choices = choices, multiple = TRUE)
+  })
+  observeEvent(input$apply_group2, {
+    req(input$selected_mods2)
+    for (mod in input$selected_mods2) {
+      valeurs_facteurs2$data[[mod]] <- input$group_qt2/input$group_value2
+    }
+  })
+  output$valeurs_associees2 <- renderTable({
+    req(input$select_var_categ2)
+    dt <- data_nc_direct()
+    all_modalities <- levels(dt[[input$select_var_categ2]])
+    assigned_values <- sapply(all_modalities, function(mod) {
+      valeurs_facteurs2$data[[mod]] %||% NA
+    })
+    data.frame(Modalité = all_modalities, Valeur = assigned_values)
   })
   
   
-
+  
   
   
 }
