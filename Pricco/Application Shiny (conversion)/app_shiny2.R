@@ -150,17 +150,17 @@ server <- function(input, output, session) {
                                  1 / df$valeur_associee,
                                  NA)
     
-    # jout colonne Proidskg si variable quantité sélectionnée
+    # Ajout colonne Proidskg si variable quantité sélectionnée
     if (!is.null(input$quant_var) && input$quant_var %in% names(df)) {
-      df$Proidskg <- df$Taux_conversion * df[[input$quant_var]]
+      df$Proids_en_kg <- df$Taux_conversion * df[[input$quant_var]]
     } else {
-      df$Proidskg <- NA
+      df$Proids_en_kg <- NA
     }
     
     df$modalite <- NULL
     
-    df[, c(var, "valeur_associee", "Taux_conversion", "Proidskg",
-           setdiff(colnames(df), c(var, "valeur_associee", "Taux_conversion", "Proidskg")))]
+    df[, c(var, "valeur_associee", "Taux_conversion", "Proids_en_kg",
+           setdiff(colnames(df), c(var, "valeur_associee", "Taux_conversion", "Proids_en_kg")))]
   }, rownames = TRUE, options = list(scrollX = TRUE))
   
 
