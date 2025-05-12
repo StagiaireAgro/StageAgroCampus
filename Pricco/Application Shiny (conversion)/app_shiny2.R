@@ -25,8 +25,8 @@ ui <- fluidPage(
                  
                  numericInput("group_value", "3. Combien de cette unité pour 1kg :", value = 0),
                  actionButton("apply_group", "Associer aux modalités sélectionnées"),
-                 uiOutput("quant_var_selector")
-                 
+                 uiOutput("quant_var_selector"),
+                 uiOutput("price_var_selector")
                  
     ),
     mainPanel(
@@ -159,8 +159,27 @@ server <- function(input, output, session) {
     
     df$modalite <- NULL
     
-    df[, c(var, "valeur_associee", "Taux_conversion", "Proids_en_kg",
-           setdiff(colnames(df), c(var, "valeur_associee", "Taux_conversion", "Proids_en_kg")))]
+    # Ajout colonne poids en kg si variable quantité sélectionnée
+    if (!is.null(input$quant_var) && input$quant_var %in% names(df)) {
+      df$Proids_en_kg <- df$Taux_conversion * df[[input$quant_var]]
+    } else {
+      df$Proids_en_kg <- NA
+    }
+    
+    # Ajout colonne prixKilo si variable prix sélectionnée
+    if (!is.null(input$price_var) && input$price_var %in% names(df)) {
+      df$prixKilo <- ifelse(!is.na(df$Proids_en_kg) & df$Proids_en_kg != 0,
+                            df[[input$price_var]] / df$Proids_en_kg,
+                            NA)
+    } else {
+      df$prixKilo <- NA
+    }
+    
+    
+    df[, c(var, "valeur_associee", "Taux_conversion", "Proids_en_kg", "prixKilo",
+           setdiff(colnames(df), c(var, "valeur_associee", "Taux_conversion", "Proids_en_kg", "prixKilo")))]
+    
+    
   }, rownames = TRUE, options = list(scrollX = TRUE))
   
 
@@ -170,6 +189,14 @@ server <- function(input, output, session) {
     choices <- names(data_select())
     selectInput("quant_var", "4. Sélection de la variable quantité :", choices = choices)
   })
+  
+  # Étape 5 - Sélection de la variable de prix
+  output$price_var_selector <- renderUI({
+    req(data_select())
+    choices <- names(data_select())
+    selectInput("price_var", "5. Sélection de la variable prix :", choices = choices)
+  })
+  
   
 
   
