@@ -8,36 +8,36 @@ files_names <- list.files(path = "data")
 ui <- fluidPage(
   sidebarLayout(
     sidebarPanel("Calcul du Kg",
-      # Slection du fichier
-      selectInput("select_file", "1. Selectionnez le fichier", choices = files_names, selected = NULL),
-      
-      actionButton("valide_file", "Valider le fichier selectione"),
-      textOutput("file_valide"),
-      # Transformation de valeurs en facteur
-      uiOutput("trans_factor"),
-
-      actionButton("apply_trans_factor", "Transformer"),
-      # Parti affection valeur pour le facteurs 
-      uiOutput("var_categ"),
-      
-      uiOutput("mod_selector"),
-      
-      
-      numericInput("group_value", "3. Combien de cette unité pour 1kg :", value = 0),
-      actionButton("apply_group", "Associer aux modalités sélectionnées")
-      
-      
+                 # Slection du fichier
+                 selectInput("select_file", "1. Selectionnez le fichier", choices = files_names, selected = NULL),
+                 
+                 actionButton("valide_file", "Valider le fichier selectione"),
+                 textOutput("file_valide"),
+                 # Transformation de valeurs en facteur
+                 uiOutput("trans_factor"),
+                 
+                 actionButton("apply_trans_factor", "Transformer"),
+                 # Parti affection valeur pour le facteurs 
+                 uiOutput("var_categ"),
+                 
+                 uiOutput("mod_selector"),
+                 
+                 
+                 numericInput("group_value", "3. Combien de cette unité pour 1kg :", value = 0),
+                 actionButton("apply_group", "Associer aux modalités sélectionnées")
+                 
+                 
     ),
     mainPanel(
       tabsetPanel(
         tabPanel("Choix csv", h4("Jeu de données"),
                  dataTableOutput("file_csv")),
-                 
+        
         tabPanel("jeu de données filtré",h4("Affectations actuelles :"),
                  tableOutput("valeurs_associees"),
                  dataTableOutput("filtered_with_values"))
       )
-
+      
     )
     
   )
@@ -129,26 +129,33 @@ server <- function(input, output, session) {
     all_modalities <- levels(dt[[input$select_var_categ]])
     assigned_values <- sapply(all_modalities, function(mod) {
       valeurs_facteurs$data[[mod]] %||% NA
-      })
-    data.frame(Modalité = all_modalities, Valeur = assigned_values)
     })
+    data.frame(Modalité = all_modalities, Valeur = assigned_values)
+  })
+
   output$filtered_with_values <- renderDT({
-    req(input$var_categ)
-    var <- input$var_categ
-    all_modalities <- levels(mtcars[[var]])
+    req(input$select_var_categ)
+    var <- input$select_var_categ
     
     df <- data_select()
     df$modalite <- df[[var]]
     
     df$valeur_associee <- sapply(as.character(df$modalite), function(mod) {
-      valeurs$data[[mod]] %||% NA
+      valeurs_facteurs$data[[mod]] %||% NA
     })
     
-    df[, c(var, "valeur_associee", setdiff(colnames(df), c(var, "valeur_associee")))]
-  }, rownames = TRUE)
+    # Tout sécurisé de la colonne Taux_conversion
+    df$Taux_conversion <- ifelse(!is.na(df$valeur_associee) & df$valeur_associee != 0,
+                                 1 / df$valeur_associee,
+                                 NA)
+    
+    # Nettoyage colonne temporaire
+    df$modalite <- NULL
+    
+    # On affiche Taux_conversion dans le tableau final
+    df[, c(var, "valeur_associee", "Taux_conversion", setdiff(colnames(df), c(var, "valeur_associee", "Taux_conversion")))]
+  }, rownames = TRUE, options = list(scrollX = TRUE))
   
-  
- 
 
   
   
