@@ -23,20 +23,21 @@ ui <- fluidPage(
       uiOutput("mod_selector"),
       
       
-      numericInput("group_value", "3. Valeur à associer :", value = 0),
+      numericInput("group_value", "3. Combien de cette unité pour 1kg :", value = 0),
       actionButton("apply_group", "Associer aux modalités sélectionnées")
       
       
     ),
     mainPanel(
-      h4("Jeu de données"),
-      dataTableOutput("file_csv"),
-      
-      h4("Affectations actuelles :"),
-      tableOutput("valeurs_associees"),
-      
-      h4("Jeu de données avec valeurs associées :"),
-      tableOutput("filtered_with_values")
+      tabsetPanel(
+        tabPanel("Choix csv", h4("Jeu de données"),
+                 dataTableOutput("file_csv")),
+                 
+        tabPanel("jeu de données filtré",h4("Affectations actuelles :"),
+                 tableOutput("valeurs_associees"),
+                 dataTableOutput("filtered_with_values"))
+      )
+
     )
     
   )
@@ -131,19 +132,26 @@ server <- function(input, output, session) {
       })
     data.frame(Modalité = all_modalities, Valeur = assigned_values)
     })
-  observeEvent(input$apply_group,{
-    req(input$select_var_categ)
-    var <- input$select_var_categ
+  output$filtered_with_values <- renderDT({
+    req(input$var_categ)
+    var <- input$var_categ
     all_modalities <- levels(mtcars[[var]])
     
     df <- data_select()
     df$modalite <- df[[var]]
     
     df$valeur_associee <- sapply(as.character(df$modalite), function(mod) {
-      valeurs_facteurs$data[[mod]] %||% NA
+      valeurs$data[[mod]] %||% NA
     })
-    data_select(df)
-    })  
+    
+    df[, c(var, "valeur_associee", setdiff(colnames(df), c(var, "valeur_associee")))]
+  }, rownames = TRUE)
+  
+  
+ 
+
+  
+  
 }
 
 shinyApp(ui, server)
