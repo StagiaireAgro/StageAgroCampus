@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>PLAT4TERFOOD</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="Version_2_documentation_files/libs/clipboard/clipboard.min.js"></script>
+<script src="Version_2_documentation_files/libs/quarto-html/quarto.js"></script>
+<script src="Version_2_documentation_files/libs/quarto-html/popper.min.js"></script>
+<script src="Version_2_documentation_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="Version_2_documentation_files/libs/quarto-html/anchor.min.js"></script>
+<link href="Version_2_documentation_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="Version_2_documentation_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="Version_2_documentation_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="Version_2_documentation_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="Version_2_documentation_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="Version_2_documentation_files/libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="Version_2_documentation_files/libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">PLAT4TERFOOD</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="packages" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="packages"><span class="header-section-number">1</span> Packages</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="imporation-des-données" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="imporation-des-données"><span class="header-section-number">2</span> Imporation des données</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(<span class="st">"24407_Export.xlsx"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="questions" class="level2" data-number="3">
+<h2 data-number="3" class="anchored" data-anchor-id="questions"><span class="header-section-number">3</span> Questions :</h2>
+<section id="pour-chaque-lieu.-expression-des-fréquences-des-courses-q6" class="level3" data-number="3.1">
+<h3 data-number="3.1" class="anchored" data-anchor-id="pour-chaque-lieu.-expression-des-fréquences-des-courses-q6"><span class="header-section-number">3.1</span> 1.Pour chaque lieu. Expression des fréquences des courses (Q6)</h3>
+<section id="avec-r-natif" class="level4" data-number="3.1.1">
+<h4 data-number="3.1.1" class="anchored" data-anchor-id="avec-r-natif"><span class="header-section-number">3.1.1</span> Avec R natif</h4>
+<p>Dans cette option, nous utiliserons exclusivement les commandes basiques de R sans importer aucune librairie.</p>
+<section id="renommage-des-variables" class="level5" data-number="3.1.1.1">
+<h5 data-number="3.1.1.1" class="anchored" data-anchor-id="renommage-des-variables"><span class="header-section-number">3.1.1.1</span> Renommage des variables</h5>
+<p>Dans cette option, il est possible de renommer immédiatement après avoir importé le jeu de données, à l’aide de la fonction names().</p>
+<ol type="1">
+<li><p>La commande names() permet de sélectionner le nom des variables du jeu de données</p></li>
+<li><p>[17:28] permet de ne garder que les colonnes numéro 17 jusqu’au numéro 28</p></li>
+<li><p>L’opérateur &lt;- est celui de l’affectation c() est l’opérateur de concaténation. Dedans, on précise le nouveau nom des colonnes</p></li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># On crée une copie de data </span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>data1 <span class="ot">=</span> data</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># On renomme le nom des colonnes de la question 6 de l'enquête</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(data1)[<span class="dv">17</span><span class="sc">:</span><span class="dv">28</span>] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Hypermarché"</span>, <span class="st">"Hard discount"</span>,<span class="st">"Epiceries indépendante"</span>,</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"Magains de surgelé"</span>,<span class="st">"Magasins spécialisés Bio"</span>, <span class="st">"Marché"</span>,<span class="st">"Directement aux agriculteur"</span>,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"Paniers en ligne"</span>, <span class="st">"Artisans et commerçants spécialisés"</span>, <span class="st">"Epicerie participative"</span>,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"Magasin alimentaire spécialisé dans le vrac"</span>, <span class="st">"Magasin d'aide alimentaire"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="renommage-des-modalités" class="level5" data-number="3.1.1.2">
+<h5 data-number="3.1.1.2" class="anchored" data-anchor-id="renommage-des-modalités"><span class="header-section-number">3.1.1.2</span> Renommage des modalités</h5>
+<p>Poursuivons avec le bon renommage des lignes des colonnes de la question 6. Etant donné qu’il faudra répéter exactement la même opération de renommage sur 13 colonnes, nous nous servirons d’une boucle for pour optimiser et éviter les copier-coller qui prend beaucoup de temps.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Vecteur de correspondance</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>modifications <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"1"</span> <span class="ot">=</span> <span class="st">"Plusieurs fois par semaine"</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"2"</span> <span class="ot">=</span> <span class="st">"1 fois par semaine"</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"3"</span> <span class="ot">=</span> <span class="st">"2 à 3 fois par mois"</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"4"</span> <span class="ot">=</span> <span class="st">"1 fois par mois"</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"5"</span> <span class="ot">=</span> <span class="st">"Moins d’une fois par mois"</span>,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"6"</span> <span class="ot">=</span> <span class="st">"Seulement pour des événements particuliers"</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>                   <span class="st">"7"</span> <span class="ot">=</span> <span class="st">"Jamais"</span>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Noms des colonnes à modifier</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>colonnes_a_modifier <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Hypermarché"</span>, <span class="st">"Hard discount"</span>,<span class="st">"Epiceries indépendante"</span>,</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"Magains de surgelé"</span>,<span class="st">"Magasins spécialisés Bio"</span>, <span class="st">"Marché"</span>,<span class="st">"Directement aux agriculteur"</span>,</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"Paniers en ligne"</span>, <span class="st">"Artisans et commerçants spécialisés"</span>, <span class="st">"Epicerie participative"</span>,</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>                            <span class="st">"Magasin alimentaire spécialisé dans le vrac"</span>, <span class="st">"Magasin d'aide alimentaire"</span>)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Appliquer les modifications à chaque colonne</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (col <span class="cf">in</span> colonnes_a_modifier) {</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  data1[[col]] <span class="ot">&lt;-</span> modifications[<span class="fu">as.character</span>(data1[[col]])]</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="sélection-des-colonnes-dintérêt" class="level5" data-number="3.1.1.3">
+<h5 data-number="3.1.1.3" class="anchored" data-anchor-id="sélection-des-colonnes-dintérêt"><span class="header-section-number">3.1.1.3</span> Sélection des colonnes d’intérêt</h5>
+<p>Ensuite, pour cette question, nous n’avons besoin que des colonnes portant sur la question 6 de l’enquête. Pour ce faire, nous exploitons la fonction subset(). Elle a pour objectif de renvoyer des sous-ensembles de vecteurs, de matrices ou de trames de données qui répondent à certaines conditions.</p>
+<ol type="1">
+<li><p>Le premier argument obligatoire de subset() est le jeu de données. Ici, il s’agit de data1.</p></li>
+<li><p>Le deuxième atgument obligatoire de subset() est la condition appliquée. Ici, il s’agit d’une sélection des colonnes 17 à 28 (qui sont celles de la question 6). D’où l’écriture, select = c(17:28) qui permet de le faire.</p></li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>data1_question_6 <span class="ot">&lt;-</span> <span class="fu">subset</span>(data1, <span class="at">select =</span> <span class="fu">c</span>(<span class="dv">17</span><span class="sc">:</span><span class="dv">28</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="calcul-des-fréquences" class="level5" data-number="3.1.1.4">
+<h5 data-number="3.1.1.4" class="anchored" data-anchor-id="calcul-des-fréquences"><span class="header-section-number">3.1.1.4</span> Calcul des fréquences</h5>
+<p>Maintenant, passons au calcul des fréquences avec la fonction lapply() Pour un jeu de données fourni, lapply() appliquera une ou des fonctions sur ce dernier. Nous entendons fonctions au sens large, c’est-à-dire que cela peut autant être des fonctions comme le type des variables, la somme etc. Les résultats renvoyés par la fonction lapply() seront au format liste.</p>
+<ol type="1">
+<li><p>On renseigne les données qui nous intéressent dans l’argument X. Ici, c’est data1_question_6</p></li>
+<li><p>On remplit la ou les fonctions qu’on souhaite appliquer sur les données d’intérêt dans l’argument FUN. Ici, on utilisera round() pour arrondi les résultats à 2 décimales puis prop.table() pour calculer les fréquences et on multiplie par 100 pour obtenir des pourcentages.</p></li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>table_propr_courses_option_1 <span class="ot">&lt;-</span> <span class="fu">lapply</span>(data1_question_6, <span class="cf">function</span>(x) <span class="fu">round</span>(<span class="fu">prop.table</span>(<span class="fu">table</span>(x)),<span class="dv">2</span>)<span class="sc">*</span><span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="transformation-en-tableau-de-résultats-explooitable-et-interprétable" class="level5" data-number="3.1.1.5">
+<h5 data-number="3.1.1.5" class="anchored" data-anchor-id="transformation-en-tableau-de-résultats-explooitable-et-interprétable"><span class="header-section-number">3.1.1.5</span> Transformation en tableau de résultats explooitable et interprétable</h5>
+<p>Le format liste n’est pas des plus appropriés pour lire des résultats dans un rapport. C’est pourquoi, nous décidons de métamorphoser les résultats listes en tableau de résultat grâce à la fonction as.data.frame() de R de base. Au sien de la fonction as.data.frame(), nous introduisons la fonction do.call() qui construit et exécute un appel de fonction à partir d’un nom ou d’une fonction et une liste d’arguments à lui transmettre.</p>
+<ol type="1">
+<li><p>Le premier argument de do.call() est le nom de la fonction. Ici, il s’agit de rbind() qui permet de combiner toutes nos listes par lignes. Attention, il faut s’assurer d’avoir exactement le même nombre de colonnes pour que rbind() marche. Sinon, une erreur sera renvoyée. Cette condition est bien vérifiée ici.</p></li>
+<li><p>Le deuxième argument est la liste. Dans notre cas, il s’agit de table_propr_courses_option_1.</p></li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tableau présentable des donénes</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>table_propr_courses_option_1 <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">do.call</span>(rbind, table_propr_courses_option_1))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="mise-en-forme-du-tableau" class="level5" data-number="3.1.1.6">
+<h5 data-number="3.1.1.6" class="anchored" data-anchor-id="mise-en-forme-du-tableau"><span class="header-section-number">3.1.1.6</span> Mise en forme du tableau</h5>
+<p>Nous allons crééer et ajouter une colonne pour le libellé du lieu d’achat à l’aide de la fonction de concaténation c() et le $. Par défaut, R place automatyiquement la nouvelle colonne créée en dernière position. Il est plus naturel et logique d’avoir le libellé du lieu d’achat en première position. Ainsi, grâce à la sélection, la concaténation et le nombre de colonnes (ncol()), nous exécutons cela. De plus, nous ajoutons le symbole % dans chaque cellule de notre tableau avec une boucle for et de la fonction paste0() qui permet de concaténer.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Création de la nouvelle colonne Type et de ses modalités</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>Type<span class="ot">=</span><span class="fu">c</span>(<span class="st">"Hypermarché"</span>, <span class="st">"Hard discount"</span>, <span class="st">"Epiceries indépendantes"</span>, <span class="st">"Magains de surgelés"</span>, <span class="st">"Magasins spécialisés Bio"</span>, <span class="st">"Marché"</span>, <span class="st">"Directement aux agriculteurs"</span>, <span class="st">"Paniers en ligne"</span>, </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>                                         <span class="st">"Artisans et commerçants spécialisés"</span>, <span class="st">"Epicerie participative"</span>, <span class="st">"Magasin alimentaire spécialisé dans le vrac"</span>, <span class="st">"Magasin d'aide alimentaire"</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Ajoutons la colonne Type dans noytre tableau de résultats</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>table_propr_courses_option_1<span class="sc">$</span>Type <span class="ot">&lt;-</span> Type</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Plaçons la dernière colonne Type à la première position </span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>table_propr_courses_option_1 <span class="ot">&lt;-</span> table_propr_courses_option_1[, <span class="fu">c</span>(<span class="fu">ncol</span>(table_propr_courses_option_1), <span class="dv">1</span><span class="sc">:</span>(<span class="fu">ncol</span>(table_propr_courses_option_1)<span class="sc">-</span><span class="dv">1</span>))]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Affichons le tableau final</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>table_propr_courses_option_1</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                                                                   Type
+Hypermarché                                                                 Hypermarché
+Hard discount                                                             Hard discount
+Epiceries indépendante                                          Epiceries indépendantes
+Magains de surgelé                                                  Magains de surgelés
+Magasins spécialisés Bio                                       Magasins spécialisés Bio
+Marché                                                                           Marché
+Directement aux agriculteur                                Directement aux agriculteurs
+Paniers en ligne                                                       Paniers en ligne
+Artisans et commerçants spécialisés                 Artisans et commerçants spécialisés
+Epicerie participative                                           Epicerie participative
+Magasin alimentaire spécialisé dans le vrac Magasin alimentaire spécialisé dans le vrac
+Magasin d'aide alimentaire                                   Magasin d'aide alimentaire
+                                            1 fois par mois 1 fois par semaine
+Hypermarché                                               7                 51
+Hard discount                                            16                 23
+Epiceries indépendante                                   13                  8
+Magains de surgelé                                       20                  5
+Magasins spécialisés Bio                                 11                  5
+Marché                                                   12                 16
+Directement aux agriculteur                               7                  4
+Paniers en ligne                                          2                  2
+Artisans et commerçants spécialisés                      15                 17
+Epicerie participative                                    3                  2
+Magasin alimentaire spécialisé dans le vrac               4                  2
+Magasin d'aide alimentaire                                2                  1
+                                            2 à 3 fois par mois Jamais
+Hypermarché                                                  15      1
+Hard discount                                                17     13
+Epiceries indépendante                                       12     31
+Magains de surgelé                                           10     26
+Magasins spécialisés Bio                                      7     43
+Marché                                                       12     21
+Directement aux agriculteur                                   6     50
+Paniers en ligne                                              1     84
+Artisans et commerçants spécialisés                          16     13
+Epicerie participative                                        2     77
+Magasin alimentaire spécialisé dans le vrac                   3     79
+Magasin d'aide alimentaire                                    2     88
+                                            Moins d’une fois par mois
+Hypermarché                                                         1
+Hard discount                                                      13
+Epiceries indépendante                                             15
+Magains de surgelé                                                 21
+Magasins spécialisés Bio                                           17
+Marché                                                             21
+Directement aux agriculteur                                        16
+Paniers en ligne                                                    4
+Artisans et commerçants spécialisés                                14
+Epicerie participative                                              7
+Magasin alimentaire spécialisé dans le vrac                         6
+Magasin d'aide alimentaire                                          4
+                                            Plusieurs fois par semaine
+Hypermarché                                                         25
+Hard discount                                                        8
+Epiceries indépendante                                               3
+Magains de surgelé                                                   1
+Magasins spécialisés Bio                                             1
+Marché                                                               2
+Directement aux agriculteur                                          1
+Paniers en ligne                                                     6
+Artisans et commerçants spécialisés                                 14
+Epicerie participative                                               0
+Magasin alimentaire spécialisé dans le vrac                          0
+Magasin d'aide alimentaire                                           1
+                                            Seulement pour des événements particuliers
+Hypermarché                                                                          0
+Hard discount                                                                       10
+Epiceries indépendante                                                              19
+Magains de surgelé                                                                  17
+Magasins spécialisés Bio                                                            16
+Marché                                                                              16
+Directement aux agriculteur                                                         16
+Paniers en ligne                                                                     2
+Artisans et commerçants spécialisés                                                 12
+Epicerie participative                                                               9
+Magasin alimentaire spécialisé dans le vrac                                          7
+Magasin d'aide alimentaire                                                           3</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="avec-usage-de-library" class="level4" data-number="3.1.2">
+<h4 data-number="3.1.2" class="anchored" data-anchor-id="avec-usage-de-library"><span class="header-section-number">3.1.2</span> Avec usage de library</h4>
+<ul>
+<li><ol type="1">
+<li>On sélectionne les données qui nous intéressent avec la fonction <code>select()</code> dans le dataframe de base (On sélectionne les données de la colonne Q6_1 à Q6_12). Pour travailler faire une action sur notre dataframe on l’outil <code>%&gt;%</code> de la library dplyr</li>
+</ol></li>
+<li><ol start="2" type="1">
+<li>On fait une mise au format long de notre nouveau dataframe à l’aide de la fonction <code>pivot_longer()</code> de la library tidyverse.</li>
+</ol></li>
+<li><ol start="3" type="1">
+<li>On passe toute les données en type facteur à l’aide de la fonction <code>factor()</code> où l’on définit les levels et les labels associés.</li>
+</ol></li>
+<li><ol start="4" type="1">
+<li>A l’aide de la fonction <code>table()</code> on fait un tableau de fréquence en fonction des catégories croisés (le lieux d’achat croisé avec sa régularité de fréquentation).</li>
+</ol></li>
+<li><ol start="5" type="1">
+<li>A partir de ce tableau on calcul les proportion d’individu en fonction des catégories croisés que l’on multipli par 100 pour avoir des pourcentages à l’aide de la fonction <code>prop.table()</code>. On arrondi à deux chiffres après la virgule avec la fonction <code>round()</code>.</li>
+</ol></li>
+<li><ol start="6" type="1">
+<li>Avec la fonction <code>kable()</code> du package KableExtra on met en forme ce tableau. On lui ajoute un style avec la fonction <code>kable_styling()</code> et on ajoute une note de fin de page avec la fonction <code>footnote()</code> qu l’on applique à kable à l’aide la <code>%&gt;%</code>.</li>
+</ol></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">#(1)</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>df_Q6 <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span>      </span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Q6_1<span class="sc">:</span>Q6_12) </span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co">#(2)</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>df_Q6_L <span class="ot">&lt;-</span> df_Q6 <span class="sc">%&gt;%</span>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> Q6_1<span class="sc">:</span>Q6_12,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>                          <span class="at">names_to =</span> <span class="st">"Q6"</span>,</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>                          <span class="at">values_to =</span> <span class="st">"value"</span>)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="co">#(3)</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>df_Q6_L<span class="sc">$</span>Q6 <span class="ot">&lt;-</span> <span class="fu">factor</span>(df_Q6_L<span class="sc">$</span>Q6, <span class="at">levels =</span> <span class="fu">paste</span>(<span class="st">"Q6_"</span>, <span class="fu">seq</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>), <span class="at">sep =</span> <span class="st">""</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Hypermarché, Supermarché"</span>,<span class="st">"Hard discount"</span>,<span class="st">"Epiceries indépendantes, de quartier, épiceries fines"</span>,<span class="st">"Magasins de surgelés"</span>,<span class="st">"Magasins spécialisés Bio"</span>,<span class="st">"Marché"</span>,<span class="st">"Directement aux agriculteurs"</span>,<span class="st">"Paniers en ligne réalisés par un intermédiaire"</span>,<span class="st">"Artisans et commerçants spécialisés"</span>,<span class="st">"Epicerie participative, associative, supermarché coopératif"</span>,<span class="st">"Magasin alimentaire spécialisé dans le vrac ou les produits locaux"</span>,<span class="st">"Magasin d’aide alimentaire"</span>))</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>df_Q6_L<span class="sc">$</span>value <span class="ot">&lt;-</span> <span class="fu">factor</span>(df_Q6_L<span class="sc">$</span>value, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">7</span>, <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Plusieurs fois par semaine"</span>,<span class="st">"1 fois par semaine"</span>,<span class="st">"2 à 3 fois par mois"</span>,<span class="st">"1 fois par mois"</span>,<span class="st">"Moins d’une fois par mois"</span>,<span class="st">"Seulement pour des événements particuliers"</span>,<span class="st">"Jamais"</span>))</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="co">#(4)</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>df_Q6_freq <span class="ot">&lt;-</span> <span class="fu">table</span>(df_Q6_L<span class="sc">$</span>Q6, df_Q6_L<span class="sc">$</span>value)</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a><span class="co">#(5)</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>df_Q6_prop <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">prop.table</span>(df_Q6_freq,<span class="dv">1</span>)<span class="sc">*</span><span class="dv">100</span>, <span class="dv">2</span>)</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a><span class="co">#(6)</span></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(df_Q6_prop, <span class="at">captation =</span> <span class="st">"Taux de réquentation en fonction des lieux d'achat"</span> ) <span class="sc">%&gt;%</span> <span class="co"># mise en forme du tableau</span></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">latex_options =</span> <span class="st">"striped"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">footnote</span>(<span class="at">general =</span> <span class="st">"Format des données en pourcentage"</span>,</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>           <span class="at">general_title =</span> <span class="st">"Note: "</span>,)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table caption-top table-sm table-striped small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th"></th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Plusieurs fois par semaine</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">1 fois par semaine</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">2 à 3 fois par mois</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">1 fois par mois</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Moins d’une fois par mois</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Seulement pour des événements particuliers</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Jamais</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Hypermarché, Supermarché</td>
+<td style="text-align: right;">24.68</td>
+<td style="text-align: right;">50.73</td>
+<td style="text-align: right;">14.93</td>
+<td style="text-align: right;">7.12</td>
+<td style="text-align: right;">1.17</td>
+<td style="text-align: right;">0.49</td>
+<td style="text-align: right;">0.88</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Hard discount</td>
+<td style="text-align: right;">7.71</td>
+<td style="text-align: right;">23.32</td>
+<td style="text-align: right;">17.07</td>
+<td style="text-align: right;">16.10</td>
+<td style="text-align: right;">12.78</td>
+<td style="text-align: right;">9.56</td>
+<td style="text-align: right;">13.46</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Epiceries indépendantes, de quartier, épiceries fines</td>
+<td style="text-align: right;">2.63</td>
+<td style="text-align: right;">7.90</td>
+<td style="text-align: right;">12.00</td>
+<td style="text-align: right;">12.68</td>
+<td style="text-align: right;">14.73</td>
+<td style="text-align: right;">18.63</td>
+<td style="text-align: right;">31.41</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Magasins de surgelés</td>
+<td style="text-align: right;">0.78</td>
+<td style="text-align: right;">5.37</td>
+<td style="text-align: right;">9.95</td>
+<td style="text-align: right;">19.90</td>
+<td style="text-align: right;">20.88</td>
+<td style="text-align: right;">17.46</td>
+<td style="text-align: right;">25.66</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Magasins spécialisés Bio</td>
+<td style="text-align: right;">1.07</td>
+<td style="text-align: right;">5.17</td>
+<td style="text-align: right;">6.93</td>
+<td style="text-align: right;">11.02</td>
+<td style="text-align: right;">17.46</td>
+<td style="text-align: right;">15.71</td>
+<td style="text-align: right;">42.63</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Marché</td>
+<td style="text-align: right;">1.76</td>
+<td style="text-align: right;">15.80</td>
+<td style="text-align: right;">11.51</td>
+<td style="text-align: right;">12.29</td>
+<td style="text-align: right;">21.17</td>
+<td style="text-align: right;">16.29</td>
+<td style="text-align: right;">21.17</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Directement aux agriculteurs</td>
+<td style="text-align: right;">1.07</td>
+<td style="text-align: right;">3.80</td>
+<td style="text-align: right;">5.56</td>
+<td style="text-align: right;">6.83</td>
+<td style="text-align: right;">16.00</td>
+<td style="text-align: right;">16.39</td>
+<td style="text-align: right;">50.34</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Paniers en ligne réalisés par un intermédiaire</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2.15</td>
+<td style="text-align: right;">1.37</td>
+<td style="text-align: right;">2.24</td>
+<td style="text-align: right;">4.39</td>
+<td style="text-align: right;">5.56</td>
+<td style="text-align: right;">84.29</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Artisans et commerçants spécialisés</td>
+<td style="text-align: right;">13.56</td>
+<td style="text-align: right;">17.37</td>
+<td style="text-align: right;">16.00</td>
+<td style="text-align: right;">14.93</td>
+<td style="text-align: right;">13.76</td>
+<td style="text-align: right;">11.51</td>
+<td style="text-align: right;">12.88</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Epicerie participative, associative, supermarché coopératif</td>
+<td style="text-align: right;">0.29</td>
+<td style="text-align: right;">1.66</td>
+<td style="text-align: right;">1.85</td>
+<td style="text-align: right;">3.22</td>
+<td style="text-align: right;">6.73</td>
+<td style="text-align: right;">9.17</td>
+<td style="text-align: right;">77.07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Magasin alimentaire spécialisé dans le vrac ou les produits locaux</td>
+<td style="text-align: right;">0.29</td>
+<td style="text-align: right;">1.85</td>
+<td style="text-align: right;">2.83</td>
+<td style="text-align: right;">3.71</td>
+<td style="text-align: right;">5.95</td>
+<td style="text-align: right;">6.83</td>
+<td style="text-align: right;">78.54</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Magasin d’aide alimentaire</td>
+<td style="text-align: right;">0.59</td>
+<td style="text-align: right;">1.27</td>
+<td style="text-align: right;">1.66</td>
+<td style="text-align: right;">1.76</td>
+<td style="text-align: right;">4.29</td>
+<td style="text-align: right;">2.73</td>
+<td style="text-align: right;">87.71</td>
+</tr>
+</tbody><tfoot>
+<tr class="odd">
+<td style="text-align: left; padding: 0;"><span style="font-style: italic;">Note: </span></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left; padding: 0;"><sup></sup> Format des données en pourcentage</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+</tr>
+</tfoot>
+
+</table>
+
+
+</div>
+</div>
+</section>
+</section>
+<section id="nombre-de-lieux-fréquentés-très-régulièrement-réponses-12-en-moyenne" class="level3" data-number="3.2">
+<h3 data-number="3.2" class="anchored" data-anchor-id="nombre-de-lieux-fréquentés-très-régulièrement-réponses-12-en-moyenne"><span class="header-section-number">3.2</span> 2.Nombre de lieux fréquentés très régulièrement (réponses 1/2) en moyenne</h3>
+<section id="usage-de-r-natif" class="level4" data-number="3.2.1">
+<h4 data-number="3.2.1" class="anchored" data-anchor-id="usage-de-r-natif"><span class="header-section-number">3.2.1</span> Usage de R natif</h4>
+<ol type="1">
+<li><p>On sélectionne les données qui nous intéressent. On utilise la fonctione <code>paste()</code> pour créer tout les noms de colonnes qui nous intéressent.</p></li>
+<li><p>On regarde pour chaque individu pour chaque lieu si il est très fréquenté ( = 1 ou = 2). cela nous retourne le dataframe de booléens (0 = FALSE ou 1 = TRUE) . Il nous reste à sommer par ligne à l’aide de la fonction <code>rowSums()</code></p></li>
+<li><p>Pour afficher notre résultat on utilise la fontion <code>print()</code> à laquel on donne comme argument notre collage de à de la fonction <code>paste()</code> pour intégrer la moyenne arrondi à un chiffre après la virgule de notre moyenne du nombre de lieux très fréquenté</p></li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">#(1)</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>dt_nb_moy <span class="ot">&lt;-</span> data[,<span class="fu">paste</span>(<span class="st">"Q6_"</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>,<span class="at">sep =</span> <span class="st">""</span>)]</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="co">#(2)</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>nb_tres_freq <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(dt_nb_moy <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> dt_nb_moy <span class="sc">==</span> <span class="dv">2</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="co">#(3)</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"Les répondants fréquentent en moyenne "</span>,<span class="fu">round</span>(<span class="fu">mean</span>(nb_tres_freq),<span class="dv">1</span>),</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>            <span class="st">" lieux très régulièrement (au moins une fois par semaine)"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Les répondants fréquentent en moyenne  1.9  lieux très régulièrement (au moins une fois par semaine)"</code></pre>
+</div>
+</div>
+</section>
+<section id="avec-usage-de-library-1" class="level4" data-number="3.2.2">
+<h4 data-number="3.2.2" class="anchored" data-anchor-id="avec-usage-de-library-1"><span class="header-section-number">3.2.2</span> Avec usage de library</h4>
+<ol type="1">
+<li>Sélectionner les variables ou colonnes qui répondent à la question dans le jeu de données avec <code>select()</code></li>
+<li>Vérifier que toutes les colonnes vérifient la condition via <code>accross()</code></li>
+<li>Pour chaque individu, il faut compter le nombre de lieux qu’il a visité <code>rowSums()</code></li>
+<li>Faire une moyenne du nombre de lieux <code>mean()</code></li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>moyenne_freq <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Q6_1<span class="sc">:</span>Q6_12) <span class="sc">%&gt;%</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span> .x <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> .x <span class="sc">==</span> <span class="dv">2</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowSums</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mean</span>()</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>moyenne_freq</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.908293</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="répartition-des-répondants-selon-le-nombre-de-lieux-fréquentés-très-régulièrement" class="level3" data-number="3.3">
+<h3 data-number="3.3" class="anchored" data-anchor-id="répartition-des-répondants-selon-le-nombre-de-lieux-fréquentés-très-régulièrement"><span class="header-section-number">3.3</span> 3.Répartition des répondants selon le nombre de lieux fréquentés très régulièrement</h3>
+<section id="avec-r-natif-1" class="level4" data-number="3.3.1">
+<h4 data-number="3.3.1" class="anchored" data-anchor-id="avec-r-natif-1"><span class="header-section-number">3.3.1</span> Avec R natif</h4>
+<ol type="1">
+<li><p>On récupère les données <code>nb_tres_freq</code> qui sont le nombre de lieu d’achat très fréquenté par individu</p></li>
+<li><p>On transforme nos données en tableeau avec la fonction <code>table()</code>, puis on calcule la proportion de chaque variable (1 à 12) avec <code>prop.table()</code> que l’on va multiplier par cent pour avoir un pourcentage. On peutarrondir à deux chiffres après la virgule avec <code>round</code></p></li>
+<li><p>On récupère le nom des dimenssions avec la fonction <code>dimnames()</code> et on récupère le nom du tableau avec <code>names</code> que l’on va réaffecter par son nouveau nom.</p></li>
+<li><p>On fait la mise en forme de notre tableau avec <code>kable()</code></p></li>
+<li><p><strong>Créer le graphique à partir du tableau avec</strong> <code>barplot()</code></p>
+<ul>
+<li>Ajouter le titre et les noms des axes, et ajuster la limite de l’axe y selon la valeur maximale<br>
+</li>
+<li>Changer la couleur des barres et mettre en évidence la valeur maximale<br>
+</li>
+<li>Ajouter la valeur maximale au-dessus de la barre avec la fonction <code>text()</code></li>
+</ul></li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co">#(1)</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(nb_tres_freq)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1]  2  1  1  2 12  6</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">#(2)</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>tb_nb_tres_freq_pourcent <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">prop.table</span>(<span class="fu">table</span>(nb_tres_freq))<span class="sc">*</span><span class="dv">100</span>,<span class="dv">2</span>) </span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="co">#(3)</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(<span class="fu">dimnames</span>(tb_nb_tres_freq_pourcent)) <span class="ot">&lt;-</span> <span class="st">"Nombre"</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="co">#(4)</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(tb_nb_tres_freq_pourcent)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Nombre
+    0     1     2     3     4     5     6     7     8     9    10    11    12 
+13.66 31.90 29.66 14.54  5.27  1.95  0.98  0.20  0.68  0.39  0.10  0.20  0.49 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">#(5)</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(tb_nb_tres_freq_pourcent)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Version_2_documentation_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>max_val <span class="ot">&lt;-</span> <span class="fu">max</span>(tb_nb_tres_freq_pourcent)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(tb_nb_tres_freq_pourcent, </span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">main =</span> <span class="st">"Répartition selon le nombre de lieux fréquentés très régulièrement"</span>,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">ylab =</span> <span class="st">"pourcentage"</span>,</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">xlab =</span> <span class="st">"nombre de lieux très fréquenté"</span>,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,max_val<span class="sc">+</span><span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Version_2_documentation_files/figure-html/unnamed-chunk-13-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>coul <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="st">"cyan3"</span>, <span class="fu">length</span>(tb_nb_tres_freq_pourcent))</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>max_id <span class="ot">&lt;-</span> <span class="fu">which.max</span>(tb_nb_tres_freq_pourcent)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>coul[max_id] <span class="ot">&lt;-</span> <span class="st">"cyan1"</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(tb_nb_tres_freq_pourcent, </span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">main =</span> <span class="st">"Répartition selon le nombre de lieux fréquentés très régulièrement"</span>,</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">ylab =</span> <span class="st">"pourcentage"</span>,</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">xlab =</span> <span class="st">"nombre de lieux très fréquenté"</span>,</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,max_val<span class="sc">+</span><span class="dv">5</span>),</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">col =</span> coul)</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="fu">barplot</span>(tb_nb_tres_freq_pourcent, </span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">main =</span> <span class="st">"Répartition selon le nombre de lieux fréquentés très régulièrement"</span>,</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>        <span class="at">ylab =</span> <span class="st">"pourcentage"</span>,</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>        <span class="at">xlab =</span> <span class="st">"nombre de lieux très fréquenté"</span>,</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>        <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,max_val<span class="sc">+</span><span class="dv">5</span>),</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>        <span class="at">col =</span> coul)</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a><span class="fu">text</span>(<span class="at">x =</span> max_id, <span class="at">y =</span> max_val, <span class="at">labels =</span> max_val, <span class="at">pos =</span> <span class="dv">3</span>, <span class="at">cex =</span> <span class="fl">1.3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Version_2_documentation_files/figure-html/unnamed-chunk-13-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="avec-usage-de-library-2" class="level4" data-number="3.3.2">
+<h4 data-number="3.3.2" class="anchored" data-anchor-id="avec-usage-de-library-2"><span class="header-section-number">3.3.2</span> Avec usage de library</h4>
+<p>Voici la version avec usage de librairies R. Pour ce faire, nous utilsierons la librairie dplyr() (déjà vue et présentée lors de la question 1) pour générer les tableaux de contingences et de pourcentages des lieux fréquentés régulièrement par les consommateurs. Puis, nous nous appuyerons sur la fonction kable() de la librairie kableExtra() déjà rencontrée plus haut dans le rapport. Enfin, nous terminerons par une représentation graphique des lieux fréquentés régulièrement par les clients.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Tableau de contingence</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>df_nb_tres_freq <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(nb_tres_freq) <span class="sc">%&gt;%</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(nb_tres_freq, <span class="at">name =</span> <span class="st">"Effectif"</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Tableau de pourcentages </span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>dt_nb_tres_freq_pourcent <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(nb_tres_freq) <span class="sc">%&gt;%</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(nb_tres_freq) <span class="sc">%&gt;%</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Pourcentage =</span> <span class="fu">round</span>(n <span class="sc">/</span> <span class="fu">sum</span>(n) <span class="sc">*</span> <span class="dv">100</span>, <span class="dv">2</span>))</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Mise en forme du tableau des pourcentages</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(dt_nb_tres_freq_pourcent) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">nb_tres_freq</th>
+<th style="text-align: right;">n</th>
+<th style="text-align: right;">Pourcentage</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">140</td>
+<td style="text-align: right;">13.66</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">327</td>
+<td style="text-align: right;">31.90</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">304</td>
+<td style="text-align: right;">29.66</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">149</td>
+<td style="text-align: right;">14.54</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">54</td>
+<td style="text-align: right;">5.27</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">1.95</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0.98</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.20</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">0.68</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.39</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.10</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.20</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0.49</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Voici, les différentes étapes à suivre pour construire un diagramme en barres avec la librairie ggplot2().</p>
+<p><strong>Etape 1 : Renseigner le jeu de données</strong></p>
+<p>La première des choses à faire est de rensigner sur quel jeu de données on travaille et le remplir dans l’argument ggplot(). Pour le moment, rien ne s’affiche et cela est tout à fait normal puisque nous n’avons pas encore précisé les variables pour construire le graphique et ni le type de graphique souhaité.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df_nb_tres_freq) <span class="co">#rien</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Version_2_documentation_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Etape 2 : Indiquer les variables retenues pour les axes des abscisses et des ordonnées</strong></p>
+<p>Maintenant, il faut indiquer les variables retenues pour les axes des abscisses et de ordonnées dans l’argument aes(). Ici, il faut remplir <em>nb_tres_freq</em> pour x et <em>Effectif</em> pour y. Pour le moment, toujours rien ne s’affiche puisqu’il manque d’informer le type de graphique à dessiner.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df_nb_tres_freq)<span class="sc">+</span><span class="fu">aes</span>(<span class="at">x=</span>nb_tres_freq,<span class="at">y=</span>Effectif) <span class="co">#rien</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Version_2_documentation_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Etape 3 : Indiquer les variables retenues pour les axes des abscisses et des ordonnées</strong></p>
+<p>A l’aide de l’argument geom_bar() nous traçons le diagramme en barres. Par défaut, dans geom_bar(stat = “bin”), cela signifie que pour chaque valeur de x, les barres seront toutes dessinées à la même hauteur. De plus, le “bins” est incompatible avec des valeurs présentes sur l’axe des y, ce qui est notre cas ici. Il faut donc remplacer “bins” par le bon argument adéquate à savoir “identity”. En effet, cela répond à notre besoin de représenter les hauteurs des barres qui prennent en compte les valeurs de y. Ainis, nous obtenons le premier diagramme en barres qui s’affiche à l’écran.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df_nb_tres_freq)<span class="sc">+</span><span class="fu">aes</span>(<span class="at">x=</span>nb_tres_freq,<span class="at">y=</span>Effectif)<span class="sc">+</span><span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>) <span class="co"># Bon</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Version_2_documentation_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Etape 4 : Personnalisation du graphique</strong></p>
+<p>Le graphique de l’étape précédente est correcte mais pas “complet”. En fonction des besoin de l’utilisateurs, il est tout à fait possible par exemple d’ajouter un titre, changer le nom des axes x et y de colorier les barres, de changer le fond d’écran et pleins d’autres choses encore. Il existe différentes manières de procéder. En ce lieu, nous proposerons une façon de personnaliser le diagramme en barres.</p>
+<ol type="1">
+<li><p>Ajouter un titre : Avec labs(title = ““)</p></li>
+<li><p>Changer le nom des axes x et y : Avec labs(x=““, y =”“)</p></li>
+<li><p>Colorier les barres : Avec geom_bar(fill = ““). On peut soit écrire le nom de couleurs en brut comme red, orange ou bien encore plus personnalisé le graphique en utilisant le code hexadéciamal des couleurs. Pour trouver les codes hexadéciamux des couleurs, on peut se rendre par exemple sur le site internet suivant : <u><strong>https://htmlcolorcodes.com/</strong></u></p></li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df_nb_tres_freq)<span class="sc">+</span><span class="fu">aes</span>(<span class="at">x=</span>nb_tres_freq,<span class="at">y=</span>Effectif)<span class="sc">+</span><span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>,<span class="at">fill =</span> <span class="st">"#FF6666"</span>) <span class="sc">+</span> </span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Répartition des lieux très fréquentés par les consommateurs"</span>, </span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Nombre de lieux très fréquentés"</span>,<span class="at">y =</span> <span class="st">"Effectif"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Version_2_documentation_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="nombre-de-lieux-fréquentés-régulièrement-réponses-1234-en-moyenne" class="level3" data-number="3.4">
+<h3 data-number="3.4" class="anchored" data-anchor-id="nombre-de-lieux-fréquentés-régulièrement-réponses-1234-en-moyenne"><span class="header-section-number">3.4</span> 4.Nombre de lieux fréquentés régulièrement (réponses 1/2/3/4) en moyenne</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>dt_nb_moy <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> <span class="co"># selection des bonnes colonnes</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Q6_1<span class="sc">:</span>Q6_12)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>nb_rgl_freq <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(dt_nb_moy <span class="sc">==</span> <span class="dv">1</span> <span class="sc">|</span> dt_nb_moy <span class="sc">==</span> <span class="dv">2</span> <span class="sc">|</span> dt_nb_moy <span class="sc">==</span> <span class="dv">3</span> <span class="sc">|</span> dt_nb_moy <span class="sc">==</span> <span class="dv">4</span>) <span class="co"># On compte le nombre de lieu régulièrement fréquenté par individu</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"Les répondants fréquentent en moyenne "</span>,<span class="fu">round</span>(<span class="fu">mean</span>(nb_rgl_freq),<span class="dv">1</span>),<span class="st">" lieux régulièrement (au moins une fois par mois)"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Les répondants fréquentent en moyenne  4  lieux régulièrement (au moins une fois par mois)"</code></pre>
+</div>
+</div>
+</section>
+<section id="répartition-des-répondants-selon-le-nombre-de-lieux-fréquentés-régulièrement" class="level3" data-number="3.5">
+<h3 data-number="3.5" class="anchored" data-anchor-id="répartition-des-répondants-selon-le-nombre-de-lieux-fréquentés-régulièrement"><span class="header-section-number">3.5</span> 5. Répartition des répondants selon le nombre de lieux fréquentés régulièrement</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>df_nb_rgl_freq <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">table</span>(nb_rgl_freq)) <span class="co"># On compte le nombre d'occurence par nb de lieux régulièrement fréquenté</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>dt_nb_rgl_freq_pourcent <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="fu">prop.table</span>(<span class="fu">table</span>(nb_rgl_freq))<span class="sc">*</span><span class="dv">100</span>,<span class="dv">2</span>) <span class="co"># On tranforme la fréquence en %</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(<span class="fu">dimnames</span>(dt_nb_rgl_freq_pourcent)) <span class="ot">&lt;-</span> <span class="st">"Nombre de lieux régulièrement fréquenté"</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(dt_nb_rgl_freq_pourcent)  <span class="co">#  mise en forme du tableau</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Nombre.de.lieux.régulièrement.fréquenté</th>
+<th style="text-align: right;">Freq</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">0</td>
+<td style="text-align: right;">0.10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1</td>
+<td style="text-align: right;">7.51</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2</td>
+<td style="text-align: right;">20.98</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">3</td>
+<td style="text-align: right;">19.32</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">4</td>
+<td style="text-align: right;">17.46</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">5</td>
+<td style="text-align: right;">13.56</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">6</td>
+<td style="text-align: right;">9.27</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">7</td>
+<td style="text-align: right;">4.39</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">8</td>
+<td style="text-align: right;">2.34</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">9</td>
+<td style="text-align: right;">1.46</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">10</td>
+<td style="text-align: right;">0.88</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">11</td>
+<td style="text-align: right;">0.59</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">12</td>
+<td style="text-align: right;">2.15</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df_nb_rgl_freq, <span class="fu">aes</span>(<span class="at">x =</span> nb_rgl_freq, <span class="at">y =</span> Freq)) <span class="sc">+</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>)<span class="sc">+</span></span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"fréquence par nombre lieux régulièrement fréquenté"</span>, <span class="at">x =</span> <span class="st">"Nombre de lieux régulièrement fréquenté"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="Version_2_documentation_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="pour-ceux-qui-nont-qu1-lieu-régulier-au-moins-une-fois-par-mois-lequel-part-des-répondants-concernés" class="level3" data-number="3.6">
+<h3 data-number="3.6" class="anchored" data-anchor-id="pour-ceux-qui-nont-qu1-lieu-régulier-au-moins-une-fois-par-mois-lequel-part-des-répondants-concernés"><span class="header-section-number">3.6</span> 6.Pour ceux qui n’ont qu’1 lieu régulier (au moins une fois par mois): lequel ? part des répondants concernés</h3>
+<section id="avec-r-natif-2" class="level4" data-number="3.6.1">
+<h4 data-number="3.6.1" class="anchored" data-anchor-id="avec-r-natif-2"><span class="header-section-number">3.6.1</span> Avec R natif</h4>
+<ol type="1">
+<li>Création d’un vecteur qui sincrémente de 1 jusqu’à 12 via le symbole <code>:</code></li>
+<li>Concatener deux expressions avec <code>paste()</code> notez que <code>sep=</code> précise le séparateur entre les expressions</li>
+<li>Selection de colonnes en utilisant les crochets <code>[ligne, variables]</code></li>
+<li>Faire la somme par ligne des cellules qui vérifie la ou les condition(s) dans <code>rowSums()</code>, En effet si la cellule vérifie alors elle vaut 1 sinon 0</li>
+<li>Realiser un filtre en spécifiant la colonne et la condition</li>
+<li>Arroundir la proportion calculé à deux chiffres après la virgule <code>round()</code></li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>num_var <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>noms_var <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">"Q6_"</span>, num_var, <span class="at">sep=</span><span class="st">""</span>)</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>df_vars <span class="ot">&lt;-</span> data[,noms_var]</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>df_vars<span class="sc">$</span>freq <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(df_vars<span class="sc">==</span><span class="dv">1</span> <span class="sc">|</span> df_vars<span class="sc">==</span><span class="dv">2</span> <span class="sc">|</span> df_vars<span class="sc">==</span><span class="dv">3</span> <span class="sc">|</span> df_vars<span class="sc">==</span><span class="dv">4</span>)</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>df_vars_filter <span class="ot">&lt;-</span> df_vars[df_vars<span class="sc">$</span>freq<span class="sc">==</span><span class="dv">1</span>,]</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>proportion <span class="ot">&lt;-</span> (<span class="fu">count</span>(df_vars_filter)<span class="sc">/</span><span class="fu">count</span>(df_vars))<span class="sc">*</span><span class="dv">100</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>arrondir_proportion <span class="ot">&lt;-</span> <span class="fu">round</span>(proportion, <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="avec-usage-de-library-3" class="level4" data-number="3.6.2">
+<h4 data-number="3.6.2" class="anchored" data-anchor-id="avec-usage-de-library-3"><span class="header-section-number">3.6.2</span> Avec usage de library</h4>
+<ol type="1">
+<li>Sélection des variables spécifiques à la question : <code>select()</code></li>
+<li>Appliquer à toutes les cellules des variables une ou des condition(s) : <code>across(everything(), ~ condition)</code></li>
+<li>Pour chaque ligne ou individu faire la somme des cellules qui respectent le ou les conditions <code>rowSums()</code> puis la stocker dans une nouvelle variable qu’on ajoutera à la base de donnée</li>
+<li>Compter le nombre de français disponible dans la base via <code>count()</code> puis la stocker dans une variable intermédiaire qui sera definie à l’intérieur de <code>{{}}</code>. L’opérateur utilisé avant doit être “%T&gt;%”</li>
+<li>Filtrer le jeu de donné avec <code>filter()</code> pour ne retenir que les individus ayant qu’un lieu régulier</li>
+<li>Utiliser summarise pour calculer la proportion et ne garder qu’elle</li>
+</ol>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(magrittr) <span class="co"># %T&gt;% </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attachement du package : 'magrittr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>L'objet suivant est masqué depuis 'package:purrr':
+
+    set_names</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>L'objet suivant est masqué depuis 'package:tidyr':
+
+    extract</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>(Frequence_regulier <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> </span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(Q6_1<span class="sc">:</span>Q6_12) <span class="sc">%&gt;%</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">freq =</span> <span class="fu">rowSums</span>(<span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span> .x<span class="sc">==</span><span class="dv">1</span> <span class="sc">|</span> .x<span class="sc">==</span><span class="dv">2</span> <span class="sc">|</span> .x<span class="sc">==</span><span class="dv">3</span> <span class="sc">|</span> .x<span class="sc">==</span><span class="dv">4</span>))) <span class="sc">%T&gt;%</span></span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  {{nombre_francais <span class="ot">&lt;&lt;-</span> <span class="fu">count</span>(.)}} <span class="sc">%&gt;%</span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(freq<span class="sc">==</span><span class="dv">1</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">round</span>((<span class="fu">count</span>(.)<span class="sc">/</span>nombre_francais)<span class="sc">*</span><span class="dv">100</span>,<span class="dv">2</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 1
+      n
+  &lt;dbl&gt;
+1  7.51</code></pre>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

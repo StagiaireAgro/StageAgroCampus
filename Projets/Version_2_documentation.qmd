@@ -1,0 +1,436 @@
+---
+title: "PLAT4TERFOOD"
+format: html
+number-sections: true
+editor: visual
+---
+
+## Packages
+
+```{r, message=FALSE, warning=FALSE}
+library(readxl)
+library(dplyr)
+library(tidyverse)
+library(kableExtra)
+```
+
+## Imporation des données
+
+```{r,}
+
+data <- read_excel("24407_Export.xlsx")
+
+```
+
+## Questions :
+
+### 1.Pour chaque lieu. Expression des fréquences des courses (Q6)
+
+#### Avec R natif
+
+Dans cette option, nous utiliserons exclusivement les commandes basiques de R sans importer aucune librairie.
+
+##### Renommage des variables
+
+Dans cette option, il est possible de renommer immédiatement après avoir importé le jeu de données, à l’aide de la fonction names().
+
+1.  La commande names() permet de sélectionner le nom des variables du jeu de données
+
+2.  \[17:28\] permet de ne garder que les colonnes numéro 17 jusqu'au numéro 28
+
+3.  L'opérateur \<- est celui de l'affectation c() est l'opérateur de concaténation. Dedans, on précise le nouveau nom des colonnes
+
+```{r}
+# On crée une copie de data 
+
+data1 = data
+
+# On renomme le nom des colonnes de la question 6 de l'enquête
+
+names(data1)[17:28] <- c("Hypermarché", "Hard discount","Epiceries indépendante",
+                            "Magains de surgelé","Magasins spécialisés Bio", "Marché","Directement aux agriculteur",
+                            "Paniers en ligne", "Artisans et commerçants spécialisés", "Epicerie participative",
+                            "Magasin alimentaire spécialisé dans le vrac", "Magasin d'aide alimentaire")
+```
+
+##### Renommage des modalités
+
+Poursuivons avec le bon renommage des lignes des colonnes de la question 6. Etant donné qu'il faudra répéter exactement la même opération de renommage sur 13 colonnes, nous nous servirons d'une boucle for pour optimiser et éviter les copier-coller qui prend beaucoup de temps.
+
+```{r}
+# Vecteur de correspondance
+modifications <- c("1" = "Plusieurs fois par semaine",
+                   "2" = "1 fois par semaine",
+                   "3" = "2 à 3 fois par mois",
+                   "4" = "1 fois par mois",
+                   "5" = "Moins d’une fois par mois",
+                   "6" = "Seulement pour des événements particuliers",
+                   "7" = "Jamais")
+
+# Noms des colonnes à modifier
+colonnes_a_modifier <- c("Hypermarché", "Hard discount","Epiceries indépendante",
+                          	"Magains de surgelé","Magasins spécialisés Bio", "Marché","Directement aux agriculteur",
+                          	"Paniers en ligne", "Artisans et commerçants spécialisés", "Epicerie participative",
+                          	"Magasin alimentaire spécialisé dans le vrac", "Magasin d'aide alimentaire")
+
+# Appliquer les modifications à chaque colonne
+for (col in colonnes_a_modifier) {
+  data1[[col]] <- modifications[as.character(data1[[col]])]
+}
+
+```
+
+##### Sélection des colonnes d'intérêt
+
+Ensuite, pour cette question, nous n'avons besoin que des colonnes portant sur la question 6 de l'enquête. Pour ce faire, nous exploitons la fonction subset(). Elle a pour objectif de renvoyer des sous-ensembles de vecteurs, de matrices ou de trames de données qui répondent à certaines conditions.
+
+1.  Le premier argument obligatoire de subset() est le jeu de données. Ici, il s'agit de data1.
+
+2.  Le deuxième atgument obligatoire de subset() est la condition appliquée. Ici, il s'agit d'une sélection des colonnes 17 à 28 (qui sont celles de la question 6). D'où l'écriture, select = c(17:28) qui permet de le faire.
+
+```{r}
+data1_question_6 <- subset(data1, select = c(17:28))
+```
+
+##### Calcul des fréquences
+
+Maintenant, passons au calcul des fréquences avec la fonction lapply() Pour un jeu de données fourni, lapply() appliquera une ou des fonctions sur ce dernier. Nous entendons fonctions au sens large, c’est-à-dire que cela peut autant être des fonctions comme le type des variables, la somme etc. Les résultats renvoyés par la fonction lapply() seront au format liste.
+
+1.  On renseigne les données qui nous intéressent dans l’argument X. Ici, c'est data1_question_6
+
+2.  On remplit la ou les fonctions qu’on souhaite appliquer sur les données d’intérêt dans l'argument FUN. Ici, on utilisera round() pour arrondi les résultats à 2 décimales puis prop.table() pour calculer les fréquences et on multiplie par 100 pour obtenir des pourcentages.
+
+```{r}
+table_propr_courses_option_1 <- lapply(data1_question_6, function(x) round(prop.table(table(x)),2)*100)
+```
+
+##### Transformation en tableau de résultats explooitable et interprétable
+
+Le format liste n’est pas des plus appropriés pour lire des résultats dans un rapport. C’est pourquoi, nous décidons de métamorphoser les résultats listes en tableau de résultat grâce à la fonction as.data.frame() de R de base. Au sien de la fonction as.data.frame(), nous introduisons la fonction do.call() qui construit et exécute un appel de fonction à partir d’un nom ou d’une fonction et une liste d’arguments à lui transmettre.
+
+1.  Le premier argument de do.call() est le nom de la fonction. Ici, il s'agit de rbind() qui permet de combiner toutes nos listes par lignes. Attention, il faut s'assurer d'avoir exactement le même nombre de colonnes pour que rbind() marche. Sinon, une erreur sera renvoyée. Cette condition est bien vérifiée ici.
+
+2.  Le deuxième argument est la liste. Dans notre cas, il s'agit de table_propr_courses_option_1.
+
+```{r,message=FALSE,warning=FALSE}
+# Tableau présentable des donénes
+table_propr_courses_option_1 <- as.data.frame(do.call(rbind, table_propr_courses_option_1))
+```
+
+##### Mise en forme du tableau
+
+Nous allons crééer et ajouter une colonne pour le libellé du lieu d'achat à l'aide de la fonction de concaténation c() et le \$. Par défaut, R place automatyiquement la nouvelle colonne créée en dernière position. Il est plus naturel et logique d'avoir le libellé du lieu d'achat en première position. Ainsi, grâce à la sélection, la concaténation et le nombre de colonnes (ncol()), nous exécutons cela. De plus, nous ajoutons le symbole % dans chaque cellule de notre tableau avec une boucle for et de la fonction paste0() qui permet de concaténer.
+
+```{r}
+# Création de la nouvelle colonne Type et de ses modalités
+
+Type=c("Hypermarché", "Hard discount", "Epiceries indépendantes", "Magains de surgelés", "Magasins spécialisés Bio", "Marché", "Directement aux agriculteurs", "Paniers en ligne", 
+                                         "Artisans et commerçants spécialisés", "Epicerie participative", "Magasin alimentaire spécialisé dans le vrac", "Magasin d'aide alimentaire")
+
+# Ajoutons la colonne Type dans noytre tableau de résultats
+
+table_propr_courses_option_1$Type <- Type
+
+# Plaçons la dernière colonne Type à la première position 
+
+table_propr_courses_option_1 <- table_propr_courses_option_1[, c(ncol(table_propr_courses_option_1), 1:(ncol(table_propr_courses_option_1)-1))]
+```
+
+```{r}
+# Affichons le tableau final
+table_propr_courses_option_1
+```
+
+#### Avec usage de library
+
+-   (1) On sélectionne les données qui nous intéressent avec la fonction `select()` dans le dataframe de base (On sélectionne les données de la colonne Q6_1 à Q6_12). Pour travailler faire une action sur notre dataframe on l'outil `%>%` de la library dplyr
+
+-   (2) On fait une mise au format long de notre nouveau dataframe à l’aide de la fonction `pivot_longer()` de la library tidyverse.
+
+-   (3) On passe toute les données en type facteur à l'aide de la fonction `factor()` où l'on définit les levels et les labels associés.
+
+-   (4) A l’aide de la fonction `table()` on fait un tableau de fréquence en fonction des catégories croisés (le lieux d’achat croisé avec sa régularité de fréquentation).
+
+-   (5) A partir de ce tableau on calcul les proportion d'individu en fonction des catégories croisés que l'on multipli par 100 pour avoir des pourcentages à l'aide de la fonction `prop.table()`. On arrondi à deux chiffres après la virgule avec la fonction `round()`.
+
+-   (6) Avec la fonction `kable()` du package KableExtra on met en forme ce tableau. On lui ajoute un style avec la fonction `kable_styling()` et on ajoute une note de fin de page avec la fonction `footnote()` qu l'on applique à kable à l'aide la `%>%`.
+
+```{r}
+#(1)
+  
+df_Q6 <- data %>%      
+  select(Q6_1:Q6_12) 
+
+#(2)
+
+df_Q6_L <- df_Q6 %>%  pivot_longer(cols = Q6_1:Q6_12,
+                          names_to = "Q6",
+                          values_to = "value")
+
+#(3)
+
+df_Q6_L$Q6 <- factor(df_Q6_L$Q6, levels = paste("Q6_", seq(1:12), sep = ""), labels = c("Hypermarché, Supermarché","Hard discount","Epiceries indépendantes, de quartier, épiceries fines","Magasins de surgelés","Magasins spécialisés Bio","Marché","Directement aux agriculteurs","Paniers en ligne réalisés par un intermédiaire","Artisans et commerçants spécialisés","Epicerie participative, associative, supermarché coopératif","Magasin alimentaire spécialisé dans le vrac ou les produits locaux","Magasin d’aide alimentaire"))
+
+df_Q6_L$value <- factor(df_Q6_L$value, levels = 1:7, labels = c("Plusieurs fois par semaine","1 fois par semaine","2 à 3 fois par mois","1 fois par mois","Moins d’une fois par mois","Seulement pour des événements particuliers","Jamais"))
+
+#(4)
+
+df_Q6_freq <- table(df_Q6_L$Q6, df_Q6_L$value)
+
+#(5)
+
+df_Q6_prop <- round(prop.table(df_Q6_freq,1)*100, 2)
+
+#(6)
+
+kable(df_Q6_prop, captation = "Taux de réquentation en fonction des lieux d'achat" ) %>% # mise en forme du tableau
+  kable_styling(latex_options = "striped") %>%
+  footnote(general = "Format des données en pourcentage",
+           general_title = "Note: ",)
+```
+
+### 2.Nombre de lieux fréquentés très régulièrement (réponses 1/2) en moyenne
+
+#### Usage de R natif
+
+1. On sélectionne les données qui nous intéressent. On utilise la fonctione `paste()` pour créer tout les noms de colonnes qui nous intéressent.
+
+2. On regarde pour chaque individu pour chaque lieu si il  est très fréquenté ( = 1 ou = 2). cela nous retourne le dataframe de booléens (0 = FALSE ou 1 = TRUE) . Il nous reste à sommer par ligne à l'aide de la fonction `rowSums()`
+
+3. Pour afficher notre résultat on utilise la fontion `print()` à laquel on donne comme argument notre collage de à de la fonction `paste()` pour intégrer la moyenne arrondi à un chiffre après la virgule de notre moyenne du nombre de lieux très fréquenté
+```{r}
+
+#(1)
+
+dt_nb_moy <- data[,paste("Q6_",1:12,sep = "")]
+
+#(2)
+
+nb_tres_freq <- rowSums(dt_nb_moy == 1 | dt_nb_moy == 2)
+
+#(3)
+
+print(paste("Les répondants fréquentent en moyenne ",round(mean(nb_tres_freq),1),
+            " lieux très régulièrement (au moins une fois par semaine)"))
+```
+#### Avec usage de library
+
+1.  Sélectionner les variables ou colonnes qui répondent à la question dans le jeu de données avec `select()`
+2.  Vérifier que toutes les colonnes vérifient la condition via `accross()`
+3.  Pour chaque individu, il faut compter le nombre de lieux qu'il a visité `rowSums()`
+4.  Faire une moyenne du nombre de lieux `mean()`
+
+```{r}
+moyenne_freq <- data %>%
+  select(Q6_1:Q6_12) %>%
+  mutate(across(everything(), ~ .x == 1 | .x == 2)) %>%
+  rowSums() %>%
+  mean()
+moyenne_freq
+```
+
+### 3.Répartition des répondants selon le nombre de lieux fréquentés très régulièrement
+
+#### Avec R natif
+
+1.  On récupère les données `nb_tres_freq` qui sont le nombre de lieu d'achat très fréquenté par individu
+
+2.  On transforme nos données en tableeau avec la fonction `table()`, puis on calcule la proportion de chaque variable (1 à 12) avec `prop.table()` que l'on va multiplier par cent pour avoir un pourcentage. On peutarrondir à deux chiffres après la virgule avec `round`
+
+3.  On récupère le nom des dimenssions avec la fonction `dimnames()` et on récupère le nom du tableau avec `names` que l'on va réaffecter par son nouveau nom.
+
+4.  On fait la mise en forme de notre tableau avec `kable()`
+
+5.  **Créer le graphique à partir du tableau avec** `barplot()`
+
+    -   Ajouter le titre et les noms des axes, et ajuster la limite de l’axe y selon la valeur maximale\
+    -   Changer la couleur des barres et mettre en évidence la valeur maximale\
+    -   Ajouter la valeur maximale au-dessus de la barre avec la fonction `text()`
+
+```{r}
+
+#(1)
+
+head(nb_tres_freq)
+
+#(2)
+
+tb_nb_tres_freq_pourcent <- round(prop.table(table(nb_tres_freq))*100,2) 
+
+#(3)
+
+names(dimnames(tb_nb_tres_freq_pourcent)) <- "Nombre"
+
+#(4)
+
+print(tb_nb_tres_freq_pourcent)
+
+#(5)
+
+barplot(tb_nb_tres_freq_pourcent)
+
+max_val <- max(tb_nb_tres_freq_pourcent)
+
+barplot(tb_nb_tres_freq_pourcent, 
+        main = "Répartition selon le nombre de lieux fréquentés très régulièrement",
+        ylab = "pourcentage",
+        xlab = "nombre de lieux très fréquenté",
+        ylim = c(0,max_val+5))
+
+coul <- rep("cyan3", length(tb_nb_tres_freq_pourcent))
+max_id <- which.max(tb_nb_tres_freq_pourcent)
+coul[max_id] <- "cyan1"
+
+
+barplot(tb_nb_tres_freq_pourcent, 
+        main = "Répartition selon le nombre de lieux fréquentés très régulièrement",
+        ylab = "pourcentage",
+        xlab = "nombre de lieux très fréquenté",
+        ylim = c(0,max_val+5),
+        col = coul)
+
+barplot(tb_nb_tres_freq_pourcent, 
+        main = "Répartition selon le nombre de lieux fréquentés très régulièrement",
+        ylab = "pourcentage",
+        xlab = "nombre de lieux très fréquenté",
+        ylim = c(0,max_val+5),
+        col = coul)
+text(x = max_id, y = max_val, labels = max_val, pos = 3, cex = 1.3)
+  
+```
+
+#### Avec usage de library
+
+Voici la version avec usage de librairies R. Pour ce faire, nous utilsierons la librairie dplyr() (déjà vue et présentée lors de la question 1) pour générer les tableaux de contingences et de pourcentages des lieux fréquentés régulièrement par les consommateurs. Puis, nous nous appuyerons sur la fonction kable() de la librairie kableExtra() déjà rencontrée plus haut dans le rapport. Enfin, nous terminerons par une représentation graphique des lieux fréquentés régulièrement par les clients.
+
+```{r}
+# Tableau de contingence
+df_nb_tres_freq <- data.frame(nb_tres_freq) %>%
+  count(nb_tres_freq, name = "Effectif")
+
+# Tableau de pourcentages 
+dt_nb_tres_freq_pourcent <- data.frame(nb_tres_freq) %>%
+  count(nb_tres_freq) %>%
+  mutate(Pourcentage = round(n / sum(n) * 100, 2))
+
+# Mise en forme du tableau des pourcentages
+kable(dt_nb_tres_freq_pourcent) 
+
+```
+
+Voici, les différentes étapes à suivre pour construire un diagramme en barres avec la librairie ggplot2().
+
+**Etape 1 : Renseigner le jeu de données**
+
+La première des choses à faire est de rensigner sur quel jeu de données on travaille et le remplir dans l'argument ggplot(). Pour le moment, rien ne s'affiche et cela est tout à fait normal puisque nous n'avons pas encore précisé les variables pour construire le graphique et ni le type de graphique souhaité.
+
+```{r}
+ggplot(df_nb_tres_freq) #rien
+```
+
+**Etape 2 : Indiquer les variables retenues pour les axes des abscisses et des ordonnées**
+
+Maintenant, il faut indiquer les variables retenues pour les axes des abscisses et de ordonnées dans l'argument aes(). Ici, il faut remplir *nb_tres_freq* pour x et *Effectif* pour y. Pour le moment, toujours rien ne s'affiche puisqu'il manque d'informer le type de graphique à dessiner.
+
+```{r}
+ggplot(df_nb_tres_freq)+aes(x=nb_tres_freq,y=Effectif) #rien
+```
+
+**Etape 3 : Indiquer les variables retenues pour les axes des abscisses et des ordonnées**
+
+A l'aide de l'argument geom_bar() nous traçons le diagramme en barres. Par défaut, dans geom_bar(stat = "bin"), cela signifie que pour chaque valeur de x, les barres seront toutes dessinées à la même hauteur. De plus, le "bins" est incompatible avec des valeurs présentes sur l'axe des y, ce qui est notre cas ici. Il faut donc remplacer "bins" par le bon argument adéquate à savoir "identity". En effet, cela répond à notre besoin de représenter les hauteurs des barres qui prennent en compte les valeurs de y. Ainis, nous obtenons le premier diagramme en barres qui s'affiche à l'écran.
+
+```{r}
+ggplot(df_nb_tres_freq)+aes(x=nb_tres_freq,y=Effectif)+geom_bar(stat = "identity") # Bon
+```
+
+**Etape 4 : Personnalisation du graphique**
+
+Le graphique de l'étape précédente est correcte mais pas "complet". En fonction des besoin de l'utilisateurs, il est tout à fait possible par exemple d'ajouter un titre, changer le nom des axes x et y de colorier les barres, de changer le fond d'écran et pleins d'autres choses encore. Il existe différentes manières de procéder. En ce lieu, nous proposerons une façon de personnaliser le diagramme en barres.
+
+1.  Ajouter un titre : Avec labs(title = "")
+
+2.  Changer le nom des axes x et y : Avec labs(x="", y ="")
+
+3.  Colorier les barres : Avec geom_bar(fill = ""). On peut soit écrire le nom de couleurs en brut comme red, orange ou bien encore plus personnalisé le graphique en utilisant le code hexadéciamal des couleurs. Pour trouver les codes hexadéciamux des couleurs, on peut se rendre par exemple sur le site internet suivant : [**https://htmlcolorcodes.com/**]{.underline}
+
+```{r}
+ggplot(df_nb_tres_freq)+aes(x=nb_tres_freq,y=Effectif)+geom_bar(stat = "identity",fill = "#FF6666") + 
+  labs(title = "Répartition des lieux très fréquentés par les consommateurs", 
+       x = "Nombre de lieux très fréquentés",y = "Effectif")
+```
+
+### 4.Nombre de lieux fréquentés régulièrement (réponses 1/2/3/4) en moyenne
+
+```{r}
+dt_nb_moy <- data %>% # selection des bonnes colonnes
+  select(Q6_1:Q6_12)
+
+nb_rgl_freq <- rowSums(dt_nb_moy == 1 | dt_nb_moy == 2 | dt_nb_moy == 3 | dt_nb_moy == 4) # On compte le nombre de lieu régulièrement fréquenté par individu
+
+print(paste("Les répondants fréquentent en moyenne ",round(mean(nb_rgl_freq),1)," lieux régulièrement (au moins une fois par mois)"))
+```
+
+### 5. Répartition des répondants selon le nombre de lieux fréquentés régulièrement
+
+```{r}
+
+df_nb_rgl_freq <- as.data.frame(table(nb_rgl_freq)) # On compte le nombre d'occurence par nb de lieux régulièrement fréquenté
+
+dt_nb_rgl_freq_pourcent <- round(prop.table(table(nb_rgl_freq))*100,2) # On tranforme la fréquence en %
+
+names(dimnames(dt_nb_rgl_freq_pourcent)) <- "Nombre de lieux régulièrement fréquenté"
+
+kable(dt_nb_rgl_freq_pourcent)  #  mise en forme du tableau
+
+
+
+ggplot(df_nb_rgl_freq, aes(x = nb_rgl_freq, y = Freq)) +
+  geom_bar(stat = "identity")+
+  labs(title = "fréquence par nombre lieux régulièrement fréquenté", x = "Nombre de lieux régulièrement fréquenté")
+
+```
+
+### 6.Pour ceux qui n’ont qu’1 lieu régulier (au moins une fois par mois): lequel ? part des répondants concernés
+
+#### Avec R natif
+
+(1) Création d'un vecteur qui sincrémente de 1 jusqu'à 12 via le symbole `:` 
+(2) Concatener deux expressions avec `paste()` notez que `sep=` précise le séparateur entre les expressions
+(3) Selection de colonnes en utilisant les crochets `[ligne, variables]`
+(4) Faire la somme par ligne des cellules qui vérifie la ou les condition(s) dans `rowSums()`, 
+En effet si la cellule vérifie alors elle vaut 1 sinon 0
+(5) Realiser un filtre en spécifiant la colonne et la condition
+(6) Arroundir la proportion calculé à deux chiffres après la virgule `round()`
+
+```{r}
+num_var <- 1:12
+noms_var <- paste("Q6_", num_var, sep="")
+df_vars <- data[,noms_var]
+df_vars$freq <- rowSums(df_vars==1 | df_vars==2 | df_vars==3 | df_vars==4)
+df_vars_filter <- df_vars[df_vars$freq==1,]
+proportion <- (count(df_vars_filter)/count(df_vars))*100
+arrondir_proportion <- round(proportion, 2)
+```
+
+#### Avec usage de library
+
+(1) Sélection des variables spécifiques à la question : `select()`
+(2) Appliquer à toutes les cellules des variables une ou des condition(s) : `across(everything(), ~ condition)`
+(3) Pour chaque ligne ou individu faire la somme des cellules qui respectent le ou les conditions `rowSums()` 
+puis la stocker dans une nouvelle variable qu'on ajoutera à la base de donnée
+(4) Compter le nombre de français disponible dans la base via `count()` puis la stocker dans une 
+variable intermédiaire qui sera definie à l'intérieur de `{{}}`. L'opérateur utilisé avant doit être "%T>%"
+(5) Filtrer le jeu de donné avec `filter()` pour ne retenir que les individus ayant qu'un lieu régulier
+(6) Utiliser summarise pour calculer la proportion et ne garder qu'elle
+
+
+```{r}
+library(magrittr) # %T>% 
+(Frequence_regulier <- data %>% 
+  select(Q6_1:Q6_12) %>%
+  mutate(freq = rowSums(across(everything(), ~ .x==1 | .x==2 | .x==3 | .x==4))) %T>%
+  {{nombre_francais <<- count(.)}} %>%
+  filter(freq==1) %>%
+  summarise(round((count(.)/nombre_francais)*100,2)))
+```
