@@ -110,12 +110,6 @@ server <- function(input, output, session) {
     selectInput("selected_mods", "Sélectionnez un sous-ensemble de modalités :",
                 choices = choices, multiple = TRUE)
   })
-  observeEvent(input$apply_group, {
-    req(input$selected_mods)
-    for (mod in input$selected_mods) {
-      valeurs$data[[mod]] <- input$group_value
-    }
-  })
   
   
   
