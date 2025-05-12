@@ -30,7 +30,9 @@ ui <- fluidPage(
     ),
     mainPanel(
       h4("Jeu de données"),
-      dataTableOutput("file_csv")
+      dataTableOutput("file_csv"),
+      h4("Affectations actuelles :"),
+      tableOutput("valeurs_associees"),
     )
     
   )
@@ -110,6 +112,21 @@ server <- function(input, output, session) {
     selectInput("selected_mods", "Sélectionnez un sous-ensemble de modalités :",
                 choices = choices, multiple = TRUE)
   })
+  observeEvent(input$apply_group, {
+    req(input$selected_mods)
+    for (mod in input$selected_mods) {
+      valeurs_facteurs$data[[mod]] <- input$group_value
+    }
+  })
+  output$valeurs_associees <- renderTable({
+    req(input$select_var_categ)
+    dt <- data_select()
+    all_modalities <- levels(dt[[input$select_var_categ]])
+    assigned_values <- sapply(all_modalities, function(mod) {
+      valeurs_facteurs$data[[mod]] %||% NaN
+      })
+    data.frame(Modalité = all_modalities, Valeur = assigned_values)
+    })
   
   
   
