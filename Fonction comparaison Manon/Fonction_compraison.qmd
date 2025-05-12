@@ -16,7 +16,7 @@ comparaison_prix_kg <- function(data_test,data_Manon){
 
   # Créons une nouvelle variable pour calculer le prix au kg 
   data_test <- data_sortie[[1]] 
-  data_test <- data_test |> mutate(prixKilo = orderProductPrice *poidsenkg)
+  data_test <- data_test |> mutate(prixKilo = orderProductPrice / poidsenkg)
   
   # Si c'est un facteur, on le transforme en caractère d'abord
   data_Manon$prixKilo <- as.character(data_Manon$prixKilo)
