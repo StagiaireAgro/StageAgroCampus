@@ -445,7 +445,9 @@ library(magrittr) # %T>%
 
 4.  On fait un tableau de fréquence avec `table()`en fonction des catégories croisée. (valeur de 1 à 6 croisé aux questions).
 
-5.  On calcule la proportion par question à l'aide de la fonction `prop.table()` et de largumentt 2 dans margin. On calcule le pourcentage en multipliant par 100 et on arrondi le résultat avec `round()`.
+5.  On calcule la proportion par question à l'aide de la fonction `prop.table()` et de largumentt 2 dans margin. On calcule le pourcentage en multipliant par 100 et on arrondi le résultat avec `round()`. 
+
+6. On calcule le pourcentage des individus qui achètent très régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multipli par 100 avec `sum()` et `nrow()`
 
 ```{r}
 
@@ -475,6 +477,10 @@ tb_cc_freq <- round(prop.table(tb_cc, margin = 2)*100, 2)
 
 tb_cc_freq
 
+#6
+
+print(paste("Il y a",round(sum(lignes_a_garder, na.rm = T)/nrow(data)*100),"pourcent des acheteurs qui achètent en très régulièrement en circuit court"))
+
 ```
 #### Avec usage de library
 - Pour chaque fonction utiliser on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
@@ -483,6 +489,7 @@ tb_cc_freq
 3. On fait une mise au format long du notre dataframe en deux colonnes Questions et Réponses à l'aide de la fonction `pivot_longer`.
 4. Avec la `table()` on calcule les fréquences croisées et on calcule la proportion par ligne avec `prop.table()`.
 5. On termine avec une mise en forme avec `kable()` pour un tableau propre que l'on peut modifier de différentes manières.
+6. On calcule le pourcentage des individus qui achètent très régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multipli par 100 avec `sum()` et `nrow()`
 
 ```{r}
 #1
@@ -508,6 +515,10 @@ df_cc <- data %>% filter(rowSums(across(all_of(col_a_tester), ~ .x %in% c(1, 2))
 kable(round(df_cc, 2), caption = "Répartition des acheteurs réguliers de produits locaux et ou en circuits courts (%)")%>% 
   kable_styling(latex_options = "striped")
 
+#6
+
+print(paste("Il y a",round(sum(lignes_a_garder, na.rm = T)/nrow(data)*100),"pourcent des acheteurs qui achètent en très régulièrement en circuit court"))
+
 ```
 ### 9.Créer un sous échantillon appelé les acheteurs réguliers de produits locaux et ou en circuits courts
 #### Avec R natif
@@ -521,6 +532,8 @@ kable(round(df_cc, 2), caption = "Répartition des acheteurs réguliers de produ
 4.  On fait un tableau de fréquence avec `table()`en fonction des catégories croisée. (valeur de 1 à 6 croisé aux questions).
 
 5.  On calcule la proportion par question à l'aide de la fonction `prop.table()` et de largumentt 2 dans margin. On calcule le pourcentage en multipliant par 100 et on arrondi le résultat avec `round()`.
+
+6. On calcule le pourcentage des individus qui achètent régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multipli par 100 avec `sum()` et `nrow()`
 
 ```{r}
 
@@ -548,6 +561,10 @@ tb_cc <- table(df_cc_comp)
 
 tb_cc_freq <- round(prop.table(tb_cc, margin = 2)*100, 2)
 
+#6
+
+print(paste("Il y a",round(sum(lignes_a_garder, na.rm = T)/nrow(data)*100),"pourcent des acheteurs qui achètent en très régulièrement en circuit court"))
+
 tb_cc_freq
 
 ```
@@ -558,6 +575,7 @@ tb_cc_freq
 3. On fait une mise au format long du notre dataframe en deux colonnes Questions et Réponses à l'aide de la fonction `pivot_longer`.
 4. Avec la `table()` on calcule les fréquences croisées et on calcule la proportion par ligne avec `prop.table()`.
 5. On termine avec une mise en forme avec `kable()` pour un tableau propre que l'on peut modifier de différentes manières.
+6. On calcule le pourcentage des individus qui achètent régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multipli par 100 avec `sum()` et `nrow()`
 
 ```{r}
 #1
@@ -583,5 +601,7 @@ df_cc <- data %>% filter(rowSums(across(all_of(col_a_tester), ~ .x %in% c(3, 4))
 kable(round(df_cc, 2), caption = "Répartition des acheteurs réguliers de produits locaux et ou en circuits courts (%)")%>% 
   kable_styling(latex_options = "striped")
 
-```
+#6
 
+print(paste("Il y a",round(sum(lignes_a_garder, na.rm = T)/nrow(data)*100),"pourcent des acheteurs qui achètent en très régulièrement en circuit court"))
+```
