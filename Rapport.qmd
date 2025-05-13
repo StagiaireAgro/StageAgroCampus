@@ -851,39 +851,6 @@ filter_data %>%
   tbl_summary(include = c(Q1, Q2, Q8, Q240, Q236, Q235))
 ```
 
-
-### 15.Budget moyen
-#### Avec R natif
-1. On selectionne la colonne Q8 avec `$` et on fait la moyenne avec la fonction `mean()`.
-2. On affiche le résultat arrondi avec `round()` que l'on colle avec un texte avec la fonction `paste()`
-```{r}
-
-#1
-
-moy_budget <- mean(data$Q8, na.rm = T)
-
-#2
-
-print(paste("Le budget alimentaire moyen est de",round(moy_budget),"euros"))
-```
-
-### 16. Budget médian
-#### Avec R natif
-1. On selectionne la colonne Q8 avec `$` et on fait la médiane avec la fonction `median()`.
-
-```{r}
-median_budget <- median(data$Q8)
-median_budget
-```
-#### Avec usage de library
-
-```{r}
-median_budget2 <- data %>%
-summarise(mediane = median(Q8))
-median_budget2
-```
-
-
 ### 13. Pour chaque combinaison, quel profil de répondants ? Voir quelles sont les variables explicatives de cette nouvelle variable "combinaison"
 
 #### Avec R natif
@@ -1078,6 +1045,38 @@ analyser_sous_echantillon_dplyr(data1, data_Magasin_aide_alimentaire)
 
 ```
 
+
+### 15.Budget moyen
+#### Avec R natif
+1. On selectionne la colonne Q8 avec `$` et on fait la moyenne avec la fonction `mean()`.
+2. On affiche le résultat arrondi avec `round()` que l'on colle avec un texte avec la fonction `paste()`
+```{r}
+
+#1
+
+moy_budget <- mean(data$Q8, na.rm = T)
+
+#2
+
+print(paste("Le budget alimentaire moyen est de",round(moy_budget),"euros"))
+```
+
+### 16. Budget médian
+#### Avec R natif
+1. On selectionne la colonne Q8 avec `$` et on fait la médiane avec la fonction `median()`.
+
+```{r}
+median_budget <- median(data$Q8)
+median_budget
+```
+#### Avec usage de library
+
+```{r}
+median_budget2 <- data %>%
+summarise(mediane = median(Q8))
+median_budget2
+```
+
 ### 18.Budget moyen consacré a chaque modalité de lieu
 #### Avec R natif
 1. On sélectionne les colonnes Q9_1 à Q9_13. On utilise `paste()` pour simplifier les noms de colonne.
@@ -1227,6 +1226,3 @@ names(tb_Q22) <- c("Oui, et j’en ai acheté au cours du mois de Septembre","Ou
 kable(round(tb_Q22, 2), col.names = c("Achetez-vous des produits vendus directement par l’agriculteur ?","Répartition (%)")) %>% 
   kable_styling(latex_options = "striped")
 ```
-
-
-
