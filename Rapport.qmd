@@ -635,7 +635,7 @@ tb_cc_freq
 
 #6
 
-print(paste("Il y a",round(sum(lignes_a_garder, na.rm = T)/nrow(data)*100),"pourcent des acheteurs qui achètent en très régulièrement en circuit court"))
+print(paste("Il y a",round(sum(lignes_a_garder, na.rm = T)/nrow(data)*100),"pourcent des acheteurs qui achètent très régulièrement en circuit court"))
 
 ```
 #### Avec usage de library
