@@ -774,3 +774,56 @@ moy_budget <- mean(data$Q8, na.rm = T)
 
 print(paste("Le budget alimentaire moyen est de",round(moy_budget),"euros"))
 ```
+### 18.Budget moyen consacré a chaque modalité de lieu
+#### Avec R natif
+1. On sélectionne les colonnes Q9_1 à Q9_13. On utilise `paste()` pour simplifier les noms de colonne.
+2. On remplace les valeurs manquantes 0 que l'on repère avec `is.na()` avec `replace()`.
+3. On calcule les moyennes par colonne avec `colMeans()` que l'on arrondi avec `round()`
+4. On renomme les noms avec `names()` et on affiche le résultat dans un dataframe avec `as.data.frame()`
+
+```{r}
+
+#1
+
+df_rep_b <- data[,paste("Q9_", 1:13, sep = "")]
+
+#2
+
+df_rep_b <- replace(df_rep_b, is.na(df_rep_b), 0)
+
+#3
+
+moy_rep_b <- round(colMeans(df_rep_b), 2)
+
+#4
+
+names(moy_rep_b) <- c("Hypermarché, Supermarché","Hard discount","Epiceries indépendantes, de quartier, épiceries fines","Magasins de surgelés","Magasins spécialisés Bio","Marché","Directement aux agriculteurs","Paniers en ligne réalisés par un intermédiaire","Artisans et commerçants spécialisés","Epicerie participative, associative, supermarché coopératif","Magasin alimentaire spécialisé dans le vrac ou les produits locaux","Magasin d’aide alimentaire","Autre")
+
+as.data.frame(moy_rep_b)
+
+```
+#### Avec usage de library
+- Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+1. On sélectionne les colonnes qui nous intéressent avec `select()`
+2. On modifie notre nouveau dataframe en remplaçant toute les valeur NA par 0 avec `mutate` et on calcule la moyenne par col avec `colMeans()`
+3. On modifie les noms des lieux d'achat et on affiche le tableau avec `kable()`
+
+```{r}
+#1
+
+moy_rep_b <- data %>% select(Q9_1:Q9_13) %>% 
+  
+#2
+  
+  mutate(across(everything(), ~replace_na(., 0))) %>% 
+  
+  colMeans()
+
+#3
+
+names(moy_rep_b) <- c("Hypermarché, Supermarché","Hard discount","Epiceries indépendantes, de quartier, épiceries fines","Magasins de surgelés","Magasins spécialisés Bio","Marché","Directement aux agriculteurs","Paniers en ligne réalisés par un intermédiaire","Artisans et commerçants spécialisés","Epicerie participative, associative, supermarché coopératif","Magasin alimentaire spécialisé dans le vrac ou les produits locaux","Magasin d’aide alimentaire","Autre")
+
+kable(round(moy_rep_b,2), caption = "Moyenne de la répartition du budget en fonction du lieu d'achat", col.names = c("Lieux d'achat","Moyenne de la répartition du budget (%)")) %>% 
+  kable_styling(latex_options = "striped")
+  
+```
