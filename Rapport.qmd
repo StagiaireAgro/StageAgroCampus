@@ -760,3 +760,17 @@ kable(round(df_cc, 2), caption = "Répartition des acheteurs réguliers de produ
 
 print(paste("Il y a",round(sum(lignes_a_garder, na.rm = T)/nrow(data)*100),"pourcent des acheteurs qui achètent en très régulièrement en circuit court"))
 ```
+### 15.Budget moyen
+#### Avec R natif
+1. On selectionne la colonne Q8 avec `$` et on fait la moyenne avec la fonction `mean()`.
+2. On affiche le résultat arrondi avec `round()` que l'on colle avec un texte avec la fonction `paste()`
+```{r}
+
+#1
+
+moy_budget <- mean(data$Q8, na.rm = T)
+
+#2
+
+print(paste("Le budget alimentaire moyen est de",round(moy_budget),"euros"))
+```
