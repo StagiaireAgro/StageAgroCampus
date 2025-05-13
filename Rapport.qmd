@@ -834,7 +834,6 @@ addmargins(table(sous_echantillon$Q235, sous_echantillon$Q236), 2)  # taille du 
 ```
 #### Avec usage de library
 
-
 ```{r}
 filter_data <- data %>%
   mutate(condition = ifelse((Q27 %in% c(3,4) | Q35 %in% c(3,4) | Q43 %in% c(3,4) | Q50 %in% c(3,4) |  Q59 %in% c(3,4)),1,0)) %>%
@@ -867,6 +866,23 @@ moy_budget <- mean(data$Q8, na.rm = T)
 
 print(paste("Le budget alimentaire moyen est de",round(moy_budget),"euros"))
 ```
+
+### 16. Budget médian
+#### Avec R natif
+1. On selectionne la colonne Q8 avec `$` et on fait la médiane avec la fonction `median()`.
+
+```{r}
+median_budget <- median(data$Q8)
+median_budget
+```
+#### Avec usage de library
+
+```{r}
+median_budget2 <- data %>%
+summarise(mediane = median(Q8))
+median_budget2
+```
+
 ### 18.Budget moyen consacré a chaque modalité de lieu
 #### Avec R natif
 1. On sélectionne les colonnes Q9_1 à Q9_13. On utilise `paste()` pour simplifier les noms de colonne.
