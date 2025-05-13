@@ -760,6 +760,98 @@ kable(round(df_cc, 2), caption = "Répartition des acheteurs réguliers de produ
 
 print(paste("Il y a",round(sum(lignes_a_garder, na.rm = T)/nrow(data)*100),"pourcent des acheteurs qui achètent en très régulièrement en circuit court"))
 ```
+
+### 10. Sous échantillon appelé les acheteurs très réguliers de produits locaux et ou en circuits courts achetant directement aux producteurs
+#### Avec R natif
+
+1. Identifier pour chaque question ceux ou celles ayant repondu 1 ou 2,
+2. Selectionner le jeu de données respectant la condition précédente,
+3. Compter le nombre de lignes obtenue grâce à la condition `nrow()` puis diviser par le nombre total d'individu,
+4. Repérer le numero de la question puis realiser un tableau descriptif des modalités de la question avec `table()`,
+5. Ajouter les totaux par lignes ou colonnes avec `addmargins()` en spécifiant 2 pour les lignes et 1 pour les colonnes.
+
+```{r}
+condition <- data$Q27 %in% c(1, 2) | data$Q35 %in% c(1, 2) | data$Q43 %in% c(1, 2) | data$Q50 %in% c(1, 2) | data$Q59 %in% c(1, 2) # Conditionn de la question
+sous_echantillon <- data[condition, ]
+pourcentage <- nrow(sous_echantillon)/nrow(data) * 100
+arrondir_pourcentage <- round(pourcentage,2) # Arrondir le pourcentage à 2 chiffres après la virgule
+arrondir_pourcentage
+
+table(sous_echantillon$Q2) # selon l'âge
+table(sous_echantillon$Q1) # selon le genre
+table(sous_echantillon$Q3) # selon la CSP
+table(cut(sous_echantillon$Q8, breaks = c(0, 199, 399, 599, 799, 999, 1499, Inf),
+                    labels = c("[0 – 199[", "[200 – 399[", "[400 – 599[", "[600 – 799[", "[800 – 999[", "[1000 – 1499[", "[1500 et plus["),
+                    right = FALSE))
+table(sous_echantillon$Q240) # selon le niveau de diplôme
+# table(sous_echantillon$Q5_taille) # selon la taille de l'agglomeration
+table(sous_echantillon$Q236) # nb d'enfants
+addmargins(table(sous_echantillon$Q235, sous_echantillon$Q236), 2)  # taille du foyer
+```
+#### Avec usage de library
+
+1. Ajouter une variable à la base de données qui prend la valeur 1 si la condition est respecté 0 sinon
+2. Selectionner uniquement que les individus qui respectent le filtre
+3. utiliser `tbl_summary()` pour réaliser directement un tableau pour chaque variable ajouté
+
+```{r}
+filter_data <- data %>%
+  mutate(condition = ifelse((Q27 %in% c(1,2) | Q35 %in% c(1,2) | Q43 %in% c(1,2) | Q50 %in% c(1,2) |  Q59 %in% c(1,2)),1,0)) %>%
+  filter(condition==1)
+
+# le pourcentage
+pourcentage_lib <-  filter_data %T>%
+  {{nombre_individu <<- nrow(data)}} %>%
+  summarise(prop = n()) %>%
+  pull()/nombre_individu*100
+
+pourcentage_lib
+
+filter_data %>%
+  tbl_summary(include = c(Q1, Q2, Q8, Q240, Q236, Q235))
+```
+
+### 11 Sous échantillon appelé les acheteurs réguliers de produits locaux et ou en circuits courts achetant directement aux producteurs
+#### Avec R natif
+```{r}
+condition <- data$Q27 %in% c(3, 4) | data$Q35 %in% c(3, 4) | data$Q43 %in% c(3, 4) | data$Q50 %in% c(3, 4) | data$Q59 %in% c(3, 4) # Conditionn de la question
+sous_echantillon <- data[condition, ]
+pourcentage <- nrow(sous_echantillon)/nrow(data) * 100
+arrondir_pourcentage <- round(pourcentage,2) # Arrondir le pourcentage à 2 chiffres après la virgule
+arrondir_pourcentage
+
+table(sous_echantillon$Q2) # selon l'âge
+table(sous_echantillon$Q1) # selon le genre
+table(sous_echantillon$Q3) # selon la CSP
+table(cut(sous_echantillon$Q8, breaks = c(0, 199, 399, 599, 799, 999, 1499, Inf),
+                    labels = c("[0 – 199[", "[200 – 399[", "[400 – 599[", "[600 – 799[", "[800 – 999[", "[1000 – 1499[", "[1500 et plus["),
+                    right = FALSE))
+table(sous_echantillon$Q240) # selon le niveau de diplôme
+# table(sous_echantillon$Q5_taille) # selon la taille de l'agglomeration
+table(sous_echantillon$Q236) # nb d'enfants
+addmargins(table(sous_echantillon$Q235, sous_echantillon$Q236), 2)  # taille du foyer
+```
+#### Avec usage de library
+
+
+```{r}
+filter_data <- data %>%
+  mutate(condition = ifelse((Q27 %in% c(3,4) | Q35 %in% c(3,4) | Q43 %in% c(3,4) | Q50 %in% c(3,4) |  Q59 %in% c(3,4)),1,0)) %>%
+  filter(condition==1)
+
+# le pourcentage
+pourcentage_lib <-  filter_data %T>%
+  {{nombre_individu <<- nrow(data)}} %>%
+  summarise(prop = n()) %>%
+  pull()/nombre_individu*100
+
+pourcentage_lib
+
+filter_data %>%
+  tbl_summary(include = c(Q1, Q2, Q8, Q240, Q236, Q235))
+```
+
+
 ### 15.Budget moyen
 #### Avec R natif
 1. On selectionne la colonne Q8 avec `$` et on fait la moyenne avec la fonction `mean()`.
@@ -827,3 +919,6 @@ kable(round(moy_rep_b,2), caption = "Moyenne de la répartition du budget en fon
   kable_styling(latex_options = "striped")
   
 ```
+
+
+
