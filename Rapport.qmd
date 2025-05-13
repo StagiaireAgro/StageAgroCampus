@@ -12,6 +12,7 @@ library(readxl)
 library(dplyr)
 library(tidyverse)
 library(kableExtra)
+library(gtsummary)
 ```
 
 ## Imporation des données
