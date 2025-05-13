@@ -1,8 +1,8 @@
 ---
 title: "PLAT4TERFOOD"
-format: html
-number-sections: true
-editor: visual
+format:
+  html:
+    toc: true
 ---
 
 ## Packages
