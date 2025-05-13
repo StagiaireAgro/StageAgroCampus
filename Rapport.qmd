@@ -434,4 +434,154 @@ library(magrittr) # %T>%
   filter(freq==1) %>%
   summarise(round((count(.)/nombre_francais)*100,2)))
 ```
+### 8.Créer un sous échantillon appelé les acheteurs très réguliers de produits locaux et ou en circuits courts
+#### Avec R natif
+
+1.  Dans un premier vecteur on met les colonnes que l'on va vérifier.
+
+2.  À l'aide de la fonction `apply()` je vérifie par ligne s'il y a au moins une valeur égal à 1 ou 2 sur une des colonnes à tester.
+
+3.  On sélectionne les lignes colonnes que l'on souhaite et on empile les colonnes de notre nouveau data frame df_cc dans df_cc_comp avec la fonction `stack()`.
+
+4.  On fait un tableau de fréquence avec `table()`en fonction des catégories croisée. (valeur de 1 à 6 croisé aux questions).
+
+5.  On calcule la proportion par question à l'aide de la fonction `prop.table()` et de largumentt 2 dans margin. On calcule le pourcentage en multipliant par 100 et on arrondi le résultat avec `round()`.
+
+```{r}
+
+#1
+
+col_a_tester <- c("Q27", "Q35", "Q43", "Q50", "Q59", "Q67", "Q81", "Q89", "Q97", "Q104", "Q111",
+                  "Q118", "Q125", "Q133", "Q142", "Q149", "Q157", "Q165", "Q173", "Q181", "Q189",
+                  "Q200", "Q208", "Q216", "Q224")
+
+#2
+
+lignes_a_garder <- apply(data[, col_a_tester], MARGIN = 1, function(x) any(x == 1 | x == 2))
+
+#3
+
+df_cc <- data[lignes_a_garder,c("Q1","recode_age","recode_csp")]
+
+df_cc_comp <- stack(df_cc)
+
+#4
+
+tb_cc <- table(df_cc_comp)
+
+#5
+
+tb_cc_freq <- round(prop.table(tb_cc, margin = 2)*100, 2)
+
+tb_cc_freq
+
+```
+#### Avec usage de library
+- Pour chaque fonction utiliser on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+1. On calcule le filtre des lignes qui nous intéresse avec `filter`.
+2. On sélectionne les colonnes qui nous intéressent avec la fonction `select`.
+3. On fait une mise au format long du notre dataframe en deux colonnes Questions et Réponses à l'aide de la fonction `pivot_longer`.
+4. Avec la `table()` on calcule les fréquences croisées et on calcule la proportion par ligne avec `prop.table()`.
+5. On termine avec une mise en forme avec `kable()` pour un tableau propre que l'on peut modifier de différentes manières.
+
+```{r}
+#1
+
+df_cc <- data %>% filter(rowSums(across(all_of(col_a_tester), ~ .x %in% c(1, 2))) >= 1) %>% 
+  
+#2
+  
+  select(Q1,recode_age,recode_csp) %>% 
+  
+#3 
+  
+  pivot_longer(cols = everything(),
+               names_to = "Questions",
+               values_to = "Réponses") %>% 
+
+#4
+  
+  table() %>% prop.table(margin = 1)*100
+
+#5
+
+kable(round(df_cc, 2), caption = "Répartition des acheteurs réguliers de produits locaux et ou en circuits courts (%)")%>% 
+  kable_styling(latex_options = "striped")
+
+```
+### 9.Créer un sous échantillon appelé les acheteurs réguliers de produits locaux et ou en circuits courts
+#### Avec R natif
+
+1.  Dans un premier vecteur on met les colonnes que l'on va vérifier.
+
+2.  À l'aide de la fonction `apply()` je vérifie par ligne s'il y a au moins une valeur égal à 3 ou 4 sur une des colonnes à tester.
+
+3.  On sélectionne les lignes colonnes que l'on souhaite et on empile les colonnes de notre nouveau data frame df_cc dans df_cc_comp avec la fonction `stack()`.
+
+4.  On fait un tableau de fréquence avec `table()`en fonction des catégories croisée. (valeur de 1 à 6 croisé aux questions).
+
+5.  On calcule la proportion par question à l'aide de la fonction `prop.table()` et de largumentt 2 dans margin. On calcule le pourcentage en multipliant par 100 et on arrondi le résultat avec `round()`.
+
+```{r}
+
+#1
+
+col_a_tester <- c("Q27", "Q35", "Q43", "Q50", "Q59", "Q67", "Q81", "Q89", "Q97", "Q104", "Q111",
+                  "Q118", "Q125", "Q133", "Q142", "Q149", "Q157", "Q165", "Q173", "Q181", "Q189",
+                  "Q200", "Q208", "Q216", "Q224")
+
+#2
+
+lignes_a_garder <- apply(data[, col_a_tester], MARGIN = 1, function(x) any(x == 3 | x == 4))
+
+#3
+
+df_cc <- data[lignes_a_garder,c("Q1","recode_age","recode_csp")]
+
+df_cc_comp <- stack(df_cc)
+
+#4
+
+tb_cc <- table(df_cc_comp)
+
+#5
+
+tb_cc_freq <- round(prop.table(tb_cc, margin = 2)*100, 2)
+
+tb_cc_freq
+
+```
+#### Avec usage de library
+- Pour chaque fonction utiliser on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+1. On calcule le filtre des lignes qui nous intéresse avec `filter`.
+2. On sélectionne les colonnes qui nous intéressent avec la fonction `select`.
+3. On fait une mise au format long du notre dataframe en deux colonnes Questions et Réponses à l'aide de la fonction `pivot_longer`.
+4. Avec la `table()` on calcule les fréquences croisées et on calcule la proportion par ligne avec `prop.table()`.
+5. On termine avec une mise en forme avec `kable()` pour un tableau propre que l'on peut modifier de différentes manières.
+
+```{r}
+#1
+
+df_cc <- data %>% filter(rowSums(across(all_of(col_a_tester), ~ .x %in% c(3, 4))) >= 1) %>% 
+  
+#2
+  
+  select(Q1,recode_age,recode_csp) %>% 
+  
+#3 
+  
+  pivot_longer(cols = everything(),
+               names_to = "Questions",
+               values_to = "Réponses") %>% 
+
+#4
+  
+  table() %>% prop.table(margin = 1)*100
+
+#5
+
+kable(round(df_cc, 2), caption = "Répartition des acheteurs réguliers de produits locaux et ou en circuits courts (%)")%>% 
+  kable_styling(latex_options = "striped")
+
+```
 
