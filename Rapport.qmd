@@ -883,6 +883,201 @@ summarise(mediane = median(Q8))
 median_budget2
 ```
 
+
+### 13. Pour chaque combinaison, quel profil de répondants ? Voir quelles sont les variables explicatives de cette nouvelle variable "combinaison"
+
+#### Avec R natif
+
+(1) Création des 12 jeux de données par lieu d'achat. À partir du jeu de données principal data1, nous avons extrait 12 sous-jeux de données, chacun correspondant à un type de lieu d’achat (ex. : hypermarché, hard-discount, épicerie indépendante, etc.). Ces sous-échantillons sont créés à l’aide de la fonction `subset()`, en filtrant les colonnes correspondant à des variables d’intérêt sociologique (sexe, âge, CSP, taille de l’agglomération, budget, etc.) ainsi qu'à une variable de motivation propre à chaque type de lieu.
+
+(2) Développement d'une fonction analyser_sous_echantillon(). Cette fonction est conçue pour automatiser l’analyse descriptive d’un sous-échantillon. Elle effectue les tâches suivantes :
+
+    (1) Calcule le nombre d’individus dans le sous-échantillon, et son pourcentage par rapport à l’échantillon total.
+
+    (2) Affiche la répartition des individus selon plusieurs variables socio-démographiques
+
+        (1) Genre (Q1)
+
+        (2) Âge (recode_age)
+
+        (3) CSP (recode_csp)
+
+        (4) Taille d’agglomération (Q5_taille)
+
+        (5) Budget alimentaire (Q8)
+
+        (6) Nombre d’enfants (Q236)
+
+        (7) Taille du foyer (somme de Q235 et Q236)
+
+        (8) Niveau de diplôme (Q240)
+
+(3) Application de la fonction sur les 12 sous-échantillons. La fonction est ensuite appliquée à chacun des sous-jeux de données pour obtenir, de manière systématique, le profil des consommateurs selon le lieu d'achat.
+
+```{r}
+# (1) 
+data_hypermarche <- subset(data1,select=c(2,4,6,11,17,33,401,402,406)) 
+data_Hard_discount <- subset(data1,select=c(2,4,6,11,18,33,401,402,406))
+data_Epiceries_inde <- subset(data1,select=c(2,4,6,11,19,33,401,402,406)) 
+data_magains_surgele <- subset(data1,select=c(2,4,6,11,20,33,401,402,406)) 
+data_Bio <- subset(data1,select=c(2,4,6,11,21,33,401,402,406)) 
+data_Marche <- subset(data1,select=c(2,4,6,11,22,33,401,402,406)) 
+data_agriculteur <- subset(data1,select=c(2,4,6,11,23,33,401,402,406))
+data_Paniers_ligne <- subset(data1,select=c(2,4,6,11,24,33,401,402,406))
+data_artisans_commerce_spe <- subset(data1,select=c(2,4,6,11,25,33,401,402,406))
+data_Epicerie_participative <- subset(data1,select=c(2,4,6,11,26,33,401,402,406))
+data_Magasin_alimentaire_spe_vrac <- subset(data1,select=c(2,4,6,11,27,33,401,402,406))
+data_Magasin_aide_alimentaire <- subset(data1,select=c(2,4,6,11,28,33,401,402,406))
+
+# (2) 
+
+analyser_sous_echantillon <- function(data_total, data_sub) {
+  total_n <- nrow(data_total)
+  sub_n <- nrow(data_sub)
+  
+  cat("Nombre de répondants dans le sous-échantillon :", sub_n, "\n")
+  cat("Pourcentage par rapport à l'échantillon total :", round(100 * sub_n / total_n, 2), "%\n\n")
+  
+  cat("Répartition selon le genre (Q1) :\n")
+  print(table(data_sub[, "Q1"], useNA = "ifany"))
+  cat("\n")
+  
+  cat("Répartition selon l'âge (recode_age) :\n")
+  print(table(data_sub[, "recode_age"], useNA = "ifany"))
+  cat("\n")
+  
+  cat("Répartition selon la CSP (recode_csp) :\n")
+  print(table(data_sub[, "recode_csp"], useNA = "ifany"))
+  cat("\n")
+  
+  cat("Répartition selon la taille de l'agglomération (Q5_taille) :\n")
+  print(table(data_sub[, "Q5_taille"], useNA = "ifany"))
+  cat("\n")
+  
+  cat("Répartition selon le budget alimentaire (Q8) :\n")
+  print(table(data_sub[, "Q8"], useNA = "ifany"))
+  cat("\n")
+  
+  cat("Répartition selon le nombre d'enfants (Q236) :\n")
+  print(table(data_sub[, "Q236"], useNA = "ifany"))
+  cat("\n")
+  
+  cat("Répartition selon la taille du foyer (Q235 + Q236) :\n")
+  taille_foyer <- data_sub[, "Q235"] + data_sub[, "Q236"]
+  print(table(taille_foyer, useNA = "ifany"))
+  cat("\n")
+  
+  cat("Répartition selon le niveau de diplôme (Q240) :\n")
+  print(table(data_sub[, "Q240"], useNA = "ifany"))
+  cat("\n")
+}
+
+# (3) 
+analyser_sous_echantillon(data1, data_hypermarche)
+analyser_sous_echantillon(data1, data_Hard_discount)
+analyser_sous_echantillon(data1, data_Epiceries_inde)
+analyser_sous_echantillon(data1, data_magains_surgele)
+analyser_sous_echantillon(data1, data_Bio)
+analyser_sous_echantillon(data1, data_Marche)
+analyser_sous_echantillon(data1, data_agriculteur)
+analyser_sous_echantillon(data1, data_Paniers_ligne)
+analyser_sous_echantillon(data1, data_artisans_commerce_spe)
+analyser_sous_echantillon(data1, data_Epicerie_participative)
+analyser_sous_echantillon(data1, data_Magasin_alimentaire_spe_vrac)
+analyser_sous_echantillon(data1, data_Magasin_aide_alimentaire)
+
+```
+
+#### Avec usage de library
+
+(1) Création des 12 jeux de données par lieu d'achat. Chaque sous-échantillon est généré à partir du jeu de données principal data1, en sélectionnant les colonnes pertinentes (variables socio-démographiques + variable spécifique au lieu d’achat). Cette opération est effectuée à l’aide de la fonction `select()` du package dplyr, qui permet de ne conserver que certaines colonnes dans un tableau de données. La syntaxe `%>%`(pipe) est issue du package magrittr et permet d’enchaîner les opérations de manière lisible. Elle se lit comme “puis” : on applique une fonction à l’objet qui précède. Ce que fait `select() `: elle extrait uniquement les colonnes dont les indices sont spécifiés, ici les variables sociologiques et celles propres au type de lieu.
+
+(2) Développement d'une fonction `analyser_sous_echantillon_dplyr()`. Cette fonction, développée avec dplyr, automatise l’analyse descriptive des sous-échantillons et calcule:
+
+    (1) Le nombre d’individus et leur proportion dans l’échantillon total
+
+    (2) La distribution des individus selon des variables clés
+
+    (3) La taille du foyer, calculée dynamiquement. 
+    Fonction imbriquée `afficher_tableau()`. Cette fonction interne permet d’afficher les effectifs et pourcentages d’une variable donnée. Elle s’appuie sur :
+      1.  `group_by()` : regroupe les données selon les modalités de la variable ;
+      2.  `summarise(N = n())` : calcule le nombre d’observations (n()) par modalité ;
+      3.  `mutate()`: ajoute une colonne avec les pourcentages. 
+  <br>
+
+      Le **`.data[[variable]]`** : syntaxe non standard utilisée pour faire du "programmation fonctionnelle" avec des noms de variables passés dynamiquement dans une fonction. La fonction `afficher_tableau()` est ensuite appelée pour chaque variable d’intérêt. Puis, une nouvelle colonne `taille_foyer` est créée avec `mutate()` en faisant la somme de deux variables (`Q235` et `Q236`), puis les données sont regroupées et résumées comme précédemment.
+
+(3) Application de la fonction sur les 12 sous-échantillons La fonction est utilisée pour analyser tous les types de lieux d’achat. Cela permet d'obtenir, pour chaque canal, un tableau clair et formaté des caractéristiques sociodémographiques des usagers.
+
+```{r}
+# (1)
+
+data_hypermarche <- data1 %>% select(2, 4, 6, 11, 17, 33, 401, 402, 406)
+data_Hard_discount <- data1 %>% select(2, 4, 6, 11, 18, 33, 401, 402, 406)
+data_Epiceries_inde <- data1 %>% select(2, 4, 6, 11, 19, 33, 401, 402, 406)
+data_magains_surgele <- data1 %>% select(2, 4, 6, 11, 20, 33, 401, 402, 406)
+data_Bio <- data1 %>% select(2, 4, 6, 11, 21, 33, 401, 402, 406)
+data_Marche <- data1 %>% select(2, 4, 6, 11, 22, 33, 401, 402, 406)
+data_agriculteur <- data1 %>% select(2, 4, 6, 11, 23, 33, 401, 402, 406)
+data_Paniers_ligne <- data1 %>% select(2, 4, 6, 11, 24, 33, 401, 402, 406)
+data_artisans_commerce_spe <- data1 %>% select(2, 4, 6, 11, 25, 33, 401, 402, 406)
+data_Epicerie_participative <- data1 %>% select(2, 4, 6, 11, 26, 33, 401, 402, 406)
+data_Magasin_alimentaire_spe_vrac <- data1 %>% select(2, 4, 6, 11, 27, 33, 401, 402, 406)
+data_Magasin_aide_alimentaire <- data1 %>% select(2, 4, 6, 11, 28, 33, 401, 402, 406)
+
+# (2)
+
+analyser_sous_echantillon_dplyr <- function(data_total, data_sub) {
+  total_n <- nrow(data_total)
+  sub_n <- nrow(data_sub)
+  
+  cat("Nombre de répondants dans le sous-échantillon :", sub_n, "\n")
+  cat("Pourcentage par rapport à l'échantillon total :", round(100 * sub_n / total_n, 2), "%\n\n")
+  
+  afficher_tableau <- function(data, variable, nom_variable) {
+    cat(paste("Répartition selon", nom_variable, ":\n"))
+    print(data %>%
+            group_by(.data[[variable]]) %>%
+            summarise(N = n()) %>%
+            mutate(Percent = round(100 * N / sum(N), 2)))
+    cat("\n")
+  }
+
+  afficher_tableau(data_sub, "Q1", "le genre (Q1)")
+  afficher_tableau(data_sub, "recode_age", "l'âge (recode_age)")
+  afficher_tableau(data_sub, "recode_csp", "la CSP (recode_csp)")
+  afficher_tableau(data_sub, "Q5_taille", "la taille de l'agglomération (Q5_taille)")
+  afficher_tableau(data_sub, "Q8", "le budget alimentaire (Q8)")
+  afficher_tableau(data_sub, "Q236", "le nombre d'enfants (Q236)")
+  
+  cat("Répartition selon la taille du foyer (Q235 + Q236) :\n")
+  data_sub %>%
+    mutate(taille_foyer = Q235 + Q236) %>%
+    group_by(taille_foyer) %>%
+    summarise(N = n()) %>%
+    mutate(Percent = round(100 * N / sum(N), 2)) %>%
+    print()
+  cat("\n")
+  
+  afficher_tableau(data_sub, "Q240", "le niveau de diplôme (Q240)")
+}
+
+# (3)
+analyser_sous_echantillon_dplyr(data1, data_hypermarche)
+analyser_sous_echantillon_dplyr(data1, data_Hard_discount)
+analyser_sous_echantillon_dplyr(data1, data_Epiceries_inde)
+analyser_sous_echantillon_dplyr(data1, data_magains_surgele)
+analyser_sous_echantillon_dplyr(data1, data_Bio)
+analyser_sous_echantillon_dplyr(data1, data_Marche)
+analyser_sous_echantillon_dplyr(data1, data_agriculteur)
+analyser_sous_echantillon_dplyr(data1, data_Paniers_ligne)
+analyser_sous_echantillon_dplyr(data1, data_artisans_commerce_spe)
+analyser_sous_echantillon_dplyr(data1, data_Epicerie_participative)
+analyser_sous_echantillon_dplyr(data1, data_Magasin_alimentaire_spe_vrac)
+analyser_sous_echantillon_dplyr(data1, data_Magasin_aide_alimentaire)
+
+```
+
 ### 18.Budget moyen consacré a chaque modalité de lieu
 #### Avec R natif
 1. On sélectionne les colonnes Q9_1 à Q9_13. On utilise `paste()` pour simplifier les noms de colonne.
