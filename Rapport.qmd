@@ -920,6 +920,61 @@ kable(round(moy_rep_b,2), caption = "Moyenne de la répartition du budget en fon
   kable_styling(latex_options = "striped")
   
 ```
+### 21.part du budget consacré aux modalités 6/7/8
+
+#### Avec R natif
+
+1. On sélectionne les lignes pour notre critère de sélection à laide de `paste()`.
+2. À l'aide de la fonction `apply()` on regarde pour chaque valeur si elle est inférieure à 7 et non manquante (lieu fréquenté) et on retourne le booléen TRUE avec `all()` si la condition est respectée sur toute la ligne (tout les lieux) ou FALSE sinon.
+3. On sélectionne les lignes et colonnes qui nous intéressent et on remplace les valeurs manquantes par 0 avec `replace()`
+4. On fait la moyenne par colonne avec `colMeans` et on retransforme en dataframe avec `as.data.frame`
+5. On modifie les noms avec `dimnames()`
+
+```{r}
+#1
+
+df_678 <- data[,paste("Q6_", 6:8, sep = "")]
+
+#2
+
+lignes_a_conserver <- apply(df_678, MARGIN = 1, function(x) all(x < 7 & !is.na(x)))
+
+#3
+
+df_678_b <- data[lignes_a_conserver,paste("Q9_", 6:8, sep = "")]
+df_678_b <- replace(df_678_b, is.na(df_678_b), 0)
+
+#4
+
+moy_b_678 <- colMeans(df_678_b)
+moy_b_678 <- as.data.frame(moy_b_678)
+
+#5
+
+dimnames(moy_b_678)[[1]] <- c("Marché","Directement aux agriculteurs","Paniers en ligne réalisés par un intermédiaire")
+dimnames(moy_b_678)[[2]] <- "Moyenne du budget dédié pour ceux qui fréquentes ces lieux (%)"
+
+moy_b_678
+
+```
+#### Avec usage de library
+-   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+1.  On sélectionne les lignes avec toutes les valeurs de la question Q9_6 à Q9_8 qui sont inférieur à 7 et non manquantes avec `filter()`
+2. On sélectionne les colonnes qui nous intéressent avec `select()` et on fait la moyenne par colonne avec `colMeans()`
+3. On fait la mise en forme du tableau avec `kablee()`
+```{r}
+moy_b_678 <- data %>% filter(apply(across(Q6_6:Q6_8, ~ .x < 7 & !is.na(.x)),1,all) ) %>% 
+  select(Q9_6:Q9_8) %>% 
+  mutate(across(Q9_6:Q9_8, ~replace_na(., 0))) %>% 
+  colMeans() 
+
+
+names(moy_b_678) <- c("Marché","Directement aux agriculteurs","Paniers en ligne réalisés par un intermédiaire")
+
+kable(round(moy_b_678,2), caption = "Moyenne du budget dédié par ceux qui fréquentent tous ces lieux d’achat.", col.names = c("Lieux d'achat","Moyenne de la répartition du budget (%)")) %>% 
+  kable_styling(latex_options = "striped")
+  
+```
 
 
 
