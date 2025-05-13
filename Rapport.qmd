@@ -447,7 +447,7 @@ library(magrittr) # %T>%
 
 5.  On calcule la proportion par question à l'aide de la fonction `prop.table()` et de largumentt 2 dans margin. On calcule le pourcentage en multipliant par 100 et on arrondi le résultat avec `round()`. 
 
-6. On calcule le pourcentage des individus qui achètent très régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multipli par 100 avec `sum()` et `nrow()`
+6. On calcule le pourcentage des individus qui achètent très régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multiplie par 100 avec `sum()` et `nrow()`
 
 ```{r}
 
@@ -489,7 +489,7 @@ print(paste("Il y a",round(sum(lignes_a_garder, na.rm = T)/nrow(data)*100),"pour
 3. On fait une mise au format long du notre dataframe en deux colonnes Questions et Réponses à l'aide de la fonction `pivot_longer`.
 4. Avec la `table()` on calcule les fréquences croisées et on calcule la proportion par ligne avec `prop.table()`.
 5. On termine avec une mise en forme avec `kable()` pour un tableau propre que l'on peut modifier de différentes manières.
-6. On calcule le pourcentage des individus qui achètent très régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multipli par 100 avec `sum()` et `nrow()`
+6. On calcule le pourcentage des individus qui achètent très régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multiplie par 100 avec `sum()` et `nrow()`
 
 ```{r}
 #1
@@ -533,7 +533,7 @@ print(paste("Il y a",round(sum(lignes_a_garder, na.rm = T)/nrow(data)*100),"pour
 
 5.  On calcule la proportion par question à l'aide de la fonction `prop.table()` et de largumentt 2 dans margin. On calcule le pourcentage en multipliant par 100 et on arrondi le résultat avec `round()`.
 
-6. On calcule le pourcentage des individus qui achètent régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multipli par 100 avec `sum()` et `nrow()`
+6. On calcule le pourcentage des individus qui achètent régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multiplie par 100 avec `sum()` et `nrow()`
 
 ```{r}
 
@@ -575,7 +575,7 @@ tb_cc_freq
 3. On fait une mise au format long du notre dataframe en deux colonnes Questions et Réponses à l'aide de la fonction `pivot_longer`.
 4. Avec la `table()` on calcule les fréquences croisées et on calcule la proportion par ligne avec `prop.table()`.
 5. On termine avec une mise en forme avec `kable()` pour un tableau propre que l'on peut modifier de différentes manières.
-6. On calcule le pourcentage des individus qui achètent régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multipli par 100 avec `sum()` et `nrow()`
+6. On calcule le pourcentage des individus qui achètent régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multiplie par 100 avec `sum()` et `nrow()`
 
 ```{r}
 #1
