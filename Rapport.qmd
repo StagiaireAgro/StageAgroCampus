@@ -1186,6 +1186,47 @@ kable(round(moy_b_678,2), caption = "Moyenne du budget dédié par ceux qui fré
   kable_styling(latex_options = "striped")
   
 ```
+### 24.Produits achetés auprès d'un agriculteur ou non?
+#### Avec R natif
+1. On la colonne qui nous intéresse. 
+2. On fait le tableau de proportion de la table de fréquence d'occurrences de réponse de la question 22 avec `table()` et `prop.table()`. On multiplie par 100 pour avoir un pourcentage.
+3. On change le nom des valeurs avec `names()`.
+4. On transforme en dataframe avec `as.data.frame()` et on change le nom de la colonne des valeurs avec `dimnames()`.
+```{r}
+#1
+
+df_Q22 <- data[,"Q22"]
+
+#2
+
+tb_Q22 <- prop.table(table(df_Q22))*100
+
+#4
+
+names(tb_Q22) <- c("Oui, et j’en ai acheté au cours du mois de Septembre","Oui, mais je n’en ai pas acheté au cours du mois de Septembre","Non, j’en ai déjà acheté de cette façon mais ce n’est plus le cas","Non, je n’en ai jamais acheté de cette façon")
+
+#4
+
+df_Q22 <- as.data.frame(round(tb_Q22,2))
+dimnames(df_Q22)[[2]] <- c("Achetez-vous des produits vendus directement par l’agriculteur ?","Répartition (%)")
+
+df_Q22
+```
+#### Avec usage de library
+-   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+1. On sélectionne la colonne qui nous intéresse avec `select()`.
+2. On fait le tableau de proportion de la table de fréquence d'occurrences de réponse de la question 22 avec `table()` et `prop.table()`. On multiplie par 100 pour avoir un pourcentage.
+3. On change le nom des valeurs avec `names()`.
+4. On met en forme avec `kable()`. 
+```{r}
+tb_Q22 <- data %>% select(Q22) %>% 
+  table() %>% 
+  prop.table()*100
+names(tb_Q22) <- c("Oui, et j’en ai acheté au cours du mois de Septembre","Oui, mais je n’en ai pas acheté au cours du mois de Septembre","Non, j’en ai déjà acheté de cette façon mais ce n’est plus le cas","Non, je n’en ai jamais acheté de cette façon")
+
+kable(round(tb_Q22, 2), col.names = c("Achetez-vous des produits vendus directement par l’agriculteur ?","Répartition (%)")) %>% 
+  kable_styling(latex_options = "striped")
+```
 
 
 
