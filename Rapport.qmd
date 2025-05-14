@@ -864,6 +864,39 @@ filter_data %>%
   tbl_summary(include = c(Q1, Q2, Q8, Q240, Q236, Q235))
 ```
 
+### 12. X % des répondants achètent des produits locaux et/ou en circuits courts sur les marchés 
+
+1. Selectionner le jeu de données avec les variables qui nous permette de repondre à la question posé
+2. Creer une variable qui est égale à TRUE si la personne à repondu à au moins des questions `apply()` préciser 1 pour dire que c'est en ligne (individu)
+3. Calcule la proportion de TRUE qui n'est rien d'autre que la moyenne des répondants : utiliser `mean()`
+
+#### Avec R natif
+
+```{r}
+questions <- c("Q27", "Q35", "Q43", "Q50", "Q59", "Q67", "Q81", "Q89", "Q97", "Q104", "Q111", "Q118", "Q125", "Q133", "Q142", "Q149", "Q157", "Q165", "Q173", "Q181", "Q189", "Q200", "Q208", "Q216", "Q224")
+data_filter <- data[,questions]
+data_filter$condition <- apply(data_filter, 1, function(x) any(!is.na(x)))
+pourcentage <- round(mean(data_filter$condition, na.rm = TRUE) * 100, 2)
+
+# Tableau de répartion
+
+tableau_croise_generalise <- function(df, variable, questions) {
+  df %>%
+    mutate(achat_local = apply(select(., all_of(questions)), 1, function(x) any(!is.na(x)))) %>%
+    filter(achat_local == TRUE) %>%
+    group_by(.data[[variable]]) %>%
+    summarise(n = n()) %>%
+    mutate(pourc = round(n / sum(n) * 100, 1))
+}
+
+tableau_croise_generalise(data, "Q2", questions)        # selon l'âge
+tableau_croise_generalise(df, "Q1", questions)      # selon le genre
+tableau_croise_generalise(df, "Q3", questions)        # selon la CSP
+tableau_croise_generalise(df, "Q8", questions)         # selon le budget alimentaire
+tableau_croise_generalise(df, "Q240", questions)    # selon le niveau de diplôme
+tableau_croise_generalise(df, "Q236", questions) # selon le nombre d'enfants
+```
+
 ### 13. Quelles combinaisons de lieux fréquentés régulièrement possibles (fréquentés au moins une fois par mois)
 
 #### Avec R natif
