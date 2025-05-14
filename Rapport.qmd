@@ -1612,3 +1612,34 @@ kable(round(tb_freq,2), caption = "Fréquences des produits achetés", col.names
   kable_styling(latex_options = "striped")
   
 ```
+### 30. Budget
+#### Avec R natif
+1. On sélectionne la colonne qui nous intéresse.
+2. On calcule la moyenne avec `mean()` en retirant les valeurs manquantes et on arrondi avec `round()`.
+3. On affiche le résultat que l'on colle à une phrase avec `paste`.
+```{r}
+#1
+
+df_Q29 <- data$Q29
+
+#2
+
+moy_Q29 <- round(mean(df_Q29, na.rm = T))
+
+#3
+
+paste("Le budget alimentaire moyen dépensé sur les marchés  est de", moy_Q29, "euros")
+
+```
+#### Avec usage de library
+-   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+1. On sélectionne la colonne qui nous intéresse avec `select()`
+2. On calcule la moyenne de la colonne avec `mean()` sans rendre en compte les valeurs manquantes et on arrondi avec `round()`
+3. On affiche le résultat que l'on colle à une phrase avec `paste`.
+```{r}
+moy_Q29 <- data %>% select(Q29) %>%
+  mean(Q29, na.rm = T) %>% round()
+
+paste("Le budget alimentaire moyen dépensé sur les marchés  est de", moy_Q29, "euros")
+
+```
