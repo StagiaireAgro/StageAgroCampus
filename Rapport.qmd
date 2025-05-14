@@ -1709,7 +1709,7 @@ kable(round(tb_freq,2), caption = "Fréquences des produits achetés", col.names
 (3) On extrait la colonne Q27 comme vecteur à l'aide de l'opétrateur de sélection `[[]]`
 (4) On crée la table des effectifs avec `table()`
 (5) On transforme cette table en table de pourcentages avec les opérateurs classiques de R (`/` pour la division et `sum()` pour la somme) qu'on arrondie à 2 chiffres après la virgule à l'aide de `round()`
-(6) On transforme au format dataframe pour un meilleur affichage
+(6) On transforme au format dataframe pour un meilleur affichage avec `as.data.frame()`
 (7) On affiche le tableau de pourcentages avec `print()`
 
 ```{r}
@@ -1749,7 +1749,7 @@ print(pct_q27)
 (3) On extrait la colonne Q27 comme vecteur à l'aide de l'opérateur de sélection `[[]]`
 (4) On crée la table des effectifs avec `table()`
 (5) On transforme cette table en table de pourcentages avec les opérateurs classiques de R (`/` pour la division et `sum()` pour la somme) qu’on arrondit à 2 chiffres après la virgule à l’aide de `round()`
-(6) On transforme au format dataframe pour un meilleur affichage
+(6) On transforme au format dataframe pour un meilleur affichage avec `as.data.frame()`
 (7) On affiche le tableau de résultat de façon élégante avec `kable()`
 
 ```{r}
@@ -1811,3 +1811,66 @@ moy_Q29 <- data %>% select(Q29) %>%
 paste("Le budget alimentaire moyen dépensé sur les marchés  est de", moy_Q29, "euros")
 
 ```
+
+### 31. Le budget médian dépensé sur les marchés
+
+#### Avec R natif
+
+(1) On sélectionne les colonnes pour notre critère de sélection à laide de `subset()` et de l'agument `select()`
+(2) On remplace les valeurs manquantes par des 0 grâce à `replace()` et l'utilisation de `is.na()` pour les détecter
+(3) On calcule la médiane avec la fonction `median()`
+(4) On transforme au format dataframe pour stocker le résultat avec `as.data.frame()`
+(5) On affiche le résultat avec `print()`
+
+```{r}
+
+# (1) 
+
+data_question_29 <- subset(data, select = 70)
+
+# (2) 
+
+data_question_29 <- replace(data_question_29, is.na(data_question_29), 0)
+
+# (3) 
+
+median_budget_marches <- median(data_question_29$Q29)
+
+# (4) 
+median_budget_marches <- as.data.frame(median_budget_marches)
+
+# (5) 
+print(median_budget_marches)
+```
+
+#### Avec usage de library
+
+(1) On sélectionne les colonnes pour notre critère de sélection à l’aide de `select()` du package `dplyr`
+(2) On remplace les valeurs manquantes par des 0 grâce à `mutate()` et `replace_na()` de `tidyr`
+(3) On calcule la médiane avec la fonction `median()`. On intègre cette fonction dans la fonction `summarise() `. Cette dernière permet de créer un nouveau tableau contenant des résumés (moyenne, médiane, total, minimum, etc.) à partir d’un data frame ou d’un tibble. Enfin, on utilise la fonction `pull()` de `dplyr` qui permet d’extraire une colonne d’un data frame ou d’un tibble sous forme de vecteur
+(4) On transforme au format dataframe pour stocker le résultat avec `as.data.frame()`
+(5) On affiche le résultat de façon élégante avec `kable()`
+
+```{r}
+# (1) 
+data_question_29 <- data %>%
+  select(Q29)
+
+# (2) 
+data_question_29 <- data_question_29 %>%
+  mutate(Q29 = replace_na(Q29, 0))
+
+# (3)
+median_budget_marches <- data_question_29 %>%
+  summarise(mediane = median(Q29)) %>%
+  pull(mediane)
+
+# (4) 
+median_budget_marches <- as.data.frame(median_budget_marches)
+
+# (5) 
+kable(median_budget_marches) %>% 
+  kable_styling(latex_options = "striped")
+
+```
+
