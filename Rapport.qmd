@@ -13,6 +13,7 @@ library(dplyr)
 library(tidyverse)
 library(kableExtra)
 library(gtsummary)
+library(questionr)
 ```
 
 ## Imporation des données
@@ -1776,8 +1777,37 @@ pct_q27 <- as.data.frame(pct_q27)
 # (7) 
 kable(pct_q27) %>% 
   kable_styling(latex_options = "striped")
+```
+
+### 29. Ancienneté
+
+#### R natif
+1. Recoder les modalités de la variable Q28 avec `factor()`
+2. Realiser le tableau de repartition en effectif avec `table()`
+3. Faire la somme des repondants de chaque modalité avec `sum()`
+4. Arrondir le pourcentage à deux chiffres après la virgule avec `round()`
 
 
+```{r}
+modalite_labels1 <- c(
+"Depuis moins d’un an",
+"De 1 à 2 ans",
+"De 2 à 5 ans",
+"De 5 à 10 ans",
+"Depuis plus de 10 ans")
+
+data$Q28 <- factor(data$Q28, levels = 1:5, labels = modalite_labels1)
+table_repartition <- table(data$Q28)
+pourcentage <- table_repartition/sum(table_repartition)*100
+round(pourcentage, 2)
+```
+
+#### Avec library
+
+1. Tableau de répartion avec `freq()`
+
+```{r}
+freq(data$Q28)
 ```
 
 ### 30. Budget
