@@ -1364,8 +1364,6 @@ kable(mediane_question_9) %>%
 
 ```
 
-
-
 ### 24.Produits achetés auprès d'un agriculteur ou non?
 #### Avec R natif
 1. On la colonne qui nous intéresse. 
@@ -1406,7 +1404,133 @@ names(tb_Q22) <- c("Oui, et j’en ai acheté au cours du mois de Septembre","Ou
 
 kable(round(tb_Q22, 2), col.names = c("Achetez-vous des produits vendus directement par l’agriculteur ?","Répartition (%)")) %>% 
   kable_styling(latex_options = "striped")
+
 ```
+
+### 25. Quelles motivations à fréquenter le marché
+
+#### Avec R natif
+
+(1) On sélectionne les colonnes pour notre critère de sélection à laide de `subset()` et de l'agument `select()`
+(2) On initialise les trois tableaux pour les 3 premières motivations
+(3) On crée les 3 tableaux de pourcentages pour les motivations des clients
+    (1) On crée une boucle `for()`
+    (2) On convertit en numérique au cas où par précaution avec `as.numeric()` et on retire les potentiels messages d'avertissements générés par R avec s`uppressWarnings()`
+    (3) On garde les lignes qui n'ont pas de valeurs manquantes au moyen de is.na() auquel on ajoute un `!` devant pour obtenir `!is.na()`. Le `!` est la négation en langage R
+    (4) On crée la table des effectifs avec `table()`
+    (5) On transforme cette table en table de pourcentages avec les opérateurs classiques de R (`/` pour la division et `sum()` pour la somme) qu'on arrondie à 2 chiffres après la virgule à l'aide de `round()`
+    (6) On effectue un trie décroissant avec `sort()` et l'argument d`ecreasing = TRUE`
+    (7) On affiche avec `cat()`, la modalité la plus fréquente avec `which.max()`. La fonction `paste0()` permet de concaténer
+    (8) On affecte au bon tableau les opérations précédentes avec `if()` et `<-`
+(4) On affiche le tableau de résultat avec `print()`
+
+```{r,}
+# (1)
+data_question_21 <- subset(data, select = 58:60)
+
+# (2) 
+motivation_1 <- NULL
+motivation_2 <- NULL
+motivation_3 <- NULL
+
+# (3)
+for (i in 1:3) {
+  
+  Motivation <- data_question_21[[i]]
+  
+  Motivation <- suppressWarnings(as.numeric(Motivation))
+  
+
+  Motivation <- Motivation[!is.na(Motivation)]
+
+  freq <- table(Motivation)
+  
+
+  pct <- round(100 * freq / sum(freq), 1)
+  
+
+  pct_sorted <- sort(pct, decreasing = TRUE)
+  
+
+  cat(paste0("Modalité la plus fréquente pour Motivation_", i, " : ", 
+             names(which.max(pct)), " (", max(pct), "%)\n\n"))
+  
+  if (i == 1) motivation_1 <- pct_sorted
+  if (i == 2) motivation_2 <- pct_sorted
+  if (i == 3) motivation_3 <- pct_sorted
+}
+
+# (4)
+print(motivation_1)
+print(motivation_2)
+print(motivation_3)
+
+```
+
+#### Avec usage de library
+
+(1) On sélectionne les colonnes pour notre critère de sélection à l’aide de `select() `du package `dplyr()`, qui permet une syntaxe plus claire et concise que `subset()`
+(3) On crée les 3 tableaux de pourcentages pour les motivations des clients
+    (1) On crée une boucle `for()`
+    (2) On convertit en numérique au cas où par précaution avec `as.numeric()` et on retire les potentiels messages d'avertissements générés par R avec s`uppressWarnings()`
+    (3) On garde les lignes qui n'ont pas de valeurs manquantes au moyen de is.na() auquel on ajoute un `!` devant pour obtenir `!is.na()`. Le `!` est la négation en langage R
+    (4) On crée la table des effectifs avec `table()`
+    (5) On transforme cette table en table de pourcentages avec les opérateurs classiques de R (`/` pour la division et `sum()` pour la somme) qu'on arrondie à 2 chiffres après la virgule à l'aide de `round()`
+    (6) On effectue un trie décroissant avec `sort()` et l'argument d`ecreasing = TRUE`
+    (7) On affiche avec `cat()`, la modalité la plus fréquente avec `which.max()`. La fonction `paste0()` permet de concaténer
+    (8) On affecte au bon tableau les opérations précédentes avec `if()` et `<-`
+(4) On affiche le tableau de résultat avec cat() et de façon élégante avec `kable()`
+
+```{r}
+
+# (1) 
+data_question_21 <- data %>%
+  select(58:60)
+
+# (2) 
+motivation_1 <- NULL
+motivation_2 <- NULL
+motivation_3 <- NULL
+
+# (3)
+for (i in 1:3) {
+  
+  Motivation <- data_question_21[[i]]
+  
+  Motivation <- suppressWarnings(as.numeric(Motivation))
+  
+  Motivation <- Motivation[!is.na(Motivation)]
+  
+  freq <- table(Motivation)
+  
+  pct <- round(100 * freq / sum(freq), 1)
+  
+  pct_sorted <- sort(pct, decreasing = TRUE)
+
+  cat(paste0("Modalité la plus fréquente pour Motivation_", i, " : ", 
+             names(which.max(pct)), " (", max(pct), "%)\n\n"))
+  
+  if (i == 1) motivation_1 <- pct_sorted
+  if (i == 2) motivation_2 <- pct_sorted
+  if (i == 3) motivation_3 <- pct_sorted
+}
+
+# (4)
+cat("Motivation 1\n")
+
+kable(motivation_1) %>% 
+  kable_styling(latex_options = "striped")
+
+cat("Motivation 2\n")
+kable(motivation_2) %>% 
+  kable_styling(latex_options = "striped")
+
+cat("Motivation 3\n")
+kable(motivation_3) %>% 
+  kable_styling(latex_options = "striped")
+
+```
+
 ### 27.Quels produits achetés?
 #### Avec R natif
 1. On sélectionne la colonne qui nous intéresse pour répondre à la question.
