@@ -591,6 +591,7 @@ print(modes_Magasin_aide_alimentaire)
 
 ```
 ### 8.Créer un sous échantillon appelé les acheteurs très réguliers de produits locaux et ou en circuits courts
+
 #### Avec R natif
 
 1.  Dans un premier vecteur on met les colonnes que l'on va vérifier.
@@ -599,11 +600,11 @@ print(modes_Magasin_aide_alimentaire)
 
 3.  On sélectionne les lignes colonnes que l'on souhaite et on empile les colonnes de notre nouveau data frame df_cc dans df_cc_comp avec la fonction `stack()`.
 
-4.  On fait un tableau de fréquence avec `table()`en fonction des catégories croisée. (valeur de 1 à 6 croisé aux questions).
+4.  On fait un tableau de fréquence avec `table()`en fonction des catégories croisée. (valeur de 1 à 6 croisé aux questions). Et on change le nom des colonnes avec `dimnames()`.
 
-5.  On calcule la proportion par question à l'aide de la fonction `prop.table()` et de largumentt 2 dans margin. On calcule le pourcentage en multipliant par 100 et on arrondi le résultat avec `round()`. 
+5.  On calcule la proportion par question à l'aide de la fonction `prop.table()` et de largumentt 2 dans margin. On calcule le pourcentage en multipliant par 100 et on arrondi le résultat avec `round()`.
 
-6. On calcule le pourcentage des individus qui achètent très régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multiplie par 100 avec `sum()` et `nrow()`
+6.  On calcule le pourcentage des individus qui achètent très régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multiplie par 100 avec `sum()` et `nrow()`.
 
 ```{r}
 
@@ -626,6 +627,7 @@ df_cc_comp <- stack(df_cc)
 #4
 
 tb_cc <- table(df_cc_comp)
+dimnames(tb_cc)[[2]] <- c("Sexe", "Tranche d'âge","CSP")
 
 #5
 
@@ -635,17 +637,20 @@ tb_cc_freq
 
 #6
 
-print(paste("Il y a",round(sum(lignes_a_garder, na.rm = T)/nrow(data)*100),"pourcent des acheteurs qui achètent très régulièrement en circuit court"))
+print(paste("Il y a",round(sum(lignes_a_garder, na.rm = T)/nrow(data)*100),"pourcent des acheteurs qui achètent en très régulièrement en circuit court"))
 
 ```
+
 #### Avec usage de library
-- Pour chaque fonction utiliser on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
-1. On calcule le filtre des lignes qui nous intéresse avec `filter`.
-2. On sélectionne les colonnes qui nous intéressent avec la fonction `select`.
-3. On fait une mise au format long du notre dataframe en deux colonnes Questions et Réponses à l'aide de la fonction `pivot_longer`.
-4. Avec la `table()` on calcule les fréquences croisées et on calcule la proportion par ligne avec `prop.table()`.
-5. On termine avec une mise en forme avec `kable()` pour un tableau propre que l'on peut modifier de différentes manières.
-6. On calcule le pourcentage des individus qui achètent très régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multiplie par 100 avec `sum()` et `nrow()`
+
+-   Pour chaque fonction utiliser on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+
+1.  On calcule le filtre des lignes qui nous intéresse avec `filter`.
+2.  On sélectionne les colonnes qui nous intéressent avec la fonction `select`.
+3.  On fait une mise au format long du notre dataframe en deux colonnes Questions et Réponses à l'aide de la fonction `pivot_longer`.
+4.  Avec la `table()` on calcule les fréquences croisées et on calcule la proportion par ligne avec `prop.table()`.
+5.  On termine avec une mise en forme avec `kable()` pour un tableau propre que l'on peut modifier de différentes manières.
+6.  On calcule le pourcentage des individus qui achètent très régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multiplie par 100 avec `sum()` et `nrow()`.
 
 ```{r}
 #1
@@ -665,6 +670,7 @@ df_cc <- data %>% filter(rowSums(across(all_of(col_a_tester), ~ .x %in% c(1, 2))
 #4
   
   table() %>% prop.table(margin = 1)*100
+dimnames(df_cc)[[1]] <- c("Sexe", "Tranche d'âge","CSP")
 
 #5
 
@@ -676,7 +682,9 @@ kable(round(df_cc, 2), caption = "Répartition des acheteurs réguliers de produ
 print(paste("Il y a",round(sum(lignes_a_garder, na.rm = T)/nrow(data)*100),"pourcent des acheteurs qui achètent en très régulièrement en circuit court"))
 
 ```
+
 ### 9.Créer un sous échantillon appelé les acheteurs réguliers de produits locaux et ou en circuits courts
+
 #### Avec R natif
 
 1.  Dans un premier vecteur on met les colonnes que l'on va vérifier.
@@ -685,11 +693,11 @@ print(paste("Il y a",round(sum(lignes_a_garder, na.rm = T)/nrow(data)*100),"pour
 
 3.  On sélectionne les lignes colonnes que l'on souhaite et on empile les colonnes de notre nouveau data frame df_cc dans df_cc_comp avec la fonction `stack()`.
 
-4.  On fait un tableau de fréquence avec `table()`en fonction des catégories croisée. (valeur de 1 à 6 croisé aux questions).
+4.  On fait un tableau de fréquence avec `table()`en fonction des catégories croisée. (valeur de 1 à 6 croisé aux questions). Et on change le nom des colonnes avec `dimnames()`.
 
 5.  On calcule la proportion par question à l'aide de la fonction `prop.table()` et de largumentt 2 dans margin. On calcule le pourcentage en multipliant par 100 et on arrondi le résultat avec `round()`.
 
-6. On calcule le pourcentage des individus qui achètent régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multiplie par 100 avec `sum()` et `nrow()`
+6.  On calcule le pourcentage des individus qui achètent régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multiplie par 100 avec `sum()` et `nrow()`.
 
 ```{r}
 
@@ -712,6 +720,7 @@ df_cc_comp <- stack(df_cc)
 #4
 
 tb_cc <- table(df_cc_comp)
+dimnames(tb_cc)[[2]] <- c("Sexe", "Tranche d'âge","CSP")
 
 #5
 
@@ -724,14 +733,17 @@ print(paste("Il y a",round(sum(lignes_a_garder, na.rm = T)/nrow(data)*100),"pour
 tb_cc_freq
 
 ```
+
 #### Avec usage de library
-- Pour chaque fonction utiliser on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
-1. On calcule le filtre des lignes qui nous intéresse avec `filter`.
-2. On sélectionne les colonnes qui nous intéressent avec la fonction `select`.
-3. On fait une mise au format long du notre dataframe en deux colonnes Questions et Réponses à l'aide de la fonction `pivot_longer`.
-4. Avec la `table()` on calcule les fréquences croisées et on calcule la proportion par ligne avec `prop.table()`.
-5. On termine avec une mise en forme avec `kable()` pour un tableau propre que l'on peut modifier de différentes manières.
-6. On calcule le pourcentage des individus qui achètent régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multiplie par 100 avec `sum()` et `nrow()`
+
+-   Pour chaque fonction utiliser on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+
+1.  On calcule le filtre des lignes qui nous intéresse avec `filter`.
+2.  On sélectionne les colonnes qui nous intéressent avec la fonction `select`.
+3.  On fait une mise au format long du notre dataframe en deux colonnes Questions et Réponses à l'aide de la fonction `pivot_longer`.
+4.  Avec la `table()` on calcule les fréquences croisées et on calcule la proportion par ligne avec `prop.table()`. Et on change le nom des colonnes avec `dimnames`.
+5.  On termine avec une mise en forme avec `kable()` pour un tableau propre que l'on peut modifier de différentes manières.
+6.  On calcule le pourcentage des individus qui achètent régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multiplie par 100 avec `sum()` et `nrow()`.
 
 ```{r}
 #1
@@ -751,6 +763,7 @@ df_cc <- data %>% filter(rowSums(across(all_of(col_a_tester), ~ .x %in% c(3, 4))
 #4
   
   table() %>% prop.table(margin = 1)*100
+dimnames(df_cc)[[1]] <- c("Sexe", "Tranche d'âge","CSP")
 
 #5
 
@@ -1111,9 +1124,12 @@ analyser_sous_echantillon_dplyr(data1, data_Magasin_aide_alimentaire)
 
 
 ### 15.Budget moyen
+
 #### Avec R natif
-1. On selectionne la colonne Q8 avec `$` et on fait la moyenne avec la fonction `mean()`.
-2. On affiche le résultat arrondi avec `round()` que l'on colle avec un texte avec la fonction `paste()`
+
+1.  On selectionne la colonne Q8 avec `$` et on fait la moyenne avec la fonction `mean()`.
+2.  On affiche le résultat arrondi avec `round()` que l'on colle avec un texte avec la fonction `paste()`
+
 ```{r}
 
 #1
@@ -1142,11 +1158,13 @@ median_budget2
 ```
 
 ### 18.Budget moyen consacré a chaque modalité de lieu
+
 #### Avec R natif
-1. On sélectionne les colonnes Q9_1 à Q9_13. On utilise `paste()` pour simplifier les noms de colonne.
-2. On remplace les valeurs manquantes 0 que l'on repère avec `is.na()` avec `replace()`.
-3. On calcule les moyennes par colonne avec `colMeans()` que l'on arrondi avec `round()`
-4. On renomme les noms avec `names()` et on affiche le résultat dans un dataframe avec `as.data.frame()`
+
+1.  On sélectionne les colonnes Q9_1 à Q9_13. On utilise `paste()` pour simplifier les noms de colonne.
+2.  On remplace les valeurs manquantes 0 que l'on repère avec `is.na()` avec `replace()`.
+3.  On calcule les moyennes par colonne avec `colMeans()` que l'on arrondi avec `round()`.
+4.  On renomme les noms avec `names()` et on affiche le résultat dans un dataframe avec `as.data.frame()`.
 
 ```{r}
 
@@ -1169,11 +1187,14 @@ names(moy_rep_b) <- c("Hypermarché, Supermarché","Hard discount","Epiceries in
 as.data.frame(moy_rep_b)
 
 ```
+
 #### Avec usage de library
-- Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
-1. On sélectionne les colonnes qui nous intéressent avec `select()`
-2. On modifie notre nouveau dataframe en remplaçant toute les valeur NA par 0 avec `mutate` et on calcule la moyenne par col avec `colMeans()`
-3. On modifie les noms des lieux d'achat et on affiche le tableau avec `kable()`
+
+-   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+
+1.  On sélectionne les colonnes qui nous intéressent avec `select()`.
+2.  On modifie notre nouveau dataframe en remplaçant toute les valeur NA par 0 avec `mutate` et on calcule la moyenne par col avec `colMeans()`.
+3.  On modifie les noms des lieux d'achat et on affiche le tableau avec `kable()`.
 
 ```{r}
 #1
@@ -1201,9 +1222,9 @@ kable(round(moy_rep_b,2), caption = "Moyenne de la répartition du budget en fon
 
 1. On sélectionne les lignes pour notre critère de sélection à laide de `paste()`.
 2. À l'aide de la fonction `apply()` on regarde pour chaque valeur si elle est inférieure à 7 et non manquante (lieu fréquenté) et on retourne le booléen TRUE avec `all()` si la condition est respectée sur toute la ligne (tout les lieux) ou FALSE sinon.
-3. On sélectionne les lignes et colonnes qui nous intéressent et on remplace les valeurs manquantes par 0 avec `replace()`
-4. On fait la moyenne par colonne avec `colMeans` et on retransforme en dataframe avec `as.data.frame`
-5. On modifie les noms avec `dimnames()`
+3. On sélectionne les lignes et colonnes qui nous intéressent et on remplace les valeurs manquantes par 0 avec `replace()`.
+4. On fait la moyenne par colonne avec `colMeans` et on retransforme en dataframe avec `as.data.frame`.
+5. On modifie les noms avec `dimnames()`.
 
 ```{r}
 #1
@@ -1221,7 +1242,7 @@ df_678_b <- replace(df_678_b, is.na(df_678_b), 0)
 
 #4
 
-moy_b_678 <- colMeans(df_678_b)
+moy_b_678 <- round(colMeans(df_678_b),2)
 moy_b_678 <- as.data.frame(moy_b_678)
 
 #5
@@ -1234,9 +1255,9 @@ moy_b_678
 ```
 #### Avec usage de library
 -   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
-1.  On sélectionne les lignes avec toutes les valeurs de la question Q9_6 à Q9_8 qui sont inférieur à 7 et non manquantes avec `filter()`
-2. On sélectionne les colonnes qui nous intéressent avec `select()` et on fait la moyenne par colonne avec `colMeans()`
-3. On fait la mise en forme du tableau avec `kablee()`
+1.  On sélectionne les lignes avec toutes les valeurs de la question Q9_6 à Q9_8 qui sont inférieur à 7 et non manquantes avec `filter()`.
+2. On sélectionne les colonnes qui nous intéressent avec `select()` et on fait la moyenne par colonne avec `colMeans()`.
+3. On fait la mise en forme du tableau avec `kablee()`.
 ```{r}
 moy_b_678 <- data %>% filter(apply(across(Q6_6:Q6_8, ~ .x < 7 & !is.na(.x)),1,all) ) %>% 
   select(Q9_6:Q9_8) %>% 
@@ -1250,7 +1271,6 @@ kable(round(moy_b_678,2), caption = "Moyenne du budget dédié par ceux qui fré
   kable_styling(latex_options = "striped")
   
 ```
-
 ### 22. Le budget médian consacré aux modalités 6/7/8 par les acheteurs 
 
 #### Avec R natif
@@ -1347,7 +1367,6 @@ kable(mediane_question_9) %>%
 
 
 ### 24.Produits achetés auprès d'un agriculteur ou non?
-
 #### Avec R natif
 1. On la colonne qui nous intéresse. 
 2. On fait le tableau de proportion de la table de fréquence d'occurrences de réponse de la question 22 avec `table()` et `prop.table()`. On multiplie par 100 pour avoir un pourcentage.
