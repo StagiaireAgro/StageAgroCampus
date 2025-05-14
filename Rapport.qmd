@@ -891,7 +891,7 @@ print(round(top10_freq, 1))
     (5) On trie avec `arrange()` par ordre décroissant à l'aide de l'argument `desc()`
     (6) On ne retient que les 10 premiers lieux les plus fréquentés avec `slice_head()`
     (7) On ajoute dans le tableau final, la colonne des pourcentages des lieux fréquéntés avec `mutate()`
-(2) Affichage de la table des 10 lieux d'achat les plus fréquentés avec `print()` de façon élégante avec `kable()`
+(2) Affichage de la table des 10 lieux d'achat les plus fréquentés de façon élégante avec `kable()`
 
 ```{r}
 # (1) 
@@ -1194,6 +1194,7 @@ kable(round(moy_rep_b,2), caption = "Moyenne de la répartition du budget en fon
   kable_styling(latex_options = "striped")
   
 ```
+
 ### 21.part du budget consacré aux modalités 6/7/8
 
 #### Avec R natif
@@ -1249,7 +1250,104 @@ kable(round(moy_b_678,2), caption = "Moyenne du budget dédié par ceux qui fré
   kable_styling(latex_options = "striped")
   
 ```
+
+### 22. Le budget médian consacré aux modalités 6/7/8 par les acheteurs 
+
+#### Avec R natif
+
+(1) On sélectionne les colonnes pour notre critère de sélection à laide de `paste()`
+(2) On remplace les valeurs manquantes par des 0 grâce à `replace()` et l'utilisation de `is.na()` pour les détecter
+(3) À l'aide de la fonction `apply()` on applique la médiane sur l'ensemble des colonnes
+(4) On modifie les noms des colonnes avec `names()`
+(5) On transforme au format 'dataframe' le tableau et on le transpose afin d'obtenir les résultats dans le bon sens avec `t()`
+(6) On garde uniquement les colonnes 6 à 8 car se sont les modalités de la question 9 du questionnaire qui nous intéressent avec l'opérateur de sélection `[]`
+(7) On affiche le tableau de résultat avec `print()`
+
+
+```{r}
+# (1)
+
+data_question_9 <- data[,paste("Q9_", 1:13, sep = "")]
+
+# (2)
+
+data_question_9 <- replace(data_question_9, is.na(data_question_9), 0)
+
+# (3)
+
+mediane_question_9 <- apply(data_question_9, 2, median, na.rm = TRUE)
+
+# (4)
+
+names(mediane_question_9) <- c("Hypermarché, Supermarché","Hard discount","Epiceries indépendantes, de quartier, épiceries fines","Magasins de surgelés","Magasins spécialisés Bio","Marché","Directement aux agriculteurs","Paniers en ligne réalisés par un intermédiaire","Artisans et commerçants spécialisés","Epicerie participative, associative, supermarché coopératif","Magasin alimentaire spécialisé dans le vrac ou les produits locaux","Magasin d’aide alimentaire","Autre")
+
+# (5)
+
+mediane_question_9 <- as.data.frame(t(mediane_question_9))  # Transpose pour avoir les valeurs en colonnes
+
+# (6)
+
+mediane_question_9 <- mediane_question_9[, 6:8]
+
+# (7)
+
+print(mediane_question_9)
+
+```
+
+#### Avec usage de library
+
+(1) On sélectionne les colonnes correspondant aux questions Q9 à l’aide de `select(starts_with("Q9_"))` puis on remplace les valeurs manquantes par des zéros grâce à `mutate()` combiné à `across()` et `replace_na()`
+
+(2) On calcule la médiane pour chaque colonne (chaque type de lieu) à l’aide de `summarise()` et `across()`, puis on renomme chaque colonne avec des libellés explicites correspondant aux types de lieux via `rename_with()`.
+
+(3) On sélectionne uniquement les colonnes 6 à 8 car ce sont celles qui nous intéressent dans le cadre de l’analyse de la question 9 du questionnaire, à l’aide de la fonction `select()` 
+
+(4) On affiche la table des résultat de façon élégante avec `kable()`
+
+
+```{r}
+
+# (1)  
+data_question_9 <- data %>%
+  select(starts_with("Q9_")) %>%
+  mutate(across(everything(), ~replace_na(., 0)))
+
+# (2) 
+
+mediane_question_9 <- data_question_9 %>%
+  summarise(across(everything(), ~median(.x, na.rm = TRUE))) %>%
+  rename_with(~c(
+    "Hypermarché, Supermarché",
+    "Hard discount",
+    "Epiceries indépendantes, de quartier, épiceries fines",
+    "Magasins de surgelés",
+    "Magasins spécialisés Bio",
+    "Marché",
+    "Directement aux agriculteurs",
+    "Paniers en ligne réalisés par un intermédiaire",
+    "Artisans et commerçants spécialisés",
+    "Epicerie participative, associative, supermarché coopératif",
+    "Magasin alimentaire spécialisé dans le vrac ou les produits locaux",
+    "Magasin d’aide alimentaire",
+    "Autre"
+  ))
+
+# (3)
+mediane_question_9 <- mediane_question_9 %>%
+  select(6:8)
+
+# (4) 
+
+kable(mediane_question_9) %>% 
+  kable_styling(latex_options = "striped")
+
+```
+
+
+
 ### 24.Produits achetés auprès d'un agriculteur ou non?
+
 #### Avec R natif
 1. On la colonne qui nous intéresse. 
 2. On fait le tableau de proportion de la table de fréquence d'occurrences de réponse de la question 22 avec `table()` et `prop.table()`. On multiplie par 100 pour avoir un pourcentage.
