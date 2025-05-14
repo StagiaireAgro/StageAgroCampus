@@ -1664,6 +1664,87 @@ kable(round(tb_freq,2), caption = "Fréquences des produits achetés", col.names
   kable_styling(latex_options = "striped")
   
 ```
+
+### 28. Fréquences d'achat auprès d’un ou plusieurs agriculteurs sur un marché 
+
+#### Avec R natif
+
+(1) On sélectionne les colonnes pour notre critère de sélection à laide de `subset()` et de l'agument `select()`
+(2) On remplace les valeurs manquantes par des 0 grâce à `replace()` et l'utilisation de `is.na()` pour les détecter
+(3) On extrait la colonne Q27 comme vecteur à l'aide de l'opétrateur de sélection `[[]]`
+(4) On crée la table des effectifs avec `table()`
+(5) On transforme cette table en table de pourcentages avec les opérateurs classiques de R (`/` pour la division et `sum()` pour la somme) qu'on arrondie à 2 chiffres après la virgule à l'aide de `round()`
+(6) On transforme au format dataframe pour un meilleur affichage
+(7) On affiche le tableau de pourcentages avec `print()`
+
+```{r}
+# (1) 
+
+data_question_27 <- subset(data, select = 68)
+
+# (2) 
+
+data_question_27 <- replace(data_question_27, is.na(data_question_27), 0)
+
+# (3) 
+
+q27 <- data_question_27[[1]]
+
+# (4) 
+
+freq_q27 <- table(q27)
+
+# (5) 
+
+pct_q27 <- round(100 * freq_q27 / sum(freq_q27), 2)
+
+# (6) 
+
+pct_q27 <- as.data.frame(pct_q27)
+
+# (7) 
+
+print(pct_q27)
+
+```
+
+#### Avec usage de library
+(1) On sélectionne la colonne pour notre critère de sélection à l’aide de `select()` du package dplyr
+(2) On remplace les valeurs manquantes par des 0 grâce à `mutate()` et `replace_na()` de `tidyr`
+(3) On extrait la colonne Q27 comme vecteur à l'aide de l'opérateur de sélection `[[]]`
+(4) On crée la table des effectifs avec `table()`
+(5) On transforme cette table en table de pourcentages avec les opérateurs classiques de R (`/` pour la division et `sum()` pour la somme) qu’on arrondit à 2 chiffres après la virgule à l’aide de `round()`
+(6) On transforme au format dataframe pour un meilleur affichage
+(7) On affiche le tableau de résultat de façon élégante avec `kable()`
+
+```{r}
+# (1) 
+data_question_27 <- data %>% 
+  select(Q27)
+
+# (2) 
+data_question_27 <- data_question_27 %>%
+  mutate(Q27 = replace_na(Q27, 0))
+
+# (3) 
+q27 <- data_question_27[["Q27"]]
+
+# (4) 
+freq_q27 <- table(q27)
+
+# (5) 
+pct_q27 <- round(100 * freq_q27 / sum(freq_q27), 2)
+
+# (6) 
+pct_q27 <- as.data.frame(pct_q27)
+
+# (7) 
+kable(pct_q27) %>% 
+  kable_styling(latex_options = "striped")
+
+
+```
+
 ### 30. Budget
 #### Avec R natif
 1. On sélectionne la colonne qui nous intéresse.
