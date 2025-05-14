@@ -1969,3 +1969,133 @@ kable(round(tb_l_cc,2), caption = "Ces magasins proposent ils des produits locau
 
 ```
 
+### 34. produits de votre production
+
+#### Avec R natif
+
+(1) Sélection des variables nécessaires pour le tableau de synthèse (Age, CSP, Sexe etc.) à l'aide de l'opérateur `[]`
+(2) Création de la variable "taille_foyer" (somme de Q235 + Q236). On supprime les potentiels messages d'avertissements de R au moment de la conversion au format numérique (`as.numeric()`) avec `suppressWarnings()`
+(3) Fonction pour trouver la modalité la plus fréquente (valeur majoritaire). A l'intérieur, on conserve les valeurs non manquantes avec `!is.na()`. A noter que le `!` correspond à la négation en R. Puis, on tri (`sort()`) par ordre décroissant (`decreasing = TRUE)`) afin d'obtenir la modalité majoritaire en première ligne.
+(4) On stocke le nom des colonnes utilent pour notre tableau de synthèse dans une liste
+(5) Boucle `for()` pour créer un tableau avec les modalités majoritaires
+(6) On ajoute la colonne du pourcentage des répondants par modalité. Pour calculer le pourcentage on utilise les opérateurs classiques de R (`/` pour la division et `sum()` pour la somme) qu'on arrondie à 2 chiffres après la virgule à l'aide de `round()`
+(7) Réorganisation des colonnes. On place la colonne contenant le pourcentage de répodnants en 2ème position
+(8) On transforme au format dataframe pour un meilleur affichage avec `as.data.frame()`
+(9) On affiche le tableau de résultat `print()`
+
+
+```{r}
+# (1) 
+vars <- c("Q227", "recode_age", "Q1", "recode_csp", "Q8", "Q240", "Q5_taille", "Q236", "Q235")
+data_subset <- data[, vars]
+
+# (2)
+data_subset$taille_foyer <- suppressWarnings(as.numeric(data$Q235)) + suppressWarnings(as.numeric(data$Q236))
+
+# (3) Fonction pour trouver la modalité la plus fréquente (valeur majoritaire)
+get_mode <- function(x) {
+  x <- x[!is.na(x)]  # on enlève les NA
+  if (length(x) == 0) return(NA)
+  as.character(names(sort(table(x), decreasing = TRUE))[1])
+}
+
+# (4) 
+col_a_resumer <- c("recode_age", "Q1", "recode_csp", "Q8", "Q240", "Q5_taille", "Q236", "taille_foyer")
+
+# (5) 
+resultat <- data.frame(Q227 = 1:3)
+
+for (var in col_a_resumer) {
+  majoritaire_par_modalite <- tapply(data_subset[[var]], data_subset$Q227, get_mode)
+  resultat[[var]] <- majoritaire_par_modalite
+}
+
+# (6) 
+total <- table(data_subset$Q227)
+pct_repondants <- round(100 * total / sum(total), 2)
+resultat$`% répondants` <- pct_repondants
+
+# (7)
+resultat <- resultat[, c("Q227", "% répondants", col_a_resumer)]
+
+# (8) Affichage du tableau final
+
+resultat <- as.data.frame(resultat)
+
+# (9)
+
+print(resultat)
+
+```
+
+
+#### Avec usage de library
+
+(1) Sélection des variables nécessaires pour le tableau de synthèse (Age, CSP, Sexe, etc.) à l’aide de `select()` de `dplyr` qui permet de sélectionner des colonnes de manière concise
+
+(2) Création de la variable taille_foyer en sommant Q235 et Q236. Ici, on utilise `mutate()` pour créer une nouvelle variable dans un data frame, et `suppressWarnings()` pour éviter les messages d’avertissement lors de la conversion avec `as.numeric()`
+
+(3) Définition d’une fonction get_mode() qui calcule la modalité majoritaire en excluant les NA, grâce à `table()` et `sort()`, comme en R natif
+
+(4) Stockage du nom des colonnes d’intérêt dans un vecteur
+
+(5) Utilisation de `group_by()` pour grouper les données par Q227, puis `summarise()` combiné avec `across()` et la fonction get_mode pour calculer la modalité majoritaire pour chaque variable.
+
+(6) Calcul du pourcentage de répondants par modalité avec `count()` et `mutate()` pour faire les opérations mathématiques de base avec division (`/`) et `round()`
+
+(7) Réorganisation des colonnes avec `select()` pour mettre % répondants en deuxième position
+
+(8) On transforme au format dataframe pour un meilleur affichage avec `as.data.frame()`
+
+(9) On affiche le résultat de façon élégante avec `kable()`
+
+```{r}
+library(dplyr)
+
+# (1)
+vars <- c("Q227", "recode_age", "Q1", "recode_csp", "Q8", "Q240", "Q5_taille", "Q236", "Q235")
+data_subset <- data %>% select(all_of(vars))
+
+# (2)
+data_subset <- data_subset %>%
+  mutate(taille_foyer = suppressWarnings(as.numeric(Q235)) + suppressWarnings(as.numeric(Q236)))
+
+# (3)
+get_mode <- function(x) {
+  x <- x[!is.na(x)]
+  if (length(x) == 0) return(NA)
+  as.character(names(sort(table(x), decreasing = TRUE))[1])
+}
+
+# (4)
+col_a_resumer <- c("recode_age", "Q1", "recode_csp", "Q8", "Q240", "Q5_taille", "Q236", "taille_foyer")
+
+# (5)
+resultat <- data_subset %>%
+  group_by(Q227) %>%
+  summarise(across(all_of(col_a_resumer), get_mode), .groups = "drop")
+
+# (6)
+pct_repondants <- data_subset %>%
+  count(Q227) %>%
+  mutate(`% répondants` = round(100 * n / sum(n), 2)) %>%
+  select(Q227, `% répondants`)
+
+# (7)
+resultat <- resultat %>%
+  left_join(pct_repondants, by = "Q227") %>%
+  select(Q227, `% répondants`, all_of(col_a_resumer))
+
+# (8) 
+
+resultat <- as.data.frame(resultat)
+
+# (9) On affiche le résultat de façon élégante avec `kable()`
+
+# (9)
+kable(resultat) %>% 
+  kable_styling(latex_options = "striped")
+
+```
+
+
