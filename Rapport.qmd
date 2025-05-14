@@ -851,6 +851,70 @@ filter_data %>%
   tbl_summary(include = c(Q1, Q2, Q8, Q240, Q236, Q235))
 ```
 
+### 13. Quelles combinaisons de lieux fréquentés régulièrement possibles (fréquentés au moins une fois par mois)
+
+#### Avec R natif
+
+(1) Sélection des colonnes des lieux d'achat
+(2) Calcul du % de fréquentation (modalités 1 à 4) pour chaque lieu. Utilisation de `sapply()` pour appliquer l'opération du calcul de pourcentage sur les colonnes de lieux d'achat.
+(3) Trier du lieu le plus fréquenté au moins fréquenté grâce à `sort()` et l'agument `decreasing = TRUE`
+(4) Sélection des 10 lieux les plus fréquentés avec `head()`
+(5) Affichage de la table des 10 lieux d'achat les plus fréquentés avec `print()`
+
+```{r}
+# (1) 
+lieux_data <- data[17:28]
+
+# (2) 
+freq_percent <- sapply(lieux_data, function(col) {
+  sum(col %in% 1:4, na.rm = TRUE) / sum(!is.na(col)) * 100
+})
+
+# (3) 
+freq_sorted <- sort(freq_percent, decreasing = TRUE)
+
+# (4)
+top10_freq <- head(freq_sorted, 10)
+
+# (5) 
+print(round(top10_freq, 1))
+
+```
+
+#### Avec usage de library
+
+(1) Création des la table des 10 lieux les plus fréquentés
+    (1) On sélectionne les colonnes (lieux d'achat) avec `select()`.
+    (2) On crée une table au format long avec `pivot_longer()`
+    (3) On regroupe par lieu d'achat avec `group_by()`
+    (4) On calcule les pourcentage avec `summarise()` en s'assurant de ne pas comptabiliser les valeurs manquantes `!is.na()`. A noter que le `!` correspond à l'évènement contraire.
+    (5) On trie avec `arrange()` par ordre décroissant à l'aide de l'argument `desc()`
+    (6) On ne retient que les 10 premiers lieux les plus fréquentés avec `slice_head()`
+    (7) On ajoute dans le tableau final, la colonne des pourcentages des lieux fréquéntés avec `mutate()`
+(2) Affichage de la table des 10 lieux d'achat les plus fréquentés avec `print()` de façon élégante avec `kable()`
+
+```{r}
+# (1) 
+top10_freq <- data %>%
+  select(17:28) %>%
+  pivot_longer(cols = everything(), names_to = "lieu", values_to = "frequence") %>%
+  filter(frequence %in% 1:4) %>%
+  group_by(lieu) %>%
+  summarise(
+    nb = n(),
+    total = sum(!is.na(data[[unique(lieu)]])),
+    pourcentage = nb / total * 100
+  ) %>%
+  arrange(desc(pourcentage)) %>%
+  slice_head(n = 10) %>%
+  mutate(pourcentage = round(pourcentage, 1))
+
+# (2)
+kable(top10_freq) %>% 
+  kable_styling(latex_options = "striped")
+
+```
+
 ### 14. Pour chaque combinaison, quel profil de répondants ? Voir quelles sont les variables explicatives de cette nouvelle variable "combinaison"
 
 #### Avec R natif
