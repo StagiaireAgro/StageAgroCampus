@@ -1903,4 +1903,69 @@ kable(median_budget_marches) %>%
   kable_styling(latex_options = "striped")
 
 ```
+### 33.Pour les suivants il y a une question en plus: ces magasins proposent ils des produits locaux et/ou en circuits courts 
+#### Avec R natif
+1. On sélectionne les colonnes qui nous intéressent à l'aide de `paste()` pour avoir le vecteur de toutes les colonnes.
+2. On fait une mise au format long de notre dataframe avec la fonction `stack()` qui empile nos colonnes.
+3. On fait la table des fréquences croisées entre les questions et les réponses avec `table()`, puis on calcule les proportions de par réponse en fonction du lieu avec `prop.table()` et l'argument `margin = 1` pour faire la proportion par ligne. On multiplie par 100 et on arrondi avec `round`.
+4. On change les noms des dimensions avec la fonction `dimnames()`.
+
+```{r}
+#1
+
+df_l_cc <- data[,paste("Q",c(78, 86,95,102,109,116,123,130, 139,146,154,162,170,178,186,193), sep = "")]
+
+#2
+
+df_l_cc <- stack(df_l_cc)
+
+#3
+
+tb_l_cc <- round(prop.table(table(df_l_cc$ind, df_l_cc$values),margin = 1)*100,2)
+
+#4
+
+dimnames(tb_l_cc)[[2]] <- c("Oui, au moins certains d’entre eux, et j’en ai acheté", "Oui, au moins certains d’entre eux, mais je n’en ai pas acheté", "Non","Je ne sais pas")
+dimnames(tb_l_cc)[[1]] <- c("Artisans et revendeurs sur les marchés", "Paniers en ligne avec un intermédiaire", "Bouchers", "Boulangers", "Fromagers", "Poissonniers", "Primeurs", "Hypermarchés", "Supermarchés", "Hard discount", "Epicerie", "Surgelés", "Magasins spécialisés Bio", "Epicerie participative", "Magasin spécialisé vrac ou bio", "Aide alimentaire")
+
+tb_l_cc
+
+```
+#### Avec usage de library
+-   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+1. On sélectionne les colonnes qui nous intéressent avec `select()`.
+2. On fait une mise au format long avec `pivot_longer()`.
+3. On transforme les question en facteur pour qu'elles gardent le même ordre avec `factor()`.
+4. On fait la table des fréquences croisées entre les questions et les réponses avec `table()`, puis on calcule les proportions de par réponse en fonction du lieu avec `prop.table()` et l'argument `margin = 1` pour faire la proportion par ligne. On multiplie par 100 pour avoir un pourcentage.
+5. On change les noms des dimensions avec la fonction `dimnames()`.
+6. On met en forme le tableau avec des valeurs arrondies avec `kable()` et `round`.
+```{r}
+#1
+
+df_l_cc <- data %>% 
+  select(paste("Q",c(78, 86,95,102,109,116,123,130, 139,146,154,162,170,178,186,193), sep = "")) %>% 
+
+#2
+  
+  pivot_longer(cols =everything(), names_to = "Questions", values_to = "Réponses") 
+
+#3
+
+df_l_cc$Questions <- factor(df_l_cc$Questions, levels = paste("Q",c(78, 86,95,102,109,116,123,130, 139,146,154,162,170,178,186,193), sep = ""),labels =c("Artisans et revendeurs sur les marchés", "Paniers en ligne avec un intermédiaire", "Bouchers", "Boulangers", "Fromagers", "Poissonniers", "Primeurs", "Hypermarchés", "Supermarchés", "Hard discount", "Epicerie", "Surgelés", "Magasins spécialisés Bio", "Epicerie participative", "Magasin spécialisé vrac ou bio", "Aide alimentaire") )
+
+#4
+
+tb_l_cc <- df_l_cc %>% table() %>% prop.table(margin = 1)*100
+
+
+#5
+
+dimnames(tb_l_cc)[[2]] <- c("Oui, au moins certains d’entre eux, et j’en ai acheté", "Oui, au moins certains d’entre eux, mais je n’en ai pas acheté", "Non","Je ne sais pas")
+
+#6
+
+kable(round(tb_l_cc,2), caption = "Ces magasins proposent ils des produits locaux et/ou en circuits courts ?") %>% 
+  kable_styling(latex_options = "striped")
+
+```
 
