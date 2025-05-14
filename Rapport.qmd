@@ -890,11 +890,11 @@ tableau_croise_generalise <- function(df, variable, questions) {
 }
 
 tableau_croise_generalise(data, "Q2", questions)        # selon l'âge
-tableau_croise_generalise(df, "Q1", questions)      # selon le genre
-tableau_croise_generalise(df, "Q3", questions)        # selon la CSP
-tableau_croise_generalise(df, "Q8", questions)         # selon le budget alimentaire
-tableau_croise_generalise(df, "Q240", questions)    # selon le niveau de diplôme
-tableau_croise_generalise(df, "Q236", questions) # selon le nombre d'enfants
+tableau_croise_generalise(data, "Q1", questions)      # selon le genre
+tableau_croise_generalise(data, "Q3", questions)        # selon la CSP
+tableau_croise_generalise(data, "Q8", questions)         # selon le budget alimentaire
+tableau_croise_generalise(data, "Q240", questions)    # selon le niveau de diplôme
+tableau_croise_generalise(data, "Q236", questions) # selon le nombre d'enfants
 ```
 
 ### 13. Quelles combinaisons de lieux fréquentés régulièrement possibles (fréquentés au moins une fois par mois)
