@@ -1190,6 +1190,25 @@ summarise(mediane = median(Q8))
 median_budget2
 ```
 
+### 17. Mise en classe et répartition statistique des répondants par classe de budget
+
+#### Avec R natif
+1. Découper le budget en 5 catégories égales avec `quantile()` puis spécifier le pourcentage de repondant dans chaque catégorie avec `seq()`
+2. Afficher les catégories de budget avec `print()`
+3. La repartition des catégories de budget
+
+```{r}
+# Création des 5 classes basées sur les quintiles
+breaks <- quantile(data$Q8, probs = seq(0, 1, 0.2), na.rm = TRUE)
+print(breaks)
+data$decouper_budget <- cut(data$Q8,
+                       breaks = breaks,
+                       include.lowest = FALSE,
+                       labels = c("[1 - 250[", "[250 - 350[", "[350 - 450[", "[450 - 600[", "[600 - 4000["))
+
+table(data$decouper_budget)
+```
+
 ### 18.Budget moyen consacré a chaque modalité de lieu
 
 #### Avec R natif
