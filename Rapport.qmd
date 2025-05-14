@@ -1459,6 +1459,30 @@ kable(round(tb_Q22, 2), col.names = c("Achetez-vous des produits vendus directem
 
 ```
 
+
+### 23. Quelles motivations à fréquenter le marché
+
+#### Avec R natif
+
+1. Spécifier les labels des modalités 
+2. Recodage des modalités de la variables Q230 avec `factor()`
+3. tableau croisé dynamique `avec table()`, utiliser l'argument `useNA="ifany"` si l'on veut afficher les NA
+
+```{r}
+modalite_labels <- c("Moins de 5% de mon budget alimentaire", "Entre 5 et 9%",
+"Entre 10 et 24%", "Entre 25 et 49%", "Entre 50 et 75%",
+"Plus de 75% de mon budget alimentaire", "Je n’en ai aucune idée")
+
+data$Q230 <- factor(data$Q230, levels = 1:7, labels=modalite_labels)
+
+table(data$Q230, data$Q1, useNA = "ifany") # Selon le genre
+table(data$Q230, data$Q2, useNA = "ifany") # selon l'âge
+table(data$Q230, data$Q3, useNA = "ifany") # Selon la CSP
+table(data$Q230, data$Q8, useNA = "ifany") # selon le budget alimentaire
+table(data$Q230, data$Q240, useNA = "ifany") # selon le niveau de diplôme
+table(data$Q230, data$Q236, useNA = "ifany") # selon le nombre d'enfants
+```
+
 ### 25. Quelles motivations à fréquenter le marché
 
 #### Avec R natif
