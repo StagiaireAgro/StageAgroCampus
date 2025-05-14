@@ -2043,5 +2043,34 @@ kable(resultat) %>%
   kable_styling(latex_options = "striped")
 
 ```
+### 36.Chasse, pêche cueillette
+#### Avec R natif
+1. On sélectionne la colonne qui nous intéresse.
+2. On fait une table des fréquences avec `table()` puis on calcule la proportion que l'on multiplie par 100 avec `prop.table()`.
+3. On arrondi avec `round()`.
+```{r}
+dt_Q229 <- data$Q229
+tb_Q229 <- prop.table(table(dt_Q229))*100
+names(tb_Q229) <- c("Oui", "Non")
+print("Consommez-vous des produits que vous-même ou un proche chassez, pêchez ou cueillez ?")
+round(tb_Q229,2)
+```
+#### Avec usage de library
+-   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+1. On sélectionne la colonne que nous intéresse avec `select()`.
+2. On fait une table des fréquences avec `table()` puis on calcule la proportion que l'on multiplie par 100 avec `prop.table()`. Et on change le nom des modalités de réponse avec `names()`.
+3. On fait la mise en forme du tableau arrondi avec `kable` et `round()`.
+```{r}
+dt_Q229 <- data %>% 
+  select(Q229) %>% 
+  table() %>% 
+  prop.table()*100
+
+names(dt_Q229) <- c("Oui", "Non")
+
+kable(round(dt_Q229,2), caption = "Consommez-vous des produits que vous-même ou un proche chassez, pêchez ou cueillez ?", col.names = c("Réponses", "Fréquences (%)"))%>% 
+  kable_styling(latex_options = "striped")
+  
+```
 
 
