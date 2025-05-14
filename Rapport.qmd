@@ -851,7 +851,7 @@ filter_data %>%
   tbl_summary(include = c(Q1, Q2, Q8, Q240, Q236, Q235))
 ```
 
-### 13. Pour chaque combinaison, quel profil de répondants ? Voir quelles sont les variables explicatives de cette nouvelle variable "combinaison"
+### 14. Pour chaque combinaison, quel profil de répondants ? Voir quelles sont les variables explicatives de cette nouvelle variable "combinaison"
 
 #### Avec R natif
 
