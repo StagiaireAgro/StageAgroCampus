@@ -2073,4 +2073,128 @@ kable(round(dt_Q229,2), caption = "Consommez-vous des produits que vous-même ou
   
 ```
 
+### 37. Modalités de vente que vous avez cessé de fréquenter
+
+#### Avec R natif
+
+1. On sélectionne la colonne qui nous intéresse pour répondre à la question.
+2. On a un format qui n'est pas exploitable. On split chaque chaine de caractère pour avoir une liste des nombres à l'aide de la fonction `strsplit()` dans `lapply()`.
+3. Le format n'est toujours pas exploitable, car on a des vecteurs dans des éléments de notre liste. Avec `unlist()`, on peut créer une seule liste. 
+4. On supprime les éléments qui n'ont pas de valeur en cherchant leurs indices avec `which()`.
+5. On transforme en facteur avec des niveaux allant de 1 à 19 avec `factor()` puis on les renomme.
+6. On fait la table des fréquences des niveaux avec `table()` que l'on divise par le nombre de personnes qui achètent en comptant le nombre de valeur qui n'est pas NA avec `is.na()` et `sum()`. On multiplie par 100 et on arrondi avec `round()`.
+7. On transforme en dataframe avec `as.data.frame()` et on renomme les colonnes avec `names()`.
+
+```{r}
+#1
+
+dt_Q231 <- data$Q231
+
+#2
+
+dt_split <- lapply(dt_Q231,FUN = function(dt) strsplit(dt,"/")[[1]])
+
+#3
+
+dt_unlist <- unlist(dt_split)
+
+#4
+
+i <- which(dt_unlist=="")
+dt_unlist <- dt_unlist[-i]
+
+#5
+
+dt_unlist <- factor(dt_unlist, levels = 1:12)
+levels(dt_unlist) <- c(
+  "Supermarché et Hypermarché et Supérette de grandes enseignes y compris en ligne",
+"Hard discount y compris en ligne ",
+"Epiceries indépendantes, de quartier, épiceries fines y compris en ligne",
+"Magasins de surgelés y compris en ligne",
+"Magasins spécialisés Bio y compris en ligne",
+"Marché   (auprès d’un agriculteur, artisan ou revendeur)",
+"Directement aux agriculteurs sous différentes formes (en dehors des marchés) y compris en ligne",
+"Paniers en ligne réalisés par un intermédiaire",
+"Artisans et commerçants de proximité ",
+"Epicerie participative, associative, supermarché coopératif, impliquant les consommateurs dans la gestion",
+"Magasin alimentaire spécialisé dans les produits en vrac ou les produits locaux",
+"Magasin d’aide alimentaire (épicerie sociale, épicerie solidaire)"
+)
+
+#6
+
+tb_freq <- round(table(dt_unlist)/sum(!is.na(dt_Q231))*100,2)
+
+#7
+tb_freq <- as.data.frame(tb_freq)
+names(tb_freq) <- c("Modalités de vente","Lieux délaissés (%)")
+
+tb_freq
+```
+
+
+#### Avec usage de library
+
+-   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+1. On sélectionne la bonne colonne avec `select()`.
+2. On transforme les valeurs en valeurs utilisables avec `strsplit()`, `apply()` (on a encore un dataframe)  et `unlist()`.
+3. On enlève les éléments `""` qui ne sont pas des valeurs.
+4. On transforme en facteur avec des niveaux allant de 1 à 19 avec les labels associé à chaque niveau avec `factor()`.
+5. On fait la table des fréquences avec `table()` que l'on divise par le nombre de personnes qui ont acheté des produits en comptant le nombre de valeurs non manquante avec `is.na()` et `sum` et on multiplie par 100.
+6. On fait la mise en forme du tableau arrondi avec `round()` et `kable()`.
+
+1. On sélectionne la colonne qui nous intéresse pour répondre à la question.
+2. On a un format qui n'est pas exploitable. On split chaque chaine de caractère pour avoir une liste des nombres à l'aide de la fonction `strsplit()` dans `lapply()`.
+3. Le format n'est toujours pas exploitable, car on a des vecteurs dans des éléments de notre liste. Avec `unlist()`, on peut créer une seule liste. 
+4. On supprime les éléments qui n'ont pas de valeur en cherchant leurs indices avec `which()`.
+5. On transforme en facteur avec des niveaux allant de 1 à 19 avec `factor()` puis on les renomme.
+6. On fait la table des fréquences des niveaux avec `table()` que l'on divise par le nombre de personnes qui achètent en comptant le nombre de valeur qui n'est pas NA avec `is.na()` et `sum()`. On multiplie par 100 et on arrondi avec `round()`.
+7. On transforme en dataframe avec `as.data.frame()` et on renomme les colonnes avec `names()`.
+
+
+
+```{r}
+#1
+
+dt_unlist <- data %>% 
+  select(Q231) %>%
+  
+#2
+  
+apply(FUN = function(dt) strsplit(dt,"/")[[1]], MARGIN = 1) %>%  unlist()
+
+#3
+
+i <- which(dt_unlist=="")
+dt_unlist <- dt_unlist[-i]
+
+#4
+
+tb_freq <- dt_unlist %>% 
+  factor(levels = 1:12, 
+         labels = c("Supermarché et Hypermarché et Supérette de grandes enseignes y compris en ligne",
+                    "Hard discount y compris en ligne ",
+                    "Epiceries indépendantes, de quartier, épiceries fines y compris en ligne",
+                    "Magasins de surgelés y compris en ligne",
+                    "Magasins spécialisés Bio y compris en ligne",
+                    "Marché   (auprès d’un agriculteur, artisan ou revendeur)",
+                    "Directement aux agriculteurs sous différentes formes (en dehors des marchés) y compris en ligne",
+                    "Paniers en ligne réalisés par un intermédiaire",
+                    "Artisans et commerçants de proximité ",
+                    "Epicerie participative, associative, supermarché coopératif, impliquant les consommateurs dans la gestion",
+                    "Magasin alimentaire spécialisé dans les produits en vrac ou les produits locaux",
+                    "Magasin d’aide alimentaire (épicerie sociale, épicerie solidaire)")) %>% 
+  
+#5
+
+table()/sum(!is.na(data$Q231))*100
+
+#6
+
+kable(round(tb_freq,2), caption = "Fréquences des lieux délaissés par les consommateurs", col.names = c("Modalités de vente", "Lieux délaissés (%)")) %>%
+  kable_styling(latex_options = "striped")
+
+```
+
+
 
