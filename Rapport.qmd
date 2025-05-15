@@ -743,11 +743,13 @@ print(paste("Il y a",round(sum(lignes_a_garder, na.rm = T)/nrow(data)*100),"pour
 
 #### Avec R natif
 
-1.  Identifier pour chaque question ceux ou celles ayant repondu 1 ou 2,
-2.  Selectionner le jeu de données respectant la condition précédente,
-3.  Compter le nombre de lignes obtenue grâce à la condition `nrow()` puis diviser par le nombre total d'individu,
-4.  Repérer le numero de la question puis realiser un tableau descriptif des modalités de la question avec `table()`,
-5.  Ajouter les totaux par lignes ou colonnes avec `addmargins()` en spécifiant 2 pour les lignes et 1 pour les colonnes.
+1. Pour chaque question, repérer les personnes qui ont répondu 1 ou 2.
+2. Garder uniquement les lignes du tableau (jeu de données) qui correspondent à cette condition.
+3. Compter combien de personnes ont été gardées avec `nrow()`, puis diviser ce nombre par le nombre total de personnes pour obtenir une proportion.
+4. Trouver le numéro de la question, puis afficher les réponses possibles avec la fonction table() pour voir combien de personnes ont donné chaque réponse.
+5. Ajouter les totaux par ligne ou par colonne avec la fonction `addmargins()` :
+  mettre 2 pour avoir les totaux des lignes,
+  mettre 1 pour avoir les totaux des colonnes.
 
 ```{r}
 condition <- data$Q27 %in% c(1, 2) | data$Q35 %in% c(1, 2) | data$Q43 %in% c(1, 2) | data$Q50 %in% c(1, 2) | data$Q59 %in% c(1, 2) # Conditionn de la question
@@ -770,9 +772,9 @@ addmargins(table(sous_echantillon$Q235, sous_echantillon$Q236), 2)  # taille du 
 
 #### Avec usage de library
 
-1.  Ajouter une variable à la base de données qui prend la valeur 1 si la condition est respecté 0 sinon
-2.  Selectionner uniquement que les individus qui respectent le filtre
-3.  utiliser `tbl_summary()` pour réaliser directement un tableau pour chaque variable ajouté
+1. Créer une nouvelle colonne dans le tableau : elle vaudra 1 si la condition est vraie, et 0 sinon.
+2. Garder uniquement les personnes (les lignes) pour lesquelles cette nouvelle colonne vaut 1.
+3. Utiliser la fonction tbl_summary() (du package {gtsummary}) pour obtenir un tableau résumé avec des statistiques descriptives pour cette variable.
 
 ```{r}
 filter_data <- data %>%
@@ -835,9 +837,9 @@ filter_data %>%
 
 ### 12. X % des répondants achètent des produits locaux et/ou en circuits courts sur les marchés
 
-1.  Selectionner le jeu de données avec les variables qui nous permette de repondre à la question posé
-2.  Creer une variable qui est égale à TRUE si la personne à repondu à au moins des questions `apply()` préciser 1 pour dire que c'est en ligne (individu)
-3.  Calcule la proportion de TRUE qui n'est rien d'autre que la moyenne des répondants : utiliser `mean()`
+1. Sélectionner le jeu de données avec les variables qui nous permettent de répondre à la question posée.
+2. Créer une variable qui est égale à TRUE si la personne a répondu à au moins une des questions (utiliser `apply()`, avec 1 pour indiquer qu'on travaille ligne par ligne, c’est-à-dire par individu).
+3. Calculer la proportion de TRUE, ce qui correspond à la moyenne des répondants : utiliser `mean()`.
 
 #### Avec R natif
 
@@ -1089,7 +1091,7 @@ print(paste("Le budget alimentaire moyen est de",round(moy_budget),"euros"))
 
 #### Avec R natif
 
-1.  On selectionne la colonne Q8 avec `$` et on fait la médiane avec la fonction `median()`.
+1. On sélectionne la colonne Q8 avec $, puis on calcule la médiane avec la fonction `median()`.
 
 ```{r}
 median_budget <- median(data$Q8)
@@ -1108,9 +1110,9 @@ median_budget2
 
 #### Avec R natif
 
-1.  Découper le budget en 5 catégories égales avec `quantile()` puis spécifier le pourcentage de repondant dans chaque catégorie avec `seq()`
-2.  Afficher les catégories de budget avec `print()`
-3.  La repartition des catégories de budget
+1. Découper le budget en 5 catégories égales avec `quantile()`, puis spécifier le pourcentage de répondants dans chaque catégorie avec `seq()`.
+2. Afficher les catégories de budget avec `print()`.
+3. Analyser la répartition des catégories de budget avec `table()`.
 
 ```{r}
 # Création des 5 classes basées sur les quintiles
@@ -1338,10 +1340,10 @@ kable(mediane_question_9) %>%
 
 #### Avec R natif
 
-1.  Spécifier les labels des modalités
-2.  Recodage des modalités de la variables Q230 avec `factor()`
-3.  tableau croisé dynamique `avec table()`, utiliser l'argument `useNA="ifany"` si l'on veut afficher les NA
-4.  Utiliser `prop.table()` pour realiser des pourcentages dans
+1. Donner des noms clairs (labels) aux différentes réponses possibles (modalités).
+2. Transformer la variable Q230 en variable catégorielle avec la fonction `factor()` en précisant les niveaux (valeurs possibles) et leurs étiquettes (labels).
+3. Créer un tableau de fréquence croisé avec la fonction `table()` pour voir combien de personnes ont donné chaque réponse. Pour inclure les réponses manquantes (NA), ajoute useNA = "ifany".
+4. Convertir ce tableau en pourcentages avec la fonction `prop.table()`.
 
 ```{r}
 modalite_labels <- c("Moins de 5% de mon budget alimentaire", "Entre 5 et 9%",
@@ -1715,10 +1717,10 @@ kable(pct_q27) %>%
 
 #### R natif
 
-1.  Recoder les modalités de la variable Q28 avec `factor()`
-2.  Realiser le tableau de repartition en effectif avec `table()`
-3.  Faire la somme des repondants de chaque modalité avec `sum()`
-4.  Arrondir le pourcentage à deux chiffres après la virgule avec `round()`
+1. Recoder les modalités de la variable Q28 avec `factor()`.
+2. Réaliser le tableau de répartition en effectifs avec `table()`.
+3. Faire la somme des répondants de chaque modalité avec `sum()`.
+4. Arrondir les pourcentages à deux chiffres après la virgule avec `round()`.
 
 ```{r}
 modalite_labels1 <- c(
@@ -1846,12 +1848,13 @@ kable(median_budget_marches) %>%
 
 ### Avec R natif
 
-1.  On creer les tranches de budget pour les dépenses avec `quantile()` si l'on veut 5 catégories
-2.  On affiche ces catégories pour visualiser les 5 catégories obtenues
-3.  On creer une nouvelle variable catégorielle qui est égal à la tranche si le budget appartient à cette catégorie avec `cut()`
-4.  On realise le tableau de répartition de cette nouvelle variable avec `table()`
-5.  On calcul le pourcentage en divisant la valeur de chaque catégorie avec la somme des valeurs de toutes les catégories, utiliser `sum()` pour le calcul du total
-6.  On peut limité à deux chiffres après la virgule le résultat de la division avec `round()`
+1. On crée les tranches de budget pour les dépenses avec quantile() si l’on veut 5 catégories.
+2. On affiche ces catégories pour visualiser les 5 tranches obtenues.
+3. On crée une nouvelle variable catégorielle qui prend la valeur de la tranche correspondant au budget, avec cut().
+4. On réalise le tableau de répartition de cette nouvelle variable avec table().
+5. On calcule le pourcentage de chaque catégorie en divisant la valeur de chaque catégorie par la somme des valeurs de toutes les catégories, en utilisant sum() pour calculer le total.
+6. On peut limiter le résultat à deux chiffres après la virgule avec round().
+
 
 ```{r}
 breaks <- quantile(data$Q29, probs = seq(0, 1, 0.2), na.rm = TRUE)
