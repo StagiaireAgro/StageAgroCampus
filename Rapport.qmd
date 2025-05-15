@@ -155,9 +155,7 @@ table_propr_courses_option_1
 
 5. A partir de ce tableau on calcul les proportion d'individu en fonction des catégories croisés que l'on multipli par 100 pour avoir des pourcentages à l'aide de la fonction `prop.table()`, l'argu. On arrondi à deux chiffres après la virgule avec la fonction `round()`.
 
--   
-
-    (6) Avec la fonction `kable()` du package KableExtra on met en forme ce tableau. On lui ajoute un style avec la fonction `kable_styling()` et on ajoute une note de fin de page avec la fonction `footnote()` qu l'on applique à kable à l'aide la `%>%`.
+6. Avec la fonction `kable()` du package KableExtra on met en forme ce tableau. On lui ajoute un style avec la fonction `kable_styling()` et on ajoute une note de fin de page avec la fonction `footnote()` qu l'on applique à kable à l'aide la `%>%`.
 
 ```{r}
 #1
