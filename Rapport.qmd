@@ -1847,9 +1847,46 @@ median_budget_marches <- as.data.frame(median_budget_marches)
 # (5) 
 kable(median_budget_marches) %>% 
   kable_styling(latex_options = "striped")
+```
+
+### 32. X% des personnes achetant sur les marchés dépensent entre X et X euros
+### Avec R natif
+
+1. On creer les tranches de budget pour les dépenses avec `quantile()` si l'on veut 5 catégories
+2. On affiche ces catégories pour visualiser les 5 catégories obtenues
+3. On creer une nouvelle variable catégorielle qui est égal à la tranche si le budget appartient à cette catégorie avec `cut()`
+4. On realise le tableau de répartition de cette nouvelle variable avec `table()`
+5. On calcul le pourcentage en divisant la valeur de chaque catégorie avec la somme des valeurs de toutes les catégories, utiliser `sum()` pour le calcul du total
+6. On peut limité à deux chiffres après la virgule le résultat de la division avec `round()`
+
+```{r}
+breaks <- quantile(data$Q29, probs = seq(0, 1, 0.2), na.rm = TRUE)
+print(breaks)
+data$decouper_budget1 <- cut(data$Q29, breaks = breaks, include.lowest = TRUE, labels = c("[4 - 20[", "[20 - 30[", "[30 - 40[", "[40 - 50[", "[50 - 500["))
+tableau <- table(data$decouper_budget1)
+round(tableau/sum(tableau)*100,2)
 
 ```
-### 33.Pour les suivants il y a une question en plus: ces magasins proposent ils des produits locaux et/ou en circuits courts 
+### Avec library
+
+1. On creer les tranches de budget pour les dépenses avec `quantile()` si l'on veut 5 catégories
+2. On utilise `mutate()` pour creer une nouvelle variable avec les différents catégories
+3. on sélectionne la nouvelle variable cree avec mutate
+4. On applique la fonction `freq()` pour afficher les pourcentages
+5. On utilise `kable()` pour embellir le tableau des pourcentages
+
+```{r}
+breaks <- quantile(data$Q29, probs = seq(0, 1, 0.2), na.rm = TRUE)
+pourcentage <- data %>%
+  mutate(decouper_budget1 = cut(Q29, breaks = breaks, include.lowest = TRUE, labels = c("[4 - 20[", "[20 - 30[", "[30 - 40[", "[40 - 50[", "[50 - 500["))) %>%
+  select(decouper_budget1) %>%
+  questionr::freq()
+
+kable(pourcentage) %>% 
+  kable_styling(latex_options = "striped")
+```
+
+### 33. Pour les suivants il y a une question en plus: ces magasins proposent ils des produits locaux et/ou en circuits courts 
 #### Avec R natif
 1. On sélectionne les colonnes qui nous intéressent à l'aide de `paste()` pour avoir le vecteur de toutes les colonnes.
 2. On fait une mise au format long de notre dataframe avec la fonction `stack()` qui empile nos colonnes.
