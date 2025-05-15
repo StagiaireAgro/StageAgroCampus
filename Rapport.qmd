@@ -1963,7 +1963,9 @@ kable(round(tb_freq,2), caption = "Fréquences des produits achetés", col.names
 (4) On crée la table des effectifs avec `table()`
 (5) On transforme cette table en table de pourcentages avec les opérateurs classiques de R (`/` pour la division et `sum()` pour la somme) qu'on arrondie à 2 chiffres après la virgule à l'aide de `round()`
 (6) On transforme au format dataframe pour un meilleur affichage avec `as.data.frame()`
-(7) On affiche le tableau de pourcentages avec `print()`
+(7) On renomme les colonnes avec `names()` pour obtenir leur nom 
+(8) On renomme le contenu du tableau en transformant en facteur avec `factor()` et en affectant le bon renommage avec `<-` 
+(9) On affiche le tableau de pourcentages avec `print()`
 
 ```{r}
 # (1) 
@@ -1990,7 +1992,29 @@ pct_q27 <- round(100 * freq_q27 / sum(freq_q27), 2)
 
 pct_q27 <- as.data.frame(pct_q27)
 
-# (7) 
+# (7)
+
+names(pct_q27) <- c("Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés",
+                    "Pourcentages")
+# (8)
+
+pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`<- as.factor(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 0] <- "Na"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 1] <- "Plusieurs fois par semaine"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 2] <- "1 fois par semaine"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 3] <- "2 à 3 fois par mois"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 4] <- "1 fois par mois"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 5] <- "Plusieurs fois par an"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 6] <- "1 fois par an ou moins"
+
+# (9) 
 
 print(pct_q27)
 
@@ -2004,7 +2028,9 @@ print(pct_q27)
 (4) On crée la table des effectifs avec `table()`
 (5) On transforme cette table en table de pourcentages avec les opérateurs classiques de R (`/` pour la division et `sum()` pour la somme) qu’on arrondit à 2 chiffres après la virgule à l’aide de `round()`
 (6) On transforme au format dataframe pour un meilleur affichage avec `as.data.frame()`
-(7) On affiche le tableau de résultat de façon élégante avec `kable()`
+(7) On renomme les colonnes avec `names()` pour obtenir leur nom 
+(8) On renomme le contenu du tableau en transformant en facteur avec `factor()` et en affectant le bon renommage avec `<-`
+(9) On affiche le tableau de résultat de façon élégante avec `kable()`
 
 ```{r}
 # (1) 
@@ -2027,40 +2053,32 @@ pct_q27 <- round(100 * freq_q27 / sum(freq_q27), 2)
 # (6) 
 pct_q27 <- as.data.frame(pct_q27)
 
-# (7) 
+
+# (7)
+
+names(pct_q27) <- c("Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés",
+                    "Pourcentages")
+# (8)
+
+pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`<- as.factor(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 0] <- "Na"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 1] <- "Plusieurs fois par semaine"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 2] <- "1 fois par semaine"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 3] <- "2 à 3 fois par mois"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 4] <- "1 fois par mois"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 5] <- "Plusieurs fois par an"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 6] <- "1 fois par an ou moins"
+
+# (9) 
 kable(pct_q27) %>% 
   kable_styling(latex_options = "striped")
-```
-
-### 29. Ancienneté
-
-#### R natif
-
-1. Recoder les modalités de la variable Q28 avec `factor()`.
-2. Réaliser le tableau de répartition en effectifs avec `table()`.
-3. Faire la somme des répondants de chaque modalité avec `sum()`.
-4. Arrondir les pourcentages à deux chiffres après la virgule avec `round()`.
-
-```{r}
-modalite_labels1 <- c(
-"Depuis moins d’un an",
-"De 1 à 2 ans",
-"De 2 à 5 ans",
-"De 5 à 10 ans",
-"Depuis plus de 10 ans")
-
-data$Q28 <- factor(data$Q28, levels = 1:5, labels = modalite_labels1)
-table_repartition <- table(data$Q28)
-pourcentage <- table_repartition/sum(table_repartition)*100
-round(pourcentage, 2)
-```
-
-#### Avec library
-
-1.  Tableau de répartion avec `freq()`
-
-```{r}
-freq(data$Q28)
 ```
 
 ### 30. Budget
