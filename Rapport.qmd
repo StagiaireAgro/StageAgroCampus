@@ -781,6 +781,22 @@ print(paste("Il y a",round(sum(lignes_a_garder, na.rm = T)/nrow(data)*100),"pour
   mettre 2 pour avoir les totaux des lignes,
   mettre 1 pour avoir les totaux des colonnes.
 
+```{r echo=FALSE}
+data$Q1 <- factor(data$Q1, levels = 1:3, labels = c("Homme", "Femme", "Autre"))
+data$Q2 <- ifelse(data$Q2<24, "[20-24 ans[",
+                              ifelse(data$Q2<34, "[25-34 ans[",
+                                     ifelse(data$Q2<44, "[35-44 ans[",
+                                            ifelse(data$Q2<54, "[45-54 ans[",
+                                                   ifelse(data$Q2<64, "[55-64 ans[","[65 ans et plus[")))))
+data$Q3 <- factor(data$Q3, levels = 1:14, labels = c("Agriculteur", "Artisan", "Commerçant", "Chef d’entreprise", "Profession libérale",
+                                         "Cadre ou profession intellectuelle supérieure", "Profession intermédiaire", "Employé", "Ouvrier",
+                                         "Retraité", "Demandeur d’emploi", "Homme ou Femme au foyer", "Etudiant, lycéen", "Autre"))
+data$Q240 <- factor(data$Q240, levels = 1:8, labels = c("Sans diplôme", "BEPC, brevet élémentaire, brevet des collèges, DNB",
+                                                                                "CAP, BEP ou diplôme de niveau équivalent", "Baccalauréat, brevet professionnel", "BTS, DUT, Deug, Deust, diplôme de la santé ou du social de niveau bac+2, diplôme équivalent", "Licence, licence professionnelle, maîtrise, diplôme équivalent de niveau bac+3 ou bac+4", "Master, DEA, DESS, diplôme de grande école de niveau bac+5, doctorat de santé", "Doctorat de recherche (hors santé)"))
+data$Q236 <- factor(data$Q236, levels = 1:7, labels = c("0", "1", "2", "3", "4", "5", "Plus de 5"))
+data$Q235 <- factor(data$Q235, levels = 1:6, labels = c("1 personne (je vis seul.e)", "2", "3", "4", "5", "Plus de 5 personnes"))
+```
+
 ```{r}
 condition <- data$Q27 %in% c(1, 2) | data$Q35 %in% c(1, 2) | data$Q43 %in% c(1, 2) | data$Q50 %in% c(1, 2) | data$Q59 %in% c(1, 2) # Conditionn de la question
 sous_echantillon <- data[condition, ]
