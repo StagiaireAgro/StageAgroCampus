@@ -236,7 +236,7 @@ moyenne_freq
 
 1.  On récupère les données `nb_tres_freq` qui sont le nombre de lieus d'achat très fréquenté par individu.
 
-2.  On transforme nos données en tableeau avec la fonction `table()`, puis on calcule la proportion de chaque variable (1 à 12) avec `prop.table()` que l'on va multiplier par cent pour avoir un pourcentage. On peut arrondir à deux chiffres après la virgule avec `round`.
+2.  On transforme nos données en tableau avec la fonction `table()`, puis on calcule la proportion de chaque variable (1 à 12) avec `prop.table()` que l'on va multiplier par cent pour avoir un pourcentage. On peut arrondir à deux chiffres après la virgule avec `round`.
 
 3.  On récupère le nom des dimensions avec la fonction `dimnames()` et on récupère le nom du tableau avec `names` que l'on va réaffecter par son nouveau nom.
 
