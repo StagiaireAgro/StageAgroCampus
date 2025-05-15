@@ -26,10 +26,9 @@ data <- read_excel("24407_Export.xlsx")
 
 ## Questions :
 
-### 1.Pour chaque lieu. Expression des fréquences des courses (Q6)
+### 1.Pour chaque lieu. Expression des fréquences des courses
 
 #### Avec R natif
-
 
 (1) On renomme les variables. Dans cette option, il est possible de renommer immédiatement après avoir importé le jeu de données, à l’aide de la fonction `names()`.
     (1) La commande `names()` permet de sélectionner le nom des variables du jeu de données.
@@ -106,17 +105,19 @@ table_propr_courses_option_1
 
 #### Avec usage de library
 
-1. On sélectionne les données qui nous intéressent avec la fonction `select()` dans le dataframe de base (On sélectionne les données de la colonne Q6_1 à Q6_12). Pour travailler faire une action sur notre dataframe on l'outil `%>%` de la library dplyr
+1.  On sélectionne les données qui nous intéressent avec la fonction `select()` dans le dataframe de base (On sélectionne les données de la colonne Q6_1 à Q6_12). Pour travailler faire une action sur notre dataframe on l'outil `%>%` de la library dplyr
 
-2. On fait une mise au format long de notre nouveau dataframe à l’aide de la fonction `pivot_longer()` de la library tidyverse.
+2.  On fait une mise au format long de notre nouveau dataframe à l’aide de la fonction `pivot_longer()` de la library tidyverse.
 
-3. On passe toute les données en type facteur à l'aide de la fonction `factor()` où l'on définit les levels et les labels associés.
+3.  On passe toute les données en type facteur à l'aide de la fonction `factor()` où l'on définit les levels et les labels associés.
 
-4.  A l’aide de la fonction `table()` on fait un tableau de fréquence en fonction des catégories croisées (le lieu d’achat croisé avec sa régularité de fréquentation).
+4.  A l’aide de la fonction `table()` on fait un tableau de fréquence en fonction des catégories croisés (le lieux d’achat croisé avec sa régularité de fréquentation).
 
-5. A partir de ce tableau, on calcule les proportions d'individu en fonction des catégories croisées que l'on multiplie par 100 pour avoir des pourcentages à l'aide de la fonction `prop.table()`. On arrondi à deux chiffres après la virgule avec la fonction `round()`.
+5.  A partir de ce tableau on calcul les proportion d'individu en fonction des catégories croisés que l'on multipli par 100 pour avoir des pourcentages à l'aide de la fonction `prop.table()`, l'argu. On arrondi à deux chiffres après la virgule avec la fonction `round()`.
 
-6. Avec la fonction `kable()` du package KableExtra, on met en forme ce tableau. On lui ajoute un style avec la fonction `kable_styling()` et on ajoute une note de fin de page avec la fonction `footnote()` qu l'on applique à kable à l'aide la `%>%`.
+-   
+
+    (6) Avec la fonction `kable()` du package KableExtra on met en forme ce tableau. On lui ajoute un style avec la fonction `kable_styling()` et on ajoute une note de fin de page avec la fonction `footnote()` qu l'on applique à kable à l'aide la `%>%`.
 
 ```{r}
 #1
@@ -151,15 +152,17 @@ kable(df_Q6_prop, captation = "Taux de réquentation en fonction des lieux d'ach
   footnote(general = "Format des données en pourcentage",
            general_title = "Note: ",)
 ```
+
 ### 2.Nombre de lieux fréquentés très régulièrement (réponses 1/2) en moyenne
 
 #### Usage de R natif
 
-1. On sélectionne les données qui nous intéressent. On utilise la fonction `paste()` pour créer tous les noms de colonnes qui nous intéressent.
+1.  On sélectionne les données qui nous intéressent. On utilise la fonctione `paste()` pour créer tout les noms de colonnes qui nous intéressent.
 
-2. On regarde pour chaque individu pour chaque lieu s'il  est très fréquenté ( = 1 ou = 2). Cela nous retourne le dataframe de booléens (0 = FALSE ou 1 = TRUE) . Il nous reste à sommer par ligne à l'aide de la fonction `rowSums()`.
+2.  On regarde pour chaque individu pour chaque lieu si il est très fréquenté ( = 1 ou = 2). cela nous retourne le dataframe de booléens (0 = FALSE ou 1 = TRUE) . Il nous reste à sommer par ligne à l'aide de la fonction `rowSums()`
 
-3. Pour afficher notre résultat, on utilise la fonction `print()` à laquel on donne comme argument notre collage avec la fonction `paste()` pour intégrer la moyenne arrondie à un chiffre après la virgule de notre moyenne du nombre de lieux très fréquenté.
+3.  Pour afficher notre résultat on utilise la fontion `print()` à laquel on donne comme argument notre collage de à de la fonction `paste()` pour intégrer la moyenne arrondi à un chiffre après la virgule de notre moyenne du nombre de lieux très fréquenté
+
 ```{r}
 
 #(1)
@@ -175,6 +178,7 @@ nb_tres_freq <- rowSums(dt_nb_moy == 1 | dt_nb_moy == 2)
 print(paste("Les répondants fréquentent en moyenne ",round(mean(nb_tres_freq),1),
             " lieux très régulièrement (au moins une fois par semaine)"))
 ```
+
 #### Avec usage de library
 
 1.  Sélectionner les variables ou colonnes qui répondent à la question dans le jeu de données avec `select()`
@@ -197,13 +201,19 @@ moyenne_freq
 
 1.  On récupère les données `nb_tres_freq` qui sont le nombre de lieus d'achat très fréquenté par individu.
 
-2.  On transforme nos données en tableau avec la fonction `table()`, puis on calcule la proportion de chaque variable (1 à 12) avec `prop.table()` que l'on va multiplier par cent pour avoir un pourcentage. On peut arrondir à deux chiffres après la virgule avec `round`.
+2.  On transforme nos données en tableeau avec la fonction `table()`, puis on calcule la proportion de chaque variable (1 à 12) avec `prop.table()` que l'on va multiplier par cent pour avoir un pourcentage. On peut arrondir à deux chiffres après la virgule avec `round`.
 
 3.  On récupère le nom des dimensions avec la fonction `dimnames()` et on récupère le nom du tableau avec `names` que l'on va réaffecter par son nouveau nom.
 
 4.  On fait la mise en forme de notre tableau avec `kable()`.
 
 5.  Créer le graphique à partir du tableau avec `barplot()`.
+
+6.  Ajouter le titre et les noms des axes, et ajuster la limite de l’axe y selon la valeur maximale.
+
+7.  Changer la couleur des barres et mettre en évidence la valeur maximale.
+
+8.  Ajouter la valeur maximale au-dessus de la barre avec la fonction `text()`.
 
 ```{r}
 
@@ -226,9 +236,6 @@ print(tb_nb_tres_freq_pourcent)
 #(5)
 
 barplot(tb_nb_tres_freq_pourcent)
-```
-6.  Ajouter le titre et les noms des axes, et ajuster la limite de l’axe y selon la valeur maximale.
-```{r}
 
 max_val <- max(tb_nb_tres_freq_pourcent)
 
@@ -237,9 +244,6 @@ barplot(tb_nb_tres_freq_pourcent,
         ylab = "pourcentage",
         xlab = "nombre de lieux très fréquenté",
         ylim = c(0,max_val+5))
-```
-7.  Changer la couleur des barres et mettre en évidence la valeur maximale.
-```{r}
 
 coul <- rep("cyan3", length(tb_nb_tres_freq_pourcent))
 max_id <- which.max(tb_nb_tres_freq_pourcent)
@@ -252,9 +256,6 @@ barplot(tb_nb_tres_freq_pourcent,
         xlab = "nombre de lieux très fréquenté",
         ylim = c(0,max_val+5),
         col = coul)
-```
-8.  Ajouter la valeur maximale au-dessus de la barre avec la fonction `text()`.
-```{r}
 
 barplot(tb_nb_tres_freq_pourcent, 
         main = "Répartition selon le nombre de lieux fréquentés très régulièrement",
@@ -328,8 +329,6 @@ ggplot(df_nb_tres_freq)+aes(x=nb_tres_freq,y=Effectif)+geom_bar(stat = "identity
 ```
 
 ### 4.Nombre de lieux fréquentés régulièrement (réponses 1/2/3/4) en moyenne
-1. On sélectionne des bonnes colonnes.
-2. On compte le nombre de lieus régulièrement fréquenté par individu.
 
 ```{r}
 dt_nb_moy <- data %>% # selection des bonnes colonnes
@@ -341,24 +340,18 @@ print(paste("Les répondants fréquentent en moyenne ",round(mean(nb_rgl_freq),1
 ```
 
 ### 5. Répartition des répondants selon le nombre de lieux fréquentés régulièrement
-1. On compte le nombre d'occurence par nb de lieux régulièrement fréquenté avec `table()`. Et on calcul la proportion avec `prop.table()`.
-2. On change le nom avec `names()` et `dimnames()`.
-3. Mise en forme du tableau avec `kable()`.
-4. On repréente le graphique avec `ggplot()`.
+
 ```{r}
-#1
 
-dt_nb_rgl_freq_pourcent <- round(prop.table(table(nb_rgl_freq))*100,2)
+df_nb_rgl_freq <- as.data.frame(table(nb_rgl_freq)) # On compte le nombre d'occurence par nb de lieux régulièrement fréquenté
 
-#2
+dt_nb_rgl_freq_pourcent <- round(prop.table(table(nb_rgl_freq))*100,2) # On tranforme la fréquence en %
 
 names(dimnames(dt_nb_rgl_freq_pourcent)) <- "Nombre de lieux régulièrement fréquenté"
 
-#3
-
 kable(dt_nb_rgl_freq_pourcent)  #  mise en forme du tableau
 
-#4
+
 
 ggplot(df_nb_rgl_freq, aes(x = nb_rgl_freq, y = Freq)) +
   geom_bar(stat = "identity")+
@@ -370,11 +363,10 @@ ggplot(df_nb_rgl_freq, aes(x = nb_rgl_freq, y = Freq)) +
 
 #### Avec R natif
 
-(1) Création d'un vecteur qui sincrémente de 1 jusqu'à 12 via le symbole `:` 
+(1) Création d'un vecteur qui sincrémente de 1 jusqu'à 12 via le symbole `:`
 (2) Concatener deux expressions avec `paste()` notez que `sep=` précise le séparateur entre les expressions
 (3) Selection de colonnes en utilisant les crochets `[ligne, variables]`
-(4) Faire la somme par ligne des cellules qui vérifie la ou les condition(s) dans `rowSums()`, 
-En effet si la cellule vérifie alors elle vaut 1 sinon 0
+(4) Faire la somme par ligne des cellules qui vérifie la ou les condition(s) dans `rowSums()`, En effet si la cellule vérifie alors elle vaut 1 sinon 0
 (5) Realiser un filtre en spécifiant la colonne et la condition
 (6) Arroundir la proportion calculé à deux chiffres après la virgule `round()`
 
@@ -392,13 +384,10 @@ arrondir_proportion <- round(proportion, 2)
 
 (1) Sélection des variables spécifiques à la question : `select()`
 (2) Appliquer à toutes les cellules des variables une ou des condition(s) : `across(everything(), ~ condition)`
-(3) Pour chaque ligne ou individu faire la somme des cellules qui respectent le ou les conditions `rowSums()` 
-puis la stocker dans une nouvelle variable qu'on ajoutera à la base de donnée
-(4) Compter le nombre de français disponible dans la base via `count()` puis la stocker dans une 
-variable intermédiaire qui sera definie à l'intérieur de `{{}}`. L'opérateur utilisé avant doit être "%T>%"
+(3) Pour chaque ligne ou individu faire la somme des cellules qui respectent le ou les conditions `rowSums()` puis la stocker dans une nouvelle variable qu'on ajoutera à la base de donnée
+(4) Compter le nombre de français disponible dans la base via `count()` puis la stocker dans une variable intermédiaire qui sera definie à l'intérieur de `{{}}`. L'opérateur utilisé avant doit être "%T\>%"
 (5) Filtrer le jeu de donné avec `filter()` pour ne retenir que les individus ayant qu'un lieu régulier
 (6) Utiliser summarise pour calculer la proportion et ne garder qu'elle
-
 
 ```{r}
 library(magrittr) # %T>% 
@@ -564,6 +553,7 @@ print(modes_Magasin_alimentaire_spe_vrac)
 print(modes_Magasin_aide_alimentaire)
 
 ```
+
 ### 8.Créer un sous échantillon appelé les acheteurs très réguliers de produits locaux et ou en circuits courts
 
 #### Avec R natif
@@ -750,13 +740,14 @@ print(paste("Il y a",round(sum(lignes_a_garder, na.rm = T)/nrow(data)*100),"pour
 ```
 
 ### 10. Sous échantillon appelé les acheteurs très réguliers de produits locaux et ou en circuits courts achetant directement aux producteurs
+
 #### Avec R natif
 
-1. Identifier pour chaque question ceux ou celles ayant repondu 1 ou 2,
-2. Selectionner le jeu de données respectant la condition précédente,
-3. Compter le nombre de lignes obtenue grâce à la condition `nrow()` puis diviser par le nombre total d'individu,
-4. Repérer le numero de la question puis realiser un tableau descriptif des modalités de la question avec `table()`,
-5. Ajouter les totaux par lignes ou colonnes avec `addmargins()` en spécifiant 2 pour les lignes et 1 pour les colonnes.
+1.  Identifier pour chaque question ceux ou celles ayant repondu 1 ou 2,
+2.  Selectionner le jeu de données respectant la condition précédente,
+3.  Compter le nombre de lignes obtenue grâce à la condition `nrow()` puis diviser par le nombre total d'individu,
+4.  Repérer le numero de la question puis realiser un tableau descriptif des modalités de la question avec `table()`,
+5.  Ajouter les totaux par lignes ou colonnes avec `addmargins()` en spécifiant 2 pour les lignes et 1 pour les colonnes.
 
 ```{r}
 condition <- data$Q27 %in% c(1, 2) | data$Q35 %in% c(1, 2) | data$Q43 %in% c(1, 2) | data$Q50 %in% c(1, 2) | data$Q59 %in% c(1, 2) # Conditionn de la question
@@ -776,11 +767,12 @@ table(sous_echantillon$Q240) # selon le niveau de diplôme
 table(sous_echantillon$Q236) # nb d'enfants
 addmargins(table(sous_echantillon$Q235, sous_echantillon$Q236), 2)  # taille du foyer
 ```
+
 #### Avec usage de library
 
-1. Ajouter une variable à la base de données qui prend la valeur 1 si la condition est respecté 0 sinon
-2. Selectionner uniquement que les individus qui respectent le filtre
-3. utiliser `tbl_summary()` pour réaliser directement un tableau pour chaque variable ajouté
+1.  Ajouter une variable à la base de données qui prend la valeur 1 si la condition est respecté 0 sinon
+2.  Selectionner uniquement que les individus qui respectent le filtre
+3.  utiliser `tbl_summary()` pour réaliser directement un tableau pour chaque variable ajouté
 
 ```{r}
 filter_data <- data %>%
@@ -800,7 +792,9 @@ filter_data %>%
 ```
 
 ### 11 Sous échantillon appelé les acheteurs réguliers de produits locaux et ou en circuits courts achetant directement aux producteurs
+
 #### Avec R natif
+
 ```{r}
 condition <- data$Q27 %in% c(3, 4) | data$Q35 %in% c(3, 4) | data$Q43 %in% c(3, 4) | data$Q50 %in% c(3, 4) | data$Q59 %in% c(3, 4) # Conditionn de la question
 sous_echantillon <- data[condition, ]
@@ -819,6 +813,7 @@ table(sous_echantillon$Q240) # selon le niveau de diplôme
 table(sous_echantillon$Q236) # nb d'enfants
 addmargins(table(sous_echantillon$Q235, sous_echantillon$Q236), 2)  # taille du foyer
 ```
+
 #### Avec usage de library
 
 ```{r}
@@ -838,11 +833,11 @@ filter_data %>%
   tbl_summary(include = c(Q1, Q2, Q8, Q240, Q236, Q235))
 ```
 
-### 12. X % des répondants achètent des produits locaux et/ou en circuits courts sur les marchés 
+### 12. X % des répondants achètent des produits locaux et/ou en circuits courts sur les marchés
 
-1. Selectionner le jeu de données avec les variables qui nous permette de repondre à la question posé
-2. Creer une variable qui est égale à TRUE si la personne à repondu à au moins des questions `apply()` préciser 1 pour dire que c'est en ligne (individu)
-3. Calcule la proportion de TRUE qui n'est rien d'autre que la moyenne des répondants : utiliser `mean()`
+1.  Selectionner le jeu de données avec les variables qui nous permette de repondre à la question posé
+2.  Creer une variable qui est égale à TRUE si la personne à repondu à au moins des questions `apply()` préciser 1 pour dire que c'est en ligne (individu)
+3.  Calcule la proportion de TRUE qui n'est rien d'autre que la moyenne des répondants : utiliser `mean()`
 
 #### Avec R natif
 
@@ -935,7 +930,6 @@ kable(top10_freq) %>%
 
 ```
 
-
 ### 14. Pour chaque combinaison, quel profil de répondants ? Voir quelles sont les variables explicatives de cette nouvelle variable "combinaison"
 
 #### Avec R natif
@@ -949,7 +943,6 @@ kable(top10_freq) %>%
 (7) Réorganisation des colonnes. On place la colonne contenant le pourcentage de répodnants en 2ème position
 (8) On transforme au format dataframe pour un meilleur affichage avec `as.data.frame()`
 (9) On affiche le tableau de résultat `print()`
-
 
 ```{r}
 
@@ -1000,7 +993,6 @@ print(resultat)
 
 
 ```
-
 
 #### Avec usage de library
 
@@ -1075,7 +1067,6 @@ kable(resultat, caption = "Modalité majoritaire par variable Q6_x") %>%
 
 ```
 
-
 ### 15.Budget moyen
 
 #### Avec R natif
@@ -1095,13 +1086,16 @@ print(paste("Le budget alimentaire moyen est de",round(moy_budget),"euros"))
 ```
 
 ### 16. Budget médian
+
 #### Avec R natif
-1. On selectionne la colonne Q8 avec `$` et on fait la médiane avec la fonction `median()`.
+
+1.  On selectionne la colonne Q8 avec `$` et on fait la médiane avec la fonction `median()`.
 
 ```{r}
 median_budget <- median(data$Q8)
 median_budget
 ```
+
 #### Avec usage de library
 
 ```{r}
@@ -1113,9 +1107,10 @@ median_budget2
 ### 17. Mise en classe et répartition statistique des répondants par classe de budget
 
 #### Avec R natif
-1. Découper le budget en 5 catégories égales avec `quantile()` puis spécifier le pourcentage de repondant dans chaque catégorie avec `seq()`
-2. Afficher les catégories de budget avec `print()`
-3. La repartition des catégories de budget
+
+1.  Découper le budget en 5 catégories égales avec `quantile()` puis spécifier le pourcentage de repondant dans chaque catégorie avec `seq()`
+2.  Afficher les catégories de budget avec `print()`
+3.  La repartition des catégories de budget
 
 ```{r}
 # Création des 5 classes basées sur les quintiles
@@ -1192,11 +1187,11 @@ kable(round(moy_rep_b,2), caption = "Moyenne de la répartition du budget en fon
 
 #### Avec R natif
 
-1. On sélectionne les lignes pour notre critère de sélection à laide de `paste()`.
-2. À l'aide de la fonction `apply()` on regarde pour chaque valeur si elle est inférieure à 7 et non manquante (lieu fréquenté) et on retourne le booléen TRUE avec `all()` si la condition est respectée sur toute la ligne (tout les lieux) ou FALSE sinon.
-3. On sélectionne les lignes et colonnes qui nous intéressent et on remplace les valeurs manquantes par 0 avec `replace()`.
-4. On fait la moyenne par colonne avec `colMeans` et on retransforme en dataframe avec `as.data.frame`.
-5. On modifie les noms avec `dimnames()`.
+1.  On sélectionne les lignes pour notre critère de sélection à laide de `paste()`.
+2.  À l'aide de la fonction `apply()` on regarde pour chaque valeur si elle est inférieure à 7 et non manquante (lieu fréquenté) et on retourne le booléen TRUE avec `all()` si la condition est respectée sur toute la ligne (tout les lieux) ou FALSE sinon.
+3.  On sélectionne les lignes et colonnes qui nous intéressent et on remplace les valeurs manquantes par 0 avec `replace()`.
+4.  On fait la moyenne par colonne avec `colMeans` et on retransforme en dataframe avec `as.data.frame`.
+5.  On modifie les noms avec `dimnames()`.
 
 ```{r}
 #1
@@ -1225,11 +1220,15 @@ dimnames(moy_b_678)[[2]] <- "Moyenne du budget dédié pour ceux qui fréquentes
 moy_b_678
 
 ```
+
 #### Avec usage de library
+
 -   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+
 1.  On sélectionne les lignes avec toutes les valeurs de la question Q9_6 à Q9_8 qui sont inférieur à 7 et non manquantes avec `filter()`.
-2. On sélectionne les colonnes qui nous intéressent avec `select()` et on fait la moyenne par colonne avec `colMeans()`.
-3. On fait la mise en forme du tableau avec `kablee()`.
+2.  On sélectionne les colonnes qui nous intéressent avec `select()` et on fait la moyenne par colonne avec `colMeans()`.
+3.  On fait la mise en forme du tableau avec `kablee()`.
+
 ```{r}
 moy_b_678 <- data %>% filter(apply(across(Q6_6:Q6_8, ~ .x < 7 & !is.na(.x)),1,all) ) %>% 
   select(Q9_6:Q9_8) %>% 
@@ -1243,7 +1242,8 @@ kable(round(moy_b_678,2), caption = "Moyenne du budget dédié par ceux qui fré
   kable_styling(latex_options = "striped")
   
 ```
-### 22. Le budget médian consacré aux modalités 6/7/8 par les acheteurs 
+
+### 22. Le budget médian consacré aux modalités 6/7/8 par les acheteurs
 
 #### Avec R natif
 
@@ -1254,7 +1254,6 @@ kable(round(moy_b_678,2), caption = "Moyenne du budget dédié par ceux qui fré
 (5) On transforme au format 'dataframe' le tableau et on le transpose afin d'obtenir les résultats dans le bon sens avec `t()`
 (6) On garde uniquement les colonnes 6 à 8 car se sont les modalités de la question 9 du questionnaire qui nous intéressent avec l'opérateur de sélection `[]`
 (7) On affiche le tableau de résultat avec `print()`
-
 
 ```{r}
 # (1)
@@ -1293,10 +1292,9 @@ print(mediane_question_9)
 
 (2) On calcule la médiane pour chaque colonne (chaque type de lieu) à l’aide de `summarise()` et `across()`, puis on renomme chaque colonne avec des libellés explicites correspondant aux types de lieux via `rename_with()`.
 
-(3) On sélectionne uniquement les colonnes 6 à 8 car ce sont celles qui nous intéressent dans le cadre de l’analyse de la question 9 du questionnaire, à l’aide de la fonction `select()` 
+(3) On sélectionne uniquement les colonnes 6 à 8 car ce sont celles qui nous intéressent dans le cadre de l’analyse de la question 9 du questionnaire, à l’aide de la fonction `select()`
 
 (4) On affiche la table des résultat de façon élégante avec `kable()`
-
 
 ```{r}
 
@@ -1340,10 +1338,10 @@ kable(mediane_question_9) %>%
 
 #### Avec R natif
 
-1. Spécifier les labels des modalités 
-2. Recodage des modalités de la variables Q230 avec `factor()`
-3. tableau croisé dynamique `avec table()`, utiliser l'argument `useNA="ifany"` si l'on veut afficher les NA
-4. Utiliser `prop.table()` pour realiser des pourcentages dans
+1.  Spécifier les labels des modalités
+2.  Recodage des modalités de la variables Q230 avec `factor()`
+3.  tableau croisé dynamique `avec table()`, utiliser l'argument `useNA="ifany"` si l'on veut afficher les NA
+4.  Utiliser `prop.table()` pour realiser des pourcentages dans
 
 ```{r}
 modalite_labels <- c("Moins de 5% de mon budget alimentaire", "Entre 5 et 9%",
@@ -1372,11 +1370,14 @@ round(enfants*100,2)
 ```
 
 ### 24.Produits achetés auprès d'un agriculteur ou non?
+
 #### Avec R natif
-1. On la colonne qui nous intéresse. 
-2. On fait le tableau de proportion de la table de fréquence d'occurrences de réponse de la question 22 avec `table()` et `prop.table()`. On multiplie par 100 pour avoir un pourcentage.
-3. On change le nom des valeurs avec `names()`.
-4. On transforme en dataframe avec `as.data.frame()` et on change le nom de la colonne des valeurs avec `dimnames()`.
+
+1.  On la colonne qui nous intéresse.
+2.  On fait le tableau de proportion de la table de fréquence d'occurrences de réponse de la question 22 avec `table()` et `prop.table()`. On multiplie par 100 pour avoir un pourcentage.
+3.  On change le nom des valeurs avec `names()`.
+4.  On transforme en dataframe avec `as.data.frame()` et on change le nom de la colonne des valeurs avec `dimnames()`.
+
 ```{r}
 #1
 
@@ -1397,12 +1398,16 @@ dimnames(df_Q22)[[2]] <- c("Achetez-vous des produits vendus directement par l�
 
 df_Q22
 ```
+
 #### Avec usage de library
+
 -   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
-1. On sélectionne la colonne qui nous intéresse avec `select()`.
-2. On fait le tableau de proportion de la table de fréquence d'occurrences de réponse de la question 22 avec `table()` et `prop.table()`. On multiplie par 100 pour avoir un pourcentage.
-3. On change le nom des valeurs avec `names()`.
-4. On met en forme avec `kable()`. 
+
+1.  On sélectionne la colonne qui nous intéresse avec `select()`.
+2.  On fait le tableau de proportion de la table de fréquence d'occurrences de réponse de la question 22 avec `table()` et `prop.table()`. On multiplie par 100 pour avoir un pourcentage.
+3.  On change le nom des valeurs avec `names()`.
+4.  On met en forme avec `kable()`.
+
 ```{r}
 tb_Q22 <- data %>% select(Q22) %>% 
   table() %>% 
@@ -1476,8 +1481,8 @@ print(motivation_3)
 
 #### Avec usage de library
 
-(1) On sélectionne les colonnes pour notre critère de sélection à l’aide de `select() `du package `dplyr()`, qui permet une syntaxe plus claire et concise que `subset()`
-(3) On crée les 3 tableaux de pourcentages pour les motivations des clients
+(1) On sélectionne les colonnes pour notre critère de sélection à l’aide de `select()`du package `dplyr()`, qui permet une syntaxe plus claire et concise que `subset()`
+(2) On crée les 3 tableaux de pourcentages pour les motivations des clients
     (1) On crée une boucle `for()`
     (2) On convertit en numérique au cas où par précaution avec `as.numeric()` et on retire les potentiels messages d'avertissements générés par R avec s`uppressWarnings()`
     (3) On garde les lignes qui n'ont pas de valeurs manquantes au moyen de is.na() auquel on ajoute un `!` devant pour obtenir `!is.na()`. Le `!` est la négation en langage R
@@ -1486,7 +1491,7 @@ print(motivation_3)
     (6) On effectue un trie décroissant avec `sort()` et l'argument d`ecreasing = TRUE`
     (7) On affiche avec `cat()`, la modalité la plus fréquente avec `which.max()`. La fonction `paste0()` permet de concaténer
     (8) On affecte au bon tableau les opérations précédentes avec `if()` et `<-`
-(4) On affiche le tableau de résultat avec cat() et de façon élégante avec `kable()`
+(3) On affiche le tableau de résultat avec cat() et de façon élégante avec `kable()`
 
 ```{r}
 
@@ -1539,14 +1544,17 @@ kable(motivation_3) %>%
 ```
 
 ### 27.Quels produits achetés?
+
 #### Avec R natif
-1. On sélectionne la colonne qui nous intéresse pour répondre à la question.
-2. On a un format qui n'est pas exploitable. On split chaque chaine de caractère pour avoir une liste des nombres à l'aide de la fonction `strsplit()` dans `lapply()`.
-3. Le format n'est toujours pas exploitable, car on a des vecteurs dans des éléments de notre liste. Avec `unlist()`, on peut créer une seule liste. 
-4. On supprime les éléments qui n'ont pas de valeur en cherchant leurs indices avec `which()`.
-5. On transforme en facteur avec des niveaux allant de 1 à 19 avec `factor()` puis on les renomme.
-6. On fait la table des fréquences des niveaux avec `table()` que l'on divise par le nombre de personnes qui achètent en comptant le nombre de valeur qui n'est pas NA avec `is.na()` et `sum()`. On multiplie par 100 et on arrondi avec `round()`.
-7. On transforme en dataframe avec `as.data.frame()` et on renomme les colonnes avec `names()`.
+
+1.  On sélectionne la colonne qui nous intéresse pour répondre à la question.
+2.  On a un format qui n'est pas exploitable. On split chaque chaine de caractère pour avoir une liste des nombres à l'aide de la fonction `strsplit()` dans `lapply()`.
+3.  Le format n'est toujours pas exploitable, car on a des vecteurs dans des éléments de notre liste. Avec `unlist()`, on peut créer une seule liste.
+4.  On supprime les éléments qui n'ont pas de valeur en cherchant leurs indices avec `which()`.
+5.  On transforme en facteur avec des niveaux allant de 1 à 19 avec `factor()` puis on les renomme.
+6.  On fait la table des fréquences des niveaux avec `table()` que l'on divise par le nombre de personnes qui achètent en comptant le nombre de valeur qui n'est pas NA avec `is.na()` et `sum()`. On multiplie par 100 et on arrondi avec `round()`.
+7.  On transforme en dataframe avec `as.data.frame()` et on renomme les colonnes avec `names()`.
+
 ```{r}
 #1
 
@@ -1581,14 +1589,18 @@ names(tb_freq) <- c("Produits","Fréquences d'achat (%)")
 tb_freq
 
 ```
+
 #### Avec usage de library
+
 -   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
-1. On sélectionne la bonne colonne avec `select()`.
-2. On transforme les valeurs en valeurs utilisables avec `strsplit()`, `apply()` (on a encore un dataframe)  et `unlist()`.
-3. On enlève les éléments `""` qui ne sont pas des valeurs.
-4. On transforme en facteur avec des niveaux allant de 1 à 19 avec les labels associé à chaque niveau avec `factor()`.
-5. On fait la table des fréquences avec `table()` que l'on divise par le nombre de personnes qui ont acheté des produits en comptant le nombre de valeurs non manquante avec `is.na()` et `sum` et on multiplie par 100.
-6. On fait la mise en forme du tableau arrondi avec `round()` et `kable()`.
+
+1.  On sélectionne la bonne colonne avec `select()`.
+2.  On transforme les valeurs en valeurs utilisables avec `strsplit()`, `apply()` (on a encore un dataframe) et `unlist()`.
+3.  On enlève les éléments `""` qui ne sont pas des valeurs.
+4.  On transforme en facteur avec des niveaux allant de 1 à 19 avec les labels associé à chaque niveau avec `factor()`.
+5.  On fait la table des fréquences avec `table()` que l'on divise par le nombre de personnes qui ont acheté des produits en comptant le nombre de valeurs non manquante avec `is.na()` et `sum` et on multiplie par 100.
+6.  On fait la mise en forme du tableau arrondi avec `round()` et `kable()`.
+
 ```{r}
 #1
 
@@ -1620,7 +1632,7 @@ kable(round(tb_freq,2), caption = "Fréquences des produits achetés", col.names
   
 ```
 
-### 28. Fréquences d'achat auprès d’un ou plusieurs agriculteurs sur un marché 
+### 28. Fréquences d'achat auprès d’un ou plusieurs agriculteurs sur un marché
 
 #### Avec R natif
 
@@ -1664,6 +1676,7 @@ print(pct_q27)
 ```
 
 #### Avec usage de library
+
 (1) On sélectionne la colonne pour notre critère de sélection à l’aide de `select()` du package dplyr
 (2) On remplace les valeurs manquantes par des 0 grâce à `mutate()` et `replace_na()` de `tidyr`
 (3) On extrait la colonne Q27 comme vecteur à l'aide de l'opérateur de sélection `[[]]`
@@ -1701,11 +1714,11 @@ kable(pct_q27) %>%
 ### 29. Ancienneté
 
 #### R natif
-1. Recoder les modalités de la variable Q28 avec `factor()`
-2. Realiser le tableau de repartition en effectif avec `table()`
-3. Faire la somme des repondants de chaque modalité avec `sum()`
-4. Arrondir le pourcentage à deux chiffres après la virgule avec `round()`
 
+1.  Recoder les modalités de la variable Q28 avec `factor()`
+2.  Realiser le tableau de repartition en effectif avec `table()`
+3.  Faire la somme des repondants de chaque modalité avec `sum()`
+4.  Arrondir le pourcentage à deux chiffres après la virgule avec `round()`
 
 ```{r}
 modalite_labels1 <- c(
@@ -1723,17 +1736,20 @@ round(pourcentage, 2)
 
 #### Avec library
 
-1. Tableau de répartion avec `freq()`
+1.  Tableau de répartion avec `freq()`
 
 ```{r}
 freq(data$Q28)
 ```
 
 ### 30. Budget
+
 #### Avec R natif
-1. On sélectionne la colonne qui nous intéresse.
-2. On calcule la moyenne avec `mean()` en retirant les valeurs manquantes et on arrondi avec `round()`.
-3. On affiche le résultat que l'on colle à une phrase avec `paste`.
+
+1.  On sélectionne la colonne qui nous intéresse.
+2.  On calcule la moyenne avec `mean()` en retirant les valeurs manquantes et on arrondi avec `round()`.
+3.  On affiche le résultat que l'on colle à une phrase avec `paste`.
+
 ```{r}
 #1
 
@@ -1748,11 +1764,15 @@ moy_Q29 <- round(mean(df_Q29, na.rm = T))
 paste("Le budget alimentaire moyen dépensé sur les marchés  est de", moy_Q29, "euros")
 
 ```
+
 #### Avec usage de library
+
 -   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
-1. On sélectionne la colonne qui nous intéresse avec `select()`
-2. On calcule la moyenne de la colonne avec `mean()` sans rendre en compte les valeurs manquantes et on arrondi avec `round()`
-3. On affiche le résultat que l'on colle à une phrase avec `paste`.
+
+1.  On sélectionne la colonne qui nous intéresse avec `select()`
+2.  On calcule la moyenne de la colonne avec `mean()` sans rendre en compte les valeurs manquantes et on arrondi avec `round()`
+3.  On affiche le résultat que l'on colle à une phrase avec `paste`.
+
 ```{r}
 moy_Q29 <- data %>% select(Q29) %>%
   mean(Q29, na.rm = T) %>% round()
@@ -1796,7 +1816,7 @@ print(median_budget_marches)
 
 (1) On sélectionne les colonnes pour notre critère de sélection à l’aide de `select()` du package `dplyr`
 (2) On remplace les valeurs manquantes par des 0 grâce à `mutate()` et `replace_na()` de `tidyr`
-(3) On calcule la médiane avec la fonction `median()`. On intègre cette fonction dans la fonction `summarise() `. Cette dernière permet de créer un nouveau tableau contenant des résumés (moyenne, médiane, total, minimum, etc.) à partir d’un data frame ou d’un tibble. Enfin, on utilise la fonction `pull()` de `dplyr` qui permet d’extraire une colonne d’un data frame ou d’un tibble sous forme de vecteur
+(3) On calcule la médiane avec la fonction `median()`. On intègre cette fonction dans la fonction `summarise()`. Cette dernière permet de créer un nouveau tableau contenant des résumés (moyenne, médiane, total, minimum, etc.) à partir d’un data frame ou d’un tibble. Enfin, on utilise la fonction `pull()` de `dplyr` qui permet d’extraire une colonne d’un data frame ou d’un tibble sous forme de vecteur
 (4) On transforme au format dataframe pour stocker le résultat avec `as.data.frame()`
 (5) On affiche le résultat de façon élégante avec `kable()`
 
@@ -1823,14 +1843,15 @@ kable(median_budget_marches) %>%
 ```
 
 ### 32. X% des personnes achetant sur les marchés dépensent entre X et X euros
+
 ### Avec R natif
 
-1. On creer les tranches de budget pour les dépenses avec `quantile()` si l'on veut 5 catégories
-2. On affiche ces catégories pour visualiser les 5 catégories obtenues
-3. On creer une nouvelle variable catégorielle qui est égal à la tranche si le budget appartient à cette catégorie avec `cut()`
-4. On realise le tableau de répartition de cette nouvelle variable avec `table()`
-5. On calcul le pourcentage en divisant la valeur de chaque catégorie avec la somme des valeurs de toutes les catégories, utiliser `sum()` pour le calcul du total
-6. On peut limité à deux chiffres après la virgule le résultat de la division avec `round()`
+1.  On creer les tranches de budget pour les dépenses avec `quantile()` si l'on veut 5 catégories
+2.  On affiche ces catégories pour visualiser les 5 catégories obtenues
+3.  On creer une nouvelle variable catégorielle qui est égal à la tranche si le budget appartient à cette catégorie avec `cut()`
+4.  On realise le tableau de répartition de cette nouvelle variable avec `table()`
+5.  On calcul le pourcentage en divisant la valeur de chaque catégorie avec la somme des valeurs de toutes les catégories, utiliser `sum()` pour le calcul du total
+6.  On peut limité à deux chiffres après la virgule le résultat de la division avec `round()`
 
 ```{r}
 breaks <- quantile(data$Q29, probs = seq(0, 1, 0.2), na.rm = TRUE)
@@ -1840,13 +1861,14 @@ tableau <- table(data$decouper_budget1)
 round(tableau/sum(tableau)*100,2)
 
 ```
+
 ### Avec library
 
-1. On creer les tranches de budget pour les dépenses avec `quantile()` si l'on veut 5 catégories
-2. On utilise `mutate()` pour creer une nouvelle variable avec les différents catégories
-3. on sélectionne la nouvelle variable cree avec `mutate()`
-4. On applique la fonction `freq()` pour afficher les pourcentages
-5. On utilise `kable()` pour embellir le tableau des pourcentages
+1.  On creer les tranches de budget pour les dépenses avec `quantile()` si l'on veut 5 catégories
+2.  On utilise `mutate()` pour creer une nouvelle variable avec les différents catégories
+3.  on sélectionne la nouvelle variable cree avec `mutate()`
+4.  On applique la fonction `freq()` pour afficher les pourcentages
+5.  On utilise `kable()` pour embellir le tableau des pourcentages
 
 ```{r}
 breaks <- quantile(data$Q29, probs = seq(0, 1, 0.2), na.rm = TRUE)
@@ -1859,12 +1881,14 @@ kable(pourcentage) %>%
   kable_styling(latex_options = "striped")
 ```
 
-### 33. Pour les suivants il y a une question en plus: ces magasins proposent ils des produits locaux et/ou en circuits courts 
+### 33. Pour les suivants il y a une question en plus: ces magasins proposent ils des produits locaux et/ou en circuits courts
+
 #### Avec R natif
-1. On sélectionne les colonnes qui nous intéressent à l'aide de `paste()` pour avoir le vecteur de toutes les colonnes.
-2. On fait une mise au format long de notre dataframe avec la fonction `stack()` qui empile nos colonnes.
-3. On fait la table des fréquences croisées entre les questions et les réponses avec `table()`, puis on calcule les proportions de par réponse en fonction du lieu avec `prop.table()` et l'argument `margin = 1` pour faire la proportion par ligne. On multiplie par 100 et on arrondi avec `round`.
-4. On change les noms des dimensions avec la fonction `dimnames()`.
+
+1.  On sélectionne les colonnes qui nous intéressent à l'aide de `paste()` pour avoir le vecteur de toutes les colonnes.
+2.  On fait une mise au format long de notre dataframe avec la fonction `stack()` qui empile nos colonnes.
+3.  On fait la table des fréquences croisées entre les questions et les réponses avec `table()`, puis on calcule les proportions de par réponse en fonction du lieu avec `prop.table()` et l'argument `margin = 1` pour faire la proportion par ligne. On multiplie par 100 et on arrondi avec `round`.
+4.  On change les noms des dimensions avec la fonction `dimnames()`.
 
 ```{r}
 #1
@@ -1887,14 +1911,18 @@ dimnames(tb_l_cc)[[1]] <- c("Artisans et revendeurs sur les marchés", "Paniers 
 tb_l_cc
 
 ```
+
 #### Avec usage de library
+
 -   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
-1. On sélectionne les colonnes qui nous intéressent avec `select()`.
-2. On fait une mise au format long avec `pivot_longer()`.
-3. On transforme les question en facteur pour qu'elles gardent le même ordre avec `factor()`.
-4. On fait la table des fréquences croisées entre les questions et les réponses avec `table()`, puis on calcule les proportions de par réponse en fonction du lieu avec `prop.table()` et l'argument `margin = 1` pour faire la proportion par ligne. On multiplie par 100 pour avoir un pourcentage.
-5. On change les noms des dimensions avec la fonction `dimnames()`.
-6. On met en forme le tableau avec des valeurs arrondies avec `kable()` et `round`.
+
+1.  On sélectionne les colonnes qui nous intéressent avec `select()`.
+2.  On fait une mise au format long avec `pivot_longer()`.
+3.  On transforme les question en facteur pour qu'elles gardent le même ordre avec `factor()`.
+4.  On fait la table des fréquences croisées entre les questions et les réponses avec `table()`, puis on calcule les proportions de par réponse en fonction du lieu avec `prop.table()` et l'argument `margin = 1` pour faire la proportion par ligne. On multiplie par 100 pour avoir un pourcentage.
+5.  On change les noms des dimensions avec la fonction `dimnames()`.
+6.  On met en forme le tableau avec des valeurs arrondies avec `kable()` et `round`.
+
 ```{r}
 #1
 
@@ -1939,7 +1967,6 @@ kable(round(tb_l_cc,2), caption = "Ces magasins proposent ils des produits locau
 (8) On transforme au format dataframe pour un meilleur affichage avec `as.data.frame()`
 (9) On affiche le tableau de résultat `print()`
 
-
 ```{r}
 # (1) 
 vars <- c("Q227", "recode_age", "Q1", "recode_csp", "Q8", "Q240", "Q5_taille", "Q236", "Q235")
@@ -1983,7 +2010,6 @@ resultat <- as.data.frame(resultat)
 print(resultat)
 
 ```
-
 
 #### Avec usage de library
 
@@ -2054,14 +2080,14 @@ kable(resultat) %>%
 
 ```
 
-
 ### 35. X% des enquêtés se voient donner/vendre des produits par leurs proches
+
 #### Avec R natif
 
-1. On labélise les modalités de la variable avec `factor()`
-2. On réalise le tableau de répartition de la variable avec `table()`
-3. On calcul le pourcentage en divisant la valeur de chaque catégorie avec la somme des valeurs de toutes les catégories, utiliser `sum()` pour le calcul du total
-4. On peut limité à deux chiffres après la virgule le résultat de la division avec `round()`
+1.  On labélise les modalités de la variable avec `factor()`
+2.  On réalise le tableau de répartition de la variable avec `table()`
+3.  On calcul le pourcentage en divisant la valeur de chaque catégorie avec la somme des valeurs de toutes les catégories, utiliser `sum()` pour le calcul du total
+4.  On peut limité à deux chiffres après la virgule le résultat de la division avec `round()`
 
 ```{r}
 data$Q228 <- factor(data$Q228, levels = 1:3, labels = c("Non", "Oui, souvent", "Oui, de temps en temps"))
@@ -2072,8 +2098,8 @@ round(pourcentage,2)
 
 #### Avec usage de library
 
-1. On réalise le tableau de fréquence de la directement avec `freq()`
-2. On utilise `kable()` pour embéllir le tableau obtenue 
+1.  On réalise le tableau de fréquence de la directement avec `freq()`
+2.  On utilise `kable()` pour embéllir le tableau obtenue
 
 ```{r}
 tableau_freq <- questionr::freq(data$Q228)
@@ -2082,10 +2108,13 @@ kable(tableau_freq) %>%
 ```
 
 ### 36.Chasse, pêche cueillette
+
 #### Avec R natif
-1. On sélectionne la colonne qui nous intéresse.
-2. On fait une table des fréquences avec `table()` puis on calcule la proportion que l'on multiplie par 100 avec `prop.table()`.
-3. On arrondi avec `round()`.
+
+1.  On sélectionne la colonne qui nous intéresse.
+2.  On fait une table des fréquences avec `table()` puis on calcule la proportion que l'on multiplie par 100 avec `prop.table()`.
+3.  On arrondi avec `round()`.
+
 ```{r}
 dt_Q229 <- data$Q229
 tb_Q229 <- prop.table(table(dt_Q229))*100
@@ -2093,11 +2122,15 @@ names(tb_Q229) <- c("Oui", "Non")
 print("Consommez-vous des produits que vous-même ou un proche chassez, pêchez ou cueillez ?")
 round(tb_Q229,2)
 ```
+
 #### Avec usage de library
+
 -   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
-1. On sélectionne la colonne que nous intéresse avec `select()`.
-2. On fait une table des fréquences avec `table()` puis on calcule la proportion que l'on multiplie par 100 avec `prop.table()`. Et on change le nom des modalités de réponse avec `names()`.
-3. On fait la mise en forme du tableau arrondi avec `kable` et `round()`.
+
+1.  On sélectionne la colonne que nous intéresse avec `select()`.
+2.  On fait une table des fréquences avec `table()` puis on calcule la proportion que l'on multiplie par 100 avec `prop.table()`. Et on change le nom des modalités de réponse avec `names()`.
+3.  On fait la mise en forme du tableau arrondi avec `kable` et `round()`.
+
 ```{r}
 dt_Q229 <- data %>% 
   select(Q229) %>% 
@@ -2115,13 +2148,13 @@ kable(round(dt_Q229,2), caption = "Consommez-vous des produits que vous-même ou
 
 #### Avec R natif
 
-1. On sélectionne la colonne qui nous intéresse pour répondre à la question.
-2. On a un format qui n'est pas exploitable. On split chaque chaine de caractère pour avoir une liste des nombres à l'aide de la fonction `strsplit()` dans `lapply()`.
-3. Le format n'est toujours pas exploitable, car on a des vecteurs dans des éléments de notre liste. Avec `unlist()`, on peut créer une seule liste. 
-4. On supprime les éléments qui n'ont pas de valeur en cherchant leurs indices avec `which()`.
-5. On transforme en facteur avec des niveaux allant de 1 à 19 avec `factor()` puis on les renomme.
-6. On fait la table des fréquences des niveaux avec `table()` que l'on divise par le nombre de personnes qui achètent en comptant le nombre de valeur qui n'est pas NA avec `is.na()` et `sum()`. On multiplie par 100 et on arrondi avec `round()`.
-7. On transforme en dataframe avec `as.data.frame()` et on renomme les colonnes avec `names()`.
+1.  On sélectionne la colonne qui nous intéresse pour répondre à la question.
+2.  On a un format qui n'est pas exploitable. On split chaque chaine de caractère pour avoir une liste des nombres à l'aide de la fonction `strsplit()` dans `lapply()`.
+3.  Le format n'est toujours pas exploitable, car on a des vecteurs dans des éléments de notre liste. Avec `unlist()`, on peut créer une seule liste.
+4.  On supprime les éléments qui n'ont pas de valeur en cherchant leurs indices avec `which()`.
+5.  On transforme en facteur avec des niveaux allant de 1 à 19 avec `factor()` puis on les renomme.
+6.  On fait la table des fréquences des niveaux avec `table()` que l'on divise par le nombre de personnes qui achètent en comptant le nombre de valeur qui n'est pas NA avec `is.na()` et `sum()`. On multiplie par 100 et on arrondi avec `round()`.
+7.  On transforme en dataframe avec `as.data.frame()` et on renomme les colonnes avec `names()`.
 
 ```{r}
 #1
@@ -2170,26 +2203,35 @@ names(tb_freq) <- c("Modalités de vente","Lieux délaissés (%)")
 tb_freq
 ```
 
-
 #### Avec usage de library
 
 -   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
-1. On sélectionne la bonne colonne avec `select()`.
-2. On transforme les valeurs en valeurs utilisables avec `strsplit()`, `apply()` (on a encore un dataframe)  et `unlist()`.
-3. On enlève les éléments `""` qui ne sont pas des valeurs.
-4. On transforme en facteur avec des niveaux allant de 1 à 19 avec les labels associé à chaque niveau avec `factor()`.
-5. On fait la table des fréquences avec `table()` que l'on divise par le nombre de personnes qui ont acheté des produits en comptant le nombre de valeurs non manquante avec `is.na()` et `sum` et on multiplie par 100.
-6. On fait la mise en forme du tableau arrondi avec `round()` et `kable()`.
 
-1. On sélectionne la colonne qui nous intéresse pour répondre à la question.
-2. On a un format qui n'est pas exploitable. On split chaque chaine de caractère pour avoir une liste des nombres à l'aide de la fonction `strsplit()` dans `lapply()`.
-3. Le format n'est toujours pas exploitable, car on a des vecteurs dans des éléments de notre liste. Avec `unlist()`, on peut créer une seule liste. 
-4. On supprime les éléments qui n'ont pas de valeur en cherchant leurs indices avec `which()`.
-5. On transforme en facteur avec des niveaux allant de 1 à 19 avec `factor()` puis on les renomme.
-6. On fait la table des fréquences des niveaux avec `table()` que l'on divise par le nombre de personnes qui achètent en comptant le nombre de valeur qui n'est pas NA avec `is.na()` et `sum()`. On multiplie par 100 et on arrondi avec `round()`.
-7. On transforme en dataframe avec `as.data.frame()` et on renomme les colonnes avec `names()`.
+1.  On sélectionne la bonne colonne avec `select()`.
 
+2.  On transforme les valeurs en valeurs utilisables avec `strsplit()`, `apply()` (on a encore un dataframe) et `unlist()`.
 
+3.  On enlève les éléments `""` qui ne sont pas des valeurs.
+
+4.  On transforme en facteur avec des niveaux allant de 1 à 19 avec les labels associé à chaque niveau avec `factor()`.
+
+5.  On fait la table des fréquences avec `table()` que l'on divise par le nombre de personnes qui ont acheté des produits en comptant le nombre de valeurs non manquante avec `is.na()` et `sum` et on multiplie par 100.
+
+6.  On fait la mise en forme du tableau arrondi avec `round()` et `kable()`.
+
+7.  On sélectionne la colonne qui nous intéresse pour répondre à la question.
+
+8.  On a un format qui n'est pas exploitable. On split chaque chaine de caractère pour avoir une liste des nombres à l'aide de la fonction `strsplit()` dans `lapply()`.
+
+9.  Le format n'est toujours pas exploitable, car on a des vecteurs dans des éléments de notre liste. Avec `unlist()`, on peut créer une seule liste.
+
+10. On supprime les éléments qui n'ont pas de valeur en cherchant leurs indices avec `which()`.
+
+11. On transforme en facteur avec des niveaux allant de 1 à 19 avec `factor()` puis on les renomme.
+
+12. On fait la table des fréquences des niveaux avec `table()` que l'on divise par le nombre de personnes qui achètent en comptant le nombre de valeur qui n'est pas NA avec `is.na()` et `sum()`. On multiplie par 100 et on arrondi avec `round()`.
+
+13. On transforme en dataframe avec `as.data.frame()` et on renomme les colonnes avec `names()`.
 
 ```{r}
 #1
@@ -2233,14 +2275,18 @@ kable(round(tb_freq,2), caption = "Fréquences des lieux délaissés par les con
   kable_styling(latex_options = "striped")
 
 ```
+
 ### 39.modalités de vente que vous avez commencer à fréquenter
+
 #### Avec R natif
-1. On sélectionne la bonne colonne avec `select()`.
-2. On transforme les valeurs en valeurs utilisables avec `strsplit()`, `apply()` (on a encore un dataframe)  et `unlist()`.
-3. On enlève les éléments `""` qui ne sont pas des valeurs.
-4. On transforme en facteur avec des niveaux allant de 1 à 14 avec les labels associé à chaque niveau avec `factor()`.
-5. On fait la table des fréquences des niveaux avec `table()` que l'on divise par le nombre de personnes. On multiplie par 100 et on arrondi avec `round()`.
-6. On affiche sous la forme d'un dataframe.
+
+1.  On sélectionne la bonne colonne avec `select()`.
+2.  On transforme les valeurs en valeurs utilisables avec `strsplit()`, `apply()` (on a encore un dataframe) et `unlist()`.
+3.  On enlève les éléments `""` qui ne sont pas des valeurs.
+4.  On transforme en facteur avec des niveaux allant de 1 à 14 avec les labels associé à chaque niveau avec `factor()`.
+5.  On fait la table des fréquences des niveaux avec `table()` que l'on divise par le nombre de personnes. On multiplie par 100 et on arrondi avec `round()`.
+6.  On affiche sous la forme d'un dataframe.
+
 ```{r}
 #1
 
@@ -2269,14 +2315,18 @@ tb_Q233 <- round(table(dt_Q233)/length(dt_Q233)*100)
 as.data.frame(tb_Q233)
 
 ```
+
 #### Avec usage de library
+
 -   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
-1. On sélectionne la bonne colonne avec `select()`.
-2. On transforme les valeurs en valeurs utilisables avec `strsplit()`, `apply()` (on a encore un dataframe)  et `unlist()`.
-3. On enlève les éléments `""` qui ne sont pas des valeurs.
-4. On transforme en facteur avec des niveaux allant de 1 à 14 avec les labels associé à chaque niveau avec `factor()`.
-5. On fait la table des fréquences des niveaux avec `table()` que l'on divise par le nombre de personnes. On multiplie par 100 et on arrondi avec `round()`.
-6. On affiche avec `kable()`.
+
+1.  On sélectionne la bonne colonne avec `select()`.
+2.  On transforme les valeurs en valeurs utilisables avec `strsplit()`, `apply()` (on a encore un dataframe) et `unlist()`.
+3.  On enlève les éléments `""` qui ne sont pas des valeurs.
+4.  On transforme en facteur avec des niveaux allant de 1 à 14 avec les labels associé à chaque niveau avec `factor()`.
+5.  On fait la table des fréquences des niveaux avec `table()` que l'on divise par le nombre de personnes. On multiplie par 100 et on arrondi avec `round()`.
+6.  On affiche avec `kable()`.
+
 ```{r}
 #1
 
@@ -2307,5 +2357,3 @@ tb_Q233 <- dt_Q233 %>%
 kable(round(tb_Q233,2), caption = "Modalités de vente que vous avez commencer à fréquenter", col.names = c("Lieux", "Fréquences (%)")) %>%
   kable_styling(latex_options = "striped")
 ```
-
-
