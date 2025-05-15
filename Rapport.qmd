@@ -151,11 +151,11 @@ table_propr_courses_option_1
 
 3. On passe toute les données en type facteur à l'aide de la fonction `factor()` où l'on définit les levels et les labels associés.
 
-4.  A l’aide de la fonction `table()` on fait un tableau de fréquence en fonction des catégories croisés (le lieux d’achat croisé avec sa régularité de fréquentation).
+4.  A l’aide de la fonction `table()` on fait un tableau de fréquence en fonction des catégories croisées (le lieu d’achat croisé avec sa régularité de fréquentation).
 
-5. A partir de ce tableau on calcul les proportion d'individu en fonction des catégories croisés que l'on multipli par 100 pour avoir des pourcentages à l'aide de la fonction `prop.table()`, l'argu. On arrondi à deux chiffres après la virgule avec la fonction `round()`.
+5. A partir de ce tableau, on calcule les proportions d'individu en fonction des catégories croisées que l'on multiplie par 100 pour avoir des pourcentages à l'aide de la fonction `prop.table()`. On arrondi à deux chiffres après la virgule avec la fonction `round()`.
 
-6. Avec la fonction `kable()` du package KableExtra on met en forme ce tableau. On lui ajoute un style avec la fonction `kable_styling()` et on ajoute une note de fin de page avec la fonction `footnote()` qu l'on applique à kable à l'aide la `%>%`.
+6. Avec la fonction `kable()` du package KableExtra, on met en forme ce tableau. On lui ajoute un style avec la fonction `kable_styling()` et on ajoute une note de fin de page avec la fonction `footnote()` qu l'on applique à kable à l'aide la `%>%`.
 
 ```{r}
 #1
