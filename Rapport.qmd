@@ -267,9 +267,10 @@ text(x = max_id, y = max_val, labels = max_val, pos = 3, cex = 1.3)
   
 ```
 
+
 #### Avec usage de library
 
-Voici la version avec usage de librairies R. Pour ce faire, nous utilsierons la librairie dplyr() (déjà vue et présentée lors de la question 1) pour générer les tableaux de contingences et de pourcentages des lieux fréquentés régulièrement par les consommateurs. Puis, nous nous appuyerons sur la fonction kable() de la librairie kableExtra() déjà rencontrée plus haut dans le rapport. Enfin, nous terminerons par une représentation graphique des lieux fréquentés régulièrement par les clients.
+Voici la version avec usage de librairies R. Pour ce faire, nous utiliserons la librairie dplyr() (déjà vue et présentée lors de la question 1) pour générer les tableaux de contingences et de pourcentages des lieux fréquentés régulièrement par les consommateurs. Puis, nous nous appuierons sur la fonction kable() de la librairie kableExtra() déjà rencontrée plus haut dans le rapport. Enfin, nous terminerons par une représentation graphique des lieux fréquentés régulièrement par les clients.
 
 ```{r}
 # Tableau de contingence
@@ -290,7 +291,7 @@ Voici, les différentes étapes à suivre pour construire un diagramme en barres
 
 **Etape 1 : Renseigner le jeu de données**
 
-La première des choses à faire est de rensigner sur quel jeu de données on travaille et le remplir dans l'argument ggplot(). Pour le moment, rien ne s'affiche et cela est tout à fait normal puisque nous n'avons pas encore précisé les variables pour construire le graphique et ni le type de graphique souhaité.
+La première des choses à faire est de renseigner sur quel jeu de données on travaille et le remplir dans l'argument ggplot(). Pour le moment, rien ne s'affiche et cela est tout à fait normal puisque nous n'avons pas encore précisé les variables pour construire le graphique et ni le type de graphique souhaité.
 
 ```{r}
 ggplot(df_nb_tres_freq) #rien
@@ -298,7 +299,7 @@ ggplot(df_nb_tres_freq) #rien
 
 **Etape 2 : Indiquer les variables retenues pour les axes des abscisses et des ordonnées**
 
-Maintenant, il faut indiquer les variables retenues pour les axes des abscisses et de ordonnées dans l'argument aes(). Ici, il faut remplir *nb_tres_freq* pour x et *Effectif* pour y. Pour le moment, toujours rien ne s'affiche puisqu'il manque d'informer le type de graphique à dessiner.
+Maintenant, il faut indiquer les variables retenues pour les axes des abscisses et des ordonnées dans l'argument aes(). Ici, il faut remplir *nb_tres_freq* pour x et *Effectif* pour y. Pour le moment, toujours rien ne s'affiche puisqu'il manque d'informer le type de graphique à dessiner.
 
 ```{r}
 ggplot(df_nb_tres_freq)+aes(x=nb_tres_freq,y=Effectif) #rien
@@ -306,7 +307,7 @@ ggplot(df_nb_tres_freq)+aes(x=nb_tres_freq,y=Effectif) #rien
 
 **Etape 3 : Indiquer les variables retenues pour les axes des abscisses et des ordonnées**
 
-A l'aide de l'argument geom_bar() nous traçons le diagramme en barres. Par défaut, dans geom_bar(stat = "bin"), cela signifie que pour chaque valeur de x, les barres seront toutes dessinées à la même hauteur. De plus, le "bins" est incompatible avec des valeurs présentes sur l'axe des y, ce qui est notre cas ici. Il faut donc remplacer "bins" par le bon argument adéquate à savoir "identity". En effet, cela répond à notre besoin de représenter les hauteurs des barres qui prennent en compte les valeurs de y. Ainis, nous obtenons le premier diagramme en barres qui s'affiche à l'écran.
+A l'aide de l'argument geom_bar() nous traçons le diagramme en barres. Par défaut, dans geom_bar(stat = "bin"), cela signifie que pour chaque valeur de x, les barres seront toutes dessinées à la même hauteur. De plus, le "bins" est incompatible avec des valeurs présentes sur l'axe des y, ce qui est notre cas ici. Il faut donc remplacer "bins" par le bon argument adéquate à savoir "identity". En effet, cela répond à notre besoin de représenter les hauteurs des barres qui prennent en compte les valeurs de y. Ainsi, nous obtenons le premier diagramme en barres qui s'affiche à l'écran.
 
 ```{r}
 ggplot(df_nb_tres_freq)+aes(x=nb_tres_freq,y=Effectif)+geom_bar(stat = "identity") # Bon
