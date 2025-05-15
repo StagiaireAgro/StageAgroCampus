@@ -2181,45 +2181,76 @@ kable(median_budget_marches) %>%
   kable_styling(latex_options = "striped")
 ```
 
-### 32. X% des personnes achetant sur les marchés dépensent entre X et X euros
+### 31. Le budget médian dépensé sur les marchés
 
-### Avec R natif
+#### Avec R natif
 
-1. On crée les tranches de budget pour les dépenses avec quantile() si l’on veut 5 catégories.
-2. On affiche ces catégories pour visualiser les 5 tranches obtenues.
-3. On crée une nouvelle variable catégorielle qui prend la valeur de la tranche correspondant au budget, avec cut().
-4. On réalise le tableau de répartition de cette nouvelle variable avec table().
-5. On calcule le pourcentage de chaque catégorie en divisant la valeur de chaque catégorie par la somme des valeurs de toutes les catégories, en utilisant sum() pour calculer le total.
-6. On peut limiter le résultat à deux chiffres après la virgule avec round().
-
+(1) On sélectionne les colonnes pour notre critère de sélection à laide de `subset()` et de l'agument `select()`
+(2) On remplace les valeurs manquantes par des 0 grâce à `replace()` et l'utilisation de `is.na()` pour les détecter
+(3) On calcule la médiane avec la fonction `median()`
+(4) On transforme au format dataframe pour stocker le résultat avec `as.data.frame()`
+(5) On renomme les colonnes avec `names()` pour obtenir leur nom 
+(6) On affiche le résultat avec `print()`
 
 ```{r}
-breaks <- quantile(data$Q29, probs = seq(0, 1, 0.2), na.rm = TRUE)
-print(breaks)
-data$decouper_budget1 <- cut(data$Q29, breaks = breaks, include.lowest = TRUE, labels = c("[4 - 20[", "[20 - 30[", "[30 - 40[", "[40 - 50[", "[50 - 500["))
-tableau <- table(data$decouper_budget1)
-round(tableau/sum(tableau)*100,2)
 
+# (1) 
+
+data_question_29 <- subset(data, select = 70)
+
+# (2) 
+
+data_question_29 <- replace(data_question_29, is.na(data_question_29), 0)
+
+# (3) 
+
+median_budget_marches <- median(data_question_29$Q29)
+
+# (4) 
+median_budget_marches <- as.data.frame(median_budget_marches)
+
+# (5) 
+
+names(median_budget_marches) <- c("Montant médian dépensé pour des achats à des agriculteurs sur les marchés")
+
+# (6) 
+print(median_budget_marches)
 ```
 
-### Avec library
+#### Avec usage de library
 
-1.  On creer les tranches de budget pour les dépenses avec `quantile()` si l'on veut 5 catégories
-2.  On utilise `mutate()` pour creer une nouvelle variable avec les différents catégories
-3.  on sélectionne la nouvelle variable cree avec `mutate()`
-4.  On applique la fonction `freq()` pour afficher les pourcentages
-5.  On utilise `kable()` pour embellir le tableau des pourcentages
+(1) On sélectionne les colonnes pour notre critère de sélection à l’aide de `select()` du package `dplyr`
+(2) On remplace les valeurs manquantes par des 0 grâce à `mutate()` et `replace_na()` de `tidyr`
+(3) On calcule la médiane avec la fonction `median()`. On intègre cette fonction dans la fonction `summarise()`. Cette dernière permet de créer un nouveau tableau contenant des résumés (moyenne, médiane, total, minimum, etc.) à partir d’un data frame ou d’un tibble. Enfin, on utilise la fonction `pull()` de `dplyr` qui permet d’extraire une colonne d’un data frame ou d’un tibble sous forme de vecteur
+(4) On transforme au format dataframe pour stocker le résultat avec `as.data.frame()`
+(5) On renomme les colonnes avec `names()` pour obtenir leur nom 
+(6) On affiche le résultat de façon élégante avec `kable()`
 
 ```{r}
-breaks <- quantile(data$Q29, probs = seq(0, 1, 0.2), na.rm = TRUE)
-pourcentage <- data %>%
-  mutate(decouper_budget1 = cut(Q29, breaks = breaks, include.lowest = TRUE, labels = c("[4 - 20[", "[20 - 30[", "[30 - 40[", "[40 - 50[", "[50 - 500["))) %>%
-  select(decouper_budget1) %>%
-  questionr::freq()
+# (1) 
+data_question_29 <- data %>%
+  select(Q29)
 
-kable(pourcentage) %>% 
+# (2) 
+data_question_29 <- data_question_29 %>%
+  mutate(Q29 = replace_na(Q29, 0))
+
+# (3)
+median_budget_marches <- data_question_29 %>%
+  summarise(mediane = median(Q29)) %>%
+  pull(mediane)
+
+# (4) 
+median_budget_marches <- as.data.frame(median_budget_marches)
+
+# (5)
+names(median_budget_marches) <- c("Montant médian dépensé pour des achats à des agriculteurs sur les marchés")
+
+# (6) 
+kable(median_budget_marches) %>% 
   kable_styling(latex_options = "striped")
 ```
+
 
 ### 33. Pour les suivants il y a une question en plus: ces magasins proposent ils des produits locaux et/ou en circuits courts
 
