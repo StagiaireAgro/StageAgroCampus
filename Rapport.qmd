@@ -145,52 +145,53 @@ table_propr_courses_option_1
 
 #### Avec usage de library
 
--   (1) On sélectionne les données qui nous intéressent avec la fonction `select()` dans le dataframe de base (On sélectionne les données de la colonne Q6_1 à Q6_12). Pour travailler faire une action sur notre dataframe on l'outil `%>%` de la library dplyr
+1. On sélectionne les données qui nous intéressent avec la fonction `select()` dans le dataframe de base (On sélectionne les données de la colonne Q6_1 à Q6_12). Pour travailler faire une action sur notre dataframe on l'outil `%>%` de la library dplyr
 
--   (2) On fait une mise au format long de notre nouveau dataframe à l’aide de la fonction `pivot_longer()` de la library tidyverse.
+2. On fait une mise au format long de notre nouveau dataframe à l’aide de la fonction `pivot_longer()` de la library tidyverse.
 
--   (3) On passe toute les données en type facteur à l'aide de la fonction `factor()` où l'on définit les levels et les labels associés.
+3. On passe toute les données en type facteur à l'aide de la fonction `factor()` où l'on définit les levels et les labels associés.
 
--   (4) A l’aide de la fonction `table()` on fait un tableau de fréquence en fonction des catégories croisés (le lieux d’achat croisé avec sa régularité de fréquentation).
+4.  A l’aide de la fonction `table()` on fait un tableau de fréquence en fonction des catégories croisés (le lieux d’achat croisé avec sa régularité de fréquentation).
 
--   (5) A partir de ce tableau on calcul les proportion d'individu en fonction des catégories croisés que l'on multipli par 100 pour avoir des pourcentages à l'aide de la fonction `prop.table()`. On arrondi à deux chiffres après la virgule avec la fonction `round()`.
+5. A partir de ce tableau on calcul les proportion d'individu en fonction des catégories croisés que l'on multipli par 100 pour avoir des pourcentages à l'aide de la fonction `prop.table()`, l'argu. On arrondi à deux chiffres après la virgule avec la fonction `round()`.
 
--   (6) Avec la fonction `kable()` du package KableExtra on met en forme ce tableau. On lui ajoute un style avec la fonction `kable_styling()` et on ajoute une note de fin de page avec la fonction `footnote()` qu l'on applique à kable à l'aide la `%>%`.
+-   
+
+    (6) Avec la fonction `kable()` du package KableExtra on met en forme ce tableau. On lui ajoute un style avec la fonction `kable_styling()` et on ajoute une note de fin de page avec la fonction `footnote()` qu l'on applique à kable à l'aide la `%>%`.
 
 ```{r}
-#(1)
+#1
   
 df_Q6 <- data %>%      
   select(Q6_1:Q6_12) 
 
-#(2)
+#2
 
 df_Q6_L <- df_Q6 %>%  pivot_longer(cols = Q6_1:Q6_12,
                           names_to = "Q6",
                           values_to = "value")
 
-#(3)
+#3
 
 df_Q6_L$Q6 <- factor(df_Q6_L$Q6, levels = paste("Q6_", seq(1:12), sep = ""), labels = c("Hypermarché, Supermarché","Hard discount","Epiceries indépendantes, de quartier, épiceries fines","Magasins de surgelés","Magasins spécialisés Bio","Marché","Directement aux agriculteurs","Paniers en ligne réalisés par un intermédiaire","Artisans et commerçants spécialisés","Epicerie participative, associative, supermarché coopératif","Magasin alimentaire spécialisé dans le vrac ou les produits locaux","Magasin d’aide alimentaire"))
 
 df_Q6_L$value <- factor(df_Q6_L$value, levels = 1:7, labels = c("Plusieurs fois par semaine","1 fois par semaine","2 à 3 fois par mois","1 fois par mois","Moins d’une fois par mois","Seulement pour des événements particuliers","Jamais"))
 
-#(4)
+#4
 
 df_Q6_freq <- table(df_Q6_L$Q6, df_Q6_L$value)
 
-#(5)
+#5
 
-df_Q6_prop <- round(prop.table(df_Q6_freq,1)*100, 2)
+df_Q6_prop <- round(prop.table(df_Q6_freq, margin = 1)*100, 2)
 
-#(6)
+#6
 
 kable(df_Q6_prop, captation = "Taux de réquentation en fonction des lieux d'achat" ) %>% # mise en forme du tableau
   kable_styling(latex_options = "striped") %>%
   footnote(general = "Format des données en pourcentage",
            general_title = "Note: ",)
 ```
-
 ### 2.Nombre de lieux fréquentés très régulièrement (réponses 1/2) en moyenne
 
 #### Usage de R natif
