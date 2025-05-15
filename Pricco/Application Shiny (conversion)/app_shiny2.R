@@ -170,37 +170,37 @@ server <- function(input, output, session) {
     
     # Ajout colonne Proidskg si variable quantité sélectionnée
     if (!is.null(input$quant_var) && input$quant_var %in% names(df)) {
-      df$Proids_en_kg <- df$Taux_conversion * df[[input$quant_var]]
+      df$Poids_en_kg <- df$Taux_conversion * df[[input$quant_var]]
     } else {
-      df$Proids_en_kg <- NA
+      df$Poids_en_kg <- NA
     }
     
     df$modalite <- NULL
     
     # Ajout colonne poids en kg si variable quantité sélectionnée
     if (!is.null(input$quant_var) && input$quant_var %in% names(df)) {
-      df$Proids_en_kg <- df$Taux_conversion * df[[input$quant_var]]
+      df$Poids_en_kg <- df$Taux_conversion * df[[input$quant_var]]
     } else {
-      df$Proids_en_kg <- NA
+      df$Poids_en_kg <- NA
     }
     
     # Ajout colonne prixKilo si variable prix sélectionnée
     if (!is.null(input$price_var) && input$price_var %in% names(df)) {
-      df$prixKilo <- ifelse(!is.na(df$Proids_en_kg) & df$Proids_en_kg != 0,
-                            df[[input$price_var]] / df$Proids_en_kg,
+      df$prixKilo <- ifelse(!is.na(df$Poids_en_kg) & df$Poids_en_kg != 0,
+                            df[[input$price_var]] / df$Poids_en_kg,
                             NA)
     } else {
       df$prixKilo <- NA
     }
     
-    data_c_direct(df[!is.na(df$Proids_en_kg), c(var, "valeur_associee", "Taux_conversion", "Proids_en_kg", "prixKilo",
-                                                setdiff(colnames(df), c(var, "valeur_associee", "Taux_conversion", "Proids_en_kg", "prixKilo")))])
+    data_c_direct(df[!is.na(df$Poids_en_kg), c(var, "valeur_associee", "Taux_conversion", "Poids_en_kg", "prixKilo",
+                                                setdiff(colnames(df), c(var, "valeur_associee", "Taux_conversion", "Poids_en_kg", "prixKilo")))])
     
-    data_nc_direct(df[is.na(df$Proids_en_kg),])
+    data_nc_direct(df[is.na(df$Poids_en_kg),])
     
-    return(df[!is.na(df$Proids_en_kg), c(var, "valeur_associee", "Taux_conversion", "Proids_en_kg", "prixKilo",
-           setdiff(colnames(df), c(var, "valeur_associee", "Taux_conversion", "Proids_en_kg", "prixKilo")))])
-
+    return(df[!is.na(df$Poids_en_kg), c(var, "valeur_associee", "Taux_conversion", "Poids_en_kg", "prixKilo",
+                                         setdiff(colnames(df), c(var, "valeur_associee", "Taux_conversion", "Poids_en_kg", "prixKilo")))])
+    
   }, rownames = TRUE, options = list(scrollX = TRUE))
   
   output$quant_var_selector <- renderUI({
@@ -270,6 +270,64 @@ server <- function(input, output, session) {
     data.frame(Modalité = all_modalities, Valeur = assigned_values)
   })
   
+  # Création du tableau interactif affiché dans l'onglet "Non calculable directement"
+  output$filtered_with_values2 <- renderDT({
+    
+    # Vérifie que la variable catégorielle a bien été sélectionnée (nécessaire pour continuer)
+    req(input$select_var_categ2)
+    
+    # On stocke le nom de la variable catégorielle sélectionnée dans 'var'
+    var <- input$select_var_categ2
+    
+    # On récupère le dataframe des données non calculables directement
+    df <- data_nc_direct()
+    
+    # On crée une nouvelle colonne 'modalite' avec les valeurs de la variable catégorielle sélectionnée
+    df$modalite <- df[[var]]
+    
+    # Pour chaque modalité, on lui associe la valeur enregistrée dans valeurs_facteurs2$data
+    # Si aucune valeur n’est associée, on met NA
+    df$valeur_associee <- sapply(as.character(df$modalite), function(mod) {
+      valeurs_facteurs2$data[[mod]] %||% NA
+    })
+    
+    # Si la valeur associée n’est pas NA et différente de 0, on garde sa valeur
+    # Sinon, on met NA. Cela permet de calculer le taux de conversion
+    df$Taux_conversion <- ifelse(!is.na(df$valeur_associee) & df$valeur_associee != 0,
+                                 df$valeur_associee,
+                                 NA)
+    
+    # Si la variable quantité est bien sélectionnée et existe dans le dataframe...
+    if (!is.null(input$quant_var) && input$quant_var %in% names(df)) {
+      # ...alors on calcule le poids en kg : quantité * taux de conversion
+      df$Proids_en_kg <- df$Taux_conversion * df[[input$quant_var]]
+    } else {
+      # Sinon, on met NA
+      df$Proids_en_kg <- NA
+    }
+    
+    # Si la variable prix est bien sélectionnée et existe dans le dataframe...
+    if (!is.null(input$price_var) && input$price_var %in% names(df)) {
+      # ...alors on calcule le prix au kilo : prix / poids en kg (si non nul)
+      df$prixKilo <- ifelse(!is.na(df$Proids_en_kg) & df$Proids_en_kg != 0,
+                            df[[input$price_var]] / df$Proids_en_kg,
+                            NA)
+    } else {
+      # Sinon, on met NA
+      df$prixKilo <- NA
+    }
+    
+    # On supprime la colonne temporaire 'modalite' (plus nécessaire pour l'affichage final)
+    df$modalite <- NULL
+    
+    # On retourne un dataframe avec :
+    # - les colonnes principales : var, valeur associée, taux, poids kg, prix/kg
+    # - suivies de toutes les autres colonnes du dataframe (en conservant leur ordre d’origine)
+    return(df[, c(var, "valeur_associee", "Taux_conversion", "Proids_en_kg", "prixKilo",
+                  setdiff(colnames(df), c(var, "valeur_associee", "Taux_conversion", "Proids_en_kg", "prixKilo")))])
+    
+    # Options du datatable : affiche les noms de ligne, et permet le scroll horizontal si nécessaire
+  }, rownames = TRUE, options = list(scrollX = TRUE))
   
   
   
