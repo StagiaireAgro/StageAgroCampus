@@ -2120,7 +2120,7 @@ paste("Le budget alimentaire moyen dépensé sur les marchés  est de", moy_Q29,
 
 ```
 
-### 32. Le budget médian dépensé sur les marchés
+### 31. Le budget moyen dépensé sur les marchés
 
 #### Avec R natif
 
@@ -2128,7 +2128,8 @@ paste("Le budget alimentaire moyen dépensé sur les marchés  est de", moy_Q29,
 (2) On remplace les valeurs manquantes par des 0 grâce à `replace()` et l'utilisation de `is.na()` pour les détecter
 (3) On calcule la médiane avec la fonction `median()`
 (4) On transforme au format dataframe pour stocker le résultat avec `as.data.frame()`
-(5) On affiche le résultat avec `print()`
+(5) On renomme les colonnes avec `names()` pour obtenir leur nom 
+(6) On affiche le résultat avec `print()`
 
 ```{r}
 
@@ -2142,13 +2143,16 @@ data_question_29 <- replace(data_question_29, is.na(data_question_29), 0)
 
 # (3) 
 
-median_budget_marches <- median(data_question_29$Q29)
+moy_budget_marches <- mean(data_question_29$Q29)
 
 # (4) 
-median_budget_marches <- as.data.frame(median_budget_marches)
+moy_budget_marches <- as.data.frame(moy_budget_marches)
 
 # (5) 
-print(median_budget_marches)
+names(moy_budget_marches) <- c("Montant moyen dépensé pour des achats à des agriculteurs sur les marchés")
+
+# (6) 
+print(moy_budget_marches)
 ```
 
 #### Avec usage de library
@@ -2157,7 +2161,8 @@ print(median_budget_marches)
 (2) On remplace les valeurs manquantes par des 0 grâce à `mutate()` et `replace_na()` de `tidyr`
 (3) On calcule la médiane avec la fonction `median()`. On intègre cette fonction dans la fonction `summarise()`. Cette dernière permet de créer un nouveau tableau contenant des résumés (moyenne, médiane, total, minimum, etc.) à partir d’un data frame ou d’un tibble. Enfin, on utilise la fonction `pull()` de `dplyr` qui permet d’extraire une colonne d’un data frame ou d’un tibble sous forme de vecteur
 (4) On transforme au format dataframe pour stocker le résultat avec `as.data.frame()`
-(5) On affiche le résultat de façon élégante avec `kable()`
+(5) On renomme les colonnes avec `names()` pour obtenir leur nom 
+(6) On affiche le résultat de façon élégante avec `kable()`
 
 ```{r}
 # (1) 
@@ -2169,19 +2174,22 @@ data_question_29 <- data_question_29 %>%
   mutate(Q29 = replace_na(Q29, 0))
 
 # (3)
-median_budget_marches <- data_question_29 %>%
-  summarise(mediane = median(Q29)) %>%
-  pull(mediane)
+moy_budget_marches <- data_question_29 %>%
+  summarise(moye = mean(Q29)) %>%
+  pull(moye)
 
 # (4) 
-median_budget_marches <- as.data.frame(median_budget_marches)
+moy_budget_marches <- as.data.frame(moy_budget_marches)
 
 # (5) 
-kable(median_budget_marches) %>% 
+names(moy_budget_marches) <- c("Montant moyen dépensé pour des achats à des agriculteurs sur les marchés")
+
+# (6) 
+kable(moy_budget_marches) %>% 
   kable_styling(latex_options = "striped")
 ```
 
-### 31. Le budget médian dépensé sur les marchés
+### 32. Le budget médian dépensé sur les marchés
 
 #### Avec R natif
 
