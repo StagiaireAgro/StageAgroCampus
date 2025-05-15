@@ -1586,7 +1586,10 @@ kable(round(tb_Q22, 2), col.names = c("Achetez-vous des produits vendus directem
     (6) On effectue un trie décroissant avec `sort()` et l'argument d`ecreasing = TRUE`
     (7) On affiche avec `cat()`, la modalité la plus fréquente avec `which.max()`. La fonction `paste0()` permet de concaténer
     (8) On affecte au bon tableau les opérations précédentes avec `if()` et `<-`
-(4) On affiche le tableau de résultat avec `print()`
+(4) On transforme en dataframe avec `as.data.frame()`
+(5) On renomme les colonnes avec `names()` pour obtenir leur nom 
+(6) On renomme le contenu du tableau en transformant en facteur avec `factor()` et en affectant le bon renommage avec `<-`
+(7) On affiche le tableau de résultat avec `print()`
 
 ```{r,}
 # (1)
@@ -1625,6 +1628,89 @@ for (i in 1:3) {
 }
 
 # (4)
+motivation_1 <- as.data.frame(motivation_1)
+motivation_2 <- as.data.frame(motivation_2)
+motivation_3 <- as.data.frame(motivation_3)
+
+# (5)
+
+names(motivation_1) <- c("Raisons d’achat sur les marchés","Pourcentages")
+names(motivation_2) <- c("Raisons d’achat sur les marchés","Pourcentages")
+names(motivation_3) <- c("Raisons d’achat sur les marchés","Pourcentages")
+
+# (6)
+
+motivation_1$`Raisons d’achat sur les marchés` <- as.factor(motivation_1$`Raisons d’achat sur les marchés`)
+
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 0] <- "Na"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 1] <- "Pour y découvrir des nouveautés"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 2] <- "Pour pouvoir flâner dans les rayons"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 3] <- "Pour y trouver des produits de grandes marques"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 4] <- "Pour y acheter des produits locaux "
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 5] <- "Pour soutenir les agriculteurs et l’économie locale"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 6] <- "Pour rencontrer des gens, discuter, échanger"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 7] <- "Pour la diversité et le large choix de produits alimentaires"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 8] <- "Pour la possibilité de faire toutes mes courses dans le même lieu de vente"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 9] <- "Pour y acheter des produits Bio"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 10] <- "Pour la proximité du lieu d’achat (ou de retrait)"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 11] <- "Pour la praticité d’accès (situé sur un trajet régulier)"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 12] <- "Pour le prix, les promotions"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 13] <- "Pour la qualité nutritionnelle des produits"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 14] <- "Pour le goût des produits"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 15] <- "Pour y acheter des produits en circuit court"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 16] <- "Pour les services associés (carte de fidélité, service après vente, caisses libre service..)"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 17] <- "Pour y acheter des produits que je ne trouve pas ailleurs"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 18] <- "Autre"
+
+
+motivation_2$`Raisons d’achat sur les marchés` <- as.factor(motivation_2$`Raisons d’achat sur les marchés`)
+
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 0] <- "Na"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 1] <- "Pour y découvrir des nouveautés"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 2] <- "Pour pouvoir flâner dans les rayons"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 3] <- "Pour y trouver des produits de grandes marques"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 4] <- "Pour y acheter des produits locaux "
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 5] <- "Pour soutenir les agriculteurs et l’économie locale"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 6] <- "Pour rencontrer des gens, discuter, échanger"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 7] <- "Pour la diversité et le large choix de produits alimentaires"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 8] <- "Pour la possibilité de faire toutes mes courses dans le même lieu de vente"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 9] <- "Pour y acheter des produits Bio"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 10] <- "Pour la proximité du lieu d’achat (ou de retrait)"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 11] <- "Pour la praticité d’accès (situé sur un trajet régulier)"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 12] <- "Pour le prix, les promotions"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 13] <- "Pour la qualité nutritionnelle des produits"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 14] <- "Pour le goût des produits"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 15] <- "Pour y acheter des produits en circuit court"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 16] <- "Pour les services associés (carte de fidélité, service après vente, caisses libre service..)"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 17] <- "Pour y acheter des produits que je ne trouve pas ailleurs"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 18] <- "Autre"
+
+
+motivation_3$`Raisons d’achat sur les marchés` <- as.factor(motivation_3$`Raisons d’achat sur les marchés`)
+
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 0] <- "Na"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 1] <- "Pour y découvrir des nouveautés"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 2] <- "Pour pouvoir flâner dans les rayons"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 3] <- "Pour y trouver des produits de grandes marques"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 4] <- "Pour y acheter des produits locaux "
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 5] <- "Pour soutenir les agriculteurs et l’économie locale"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 6] <- "Pour rencontrer des gens, discuter, échanger"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 7] <- "Pour la diversité et le large choix de produits alimentaires"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 8] <- "Pour la possibilité de faire toutes mes courses dans le même lieu de vente"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 9] <- "Pour y acheter des produits Bio"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 10] <- "Pour la proximité du lieu d’achat (ou de retrait)"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 11] <- "Pour la praticité d’accès (situé sur un trajet régulier)"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 12] <- "Pour le prix, les promotions"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 13] <- "Pour la qualité nutritionnelle des produits"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 14] <- "Pour le goût des produits"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 15] <- "Pour y acheter des produits en circuit court"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 16] <- "Pour les services associés (carte de fidélité, service après vente, caisses libre service..)"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 17] <- "Pour y acheter des produits que je ne trouve pas ailleurs"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 18] <- "Autre"
+
+
+# (7)
+
 print(motivation_1)
 print(motivation_2)
 print(motivation_3)
@@ -1643,7 +1729,10 @@ print(motivation_3)
     (6) On effectue un trie décroissant avec `sort()` et l'argument d`ecreasing = TRUE`
     (7) On affiche avec `cat()`, la modalité la plus fréquente avec `which.max()`. La fonction `paste0()` permet de concaténer
     (8) On affecte au bon tableau les opérations précédentes avec `if()` et `<-`
-(3) On affiche le tableau de résultat avec cat() et de façon élégante avec `kable()`
+(3) On transforme en dataframe avec `as.data.frame()`
+(4) On renomme les colonnes avec `names()` pour obtenir leur nom 
+(5) On renomme le contenu du tableau en transformant en facteur avec `factor()` et en affectant le bon renommage avec `<-`
+(6) On affiche le tableau de résultat avec `cat()`et de façon élégante avec `kable()`
 
 ```{r}
 
@@ -1656,7 +1745,6 @@ motivation_1 <- NULL
 motivation_2 <- NULL
 motivation_3 <- NULL
 
-# (3)
 for (i in 1:3) {
   
   Motivation <- data_question_21[[i]]
@@ -1679,7 +1767,88 @@ for (i in 1:3) {
   if (i == 3) motivation_3 <- pct_sorted
 }
 
+# (3)
+motivation_1 <- as.data.frame(motivation_1)
+motivation_2 <- as.data.frame(motivation_2)
+motivation_3 <- as.data.frame(motivation_3)
+
 # (4)
+
+names(motivation_1) <- c("Raisons d’achat sur les marchés","Pourcentages")
+names(motivation_2) <- c("Raisons d’achat sur les marchés","Pourcentages")
+names(motivation_3) <- c("Raisons d’achat sur les marchés","Pourcentages")
+
+# (5)
+
+motivation_1$`Raisons d’achat sur les marchés` <- as.factor(motivation_1$`Raisons d’achat sur les marchés`)
+
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 0] <- "Na"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 1] <- "Pour y découvrir des nouveautés"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 2] <- "Pour pouvoir flâner dans les rayons"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 3] <- "Pour y trouver des produits de grandes marques"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 4] <- "Pour y acheter des produits locaux "
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 5] <- "Pour soutenir les agriculteurs et l’économie locale"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 6] <- "Pour rencontrer des gens, discuter, échanger"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 7] <- "Pour la diversité et le large choix de produits alimentaires"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 8] <- "Pour la possibilité de faire toutes mes courses dans le même lieu de vente"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 9] <- "Pour y acheter des produits Bio"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 10] <- "Pour la proximité du lieu d’achat (ou de retrait)"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 11] <- "Pour la praticité d’accès (situé sur un trajet régulier)"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 12] <- "Pour le prix, les promotions"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 13] <- "Pour la qualité nutritionnelle des produits"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 14] <- "Pour le goût des produits"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 15] <- "Pour y acheter des produits en circuit court"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 16] <- "Pour les services associés (carte de fidélité, service après vente, caisses libre service..)"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 17] <- "Pour y acheter des produits que je ne trouve pas ailleurs"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 18] <- "Autre"
+
+
+motivation_2$`Raisons d’achat sur les marchés` <- as.factor(motivation_2$`Raisons d’achat sur les marchés`)
+
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 0] <- "Na"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 1] <- "Pour y découvrir des nouveautés"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 2] <- "Pour pouvoir flâner dans les rayons"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 3] <- "Pour y trouver des produits de grandes marques"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 4] <- "Pour y acheter des produits locaux "
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 5] <- "Pour soutenir les agriculteurs et l’économie locale"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 6] <- "Pour rencontrer des gens, discuter, échanger"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 7] <- "Pour la diversité et le large choix de produits alimentaires"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 8] <- "Pour la possibilité de faire toutes mes courses dans le même lieu de vente"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 9] <- "Pour y acheter des produits Bio"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 10] <- "Pour la proximité du lieu d’achat (ou de retrait)"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 11] <- "Pour la praticité d’accès (situé sur un trajet régulier)"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 12] <- "Pour le prix, les promotions"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 13] <- "Pour la qualité nutritionnelle des produits"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 14] <- "Pour le goût des produits"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 15] <- "Pour y acheter des produits en circuit court"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 16] <- "Pour les services associés (carte de fidélité, service après vente, caisses libre service..)"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 17] <- "Pour y acheter des produits que je ne trouve pas ailleurs"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 18] <- "Autre"
+
+
+motivation_3$`Raisons d’achat sur les marchés` <- as.factor(motivation_3$`Raisons d’achat sur les marchés`)
+
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 0] <- "Na"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 1] <- "Pour y découvrir des nouveautés"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 2] <- "Pour pouvoir flâner dans les rayons"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 3] <- "Pour y trouver des produits de grandes marques"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 4] <- "Pour y acheter des produits locaux "
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 5] <- "Pour soutenir les agriculteurs et l’économie locale"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 6] <- "Pour rencontrer des gens, discuter, échanger"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 7] <- "Pour la diversité et le large choix de produits alimentaires"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 8] <- "Pour la possibilité de faire toutes mes courses dans le même lieu de vente"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 9] <- "Pour y acheter des produits Bio"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 10] <- "Pour la proximité du lieu d’achat (ou de retrait)"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 11] <- "Pour la praticité d’accès (situé sur un trajet régulier)"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 12] <- "Pour le prix, les promotions"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 13] <- "Pour la qualité nutritionnelle des produits"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 14] <- "Pour le goût des produits"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 15] <- "Pour y acheter des produits en circuit court"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 16] <- "Pour les services associés (carte de fidélité, service après vente, caisses libre service..)"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 17] <- "Pour y acheter des produits que je ne trouve pas ailleurs"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 18] <- "Autre"
+
+# (6)
 cat("Motivation 1\n")
 
 kable(motivation_1) %>% 
