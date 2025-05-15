@@ -1446,7 +1446,7 @@ print(mediane_question_9)
 
 (3) On sélectionne uniquement les colonnes 6 à 8 car ce sont celles qui nous intéressent dans le cadre de l’analyse de la question 9 du questionnaire, à l’aide de la fonction `select()`
 
-(4) On affiche la table des résultat de façon élégante avec `kable()`
+(4) On affiche la table des résultats de façon élégante avec `kable()`
 
 ```{r}
 
