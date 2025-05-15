@@ -381,9 +381,9 @@ print(paste("Les répondants fréquentent en moyenne ",round(mean(nb_rgl_freq),1
 
 ### 5. Répartition des répondants selon le nombre de lieux fréquentés régulièrement
 1. On compte le nombre d'occurence par nb de lieux régulièrement fréquenté avec `table()`. Et on calcul la proportion avec `prop.table()`.
-2. On change le nom avec `names()` et `dimnames()`
-3. Mise en forme du tableau avec `kable()`
-4. On repréente le graphique avec `ggplot()`
+2. On change le nom avec `names()` et `dimnames()`.
+3. Mise en forme du tableau avec `kable()`.
+4. On repréente le graphique avec `ggplot()`.
 ```{r}
 #1
 
