@@ -380,18 +380,24 @@ print(paste("Les répondants fréquentent en moyenne ",round(mean(nb_rgl_freq),1
 ```
 
 ### 5. Répartition des répondants selon le nombre de lieux fréquentés régulièrement
-
+1. On compte le nombre d'occurence par nb de lieux régulièrement fréquenté avec `table()`. Et on calcul la proportion avec `prop.table()`.
+2. On change le nom avec `names()` et `dimnames()`
+3. Mise en forme du tableau avec `kable()`
+4. On repréente le graphique avec `ggplot()`
 ```{r}
+#1
 
-df_nb_rgl_freq <- as.data.frame(table(nb_rgl_freq)) # On compte le nombre d'occurence par nb de lieux régulièrement fréquenté
+dt_nb_rgl_freq_pourcent <- round(prop.table(table(nb_rgl_freq))*100,2)
 
-dt_nb_rgl_freq_pourcent <- round(prop.table(table(nb_rgl_freq))*100,2) # On tranforme la fréquence en %
+#2
 
 names(dimnames(dt_nb_rgl_freq_pourcent)) <- "Nombre de lieux régulièrement fréquenté"
 
+#3
+
 kable(dt_nb_rgl_freq_pourcent)  #  mise en forme du tableau
 
-
+#4
 
 ggplot(df_nb_rgl_freq, aes(x = nb_rgl_freq, y = Freq)) +
   geom_bar(stat = "identity")+
