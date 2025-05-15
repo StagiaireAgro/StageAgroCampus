@@ -236,19 +236,21 @@ moyenne_freq
 
 #### Avec R natif
 
-1.  On récupère les données `nb_tres_freq` qui sont le nombre de lieu d'achat très fréquenté par individu
+1.  On récupère les données `nb_tres_freq` qui sont le nombre de lieus d'achat très fréquenté par individu.
 
-2.  On transforme nos données en tableeau avec la fonction `table()`, puis on calcule la proportion de chaque variable (1 à 12) avec `prop.table()` que l'on va multiplier par cent pour avoir un pourcentage. On peutarrondir à deux chiffres après la virgule avec `round`
+2.  On transforme nos données en tableeau avec la fonction `table()`, puis on calcule la proportion de chaque variable (1 à 12) avec `prop.table()` que l'on va multiplier par cent pour avoir un pourcentage. On peut arrondir à deux chiffres après la virgule avec `round`.
 
-3.  On récupère le nom des dimenssions avec la fonction `dimnames()` et on récupère le nom du tableau avec `names` que l'on va réaffecter par son nouveau nom.
+3.  On récupère le nom des dimensions avec la fonction `dimnames()` et on récupère le nom du tableau avec `names` que l'on va réaffecter par son nouveau nom.
 
-4.  On fait la mise en forme de notre tableau avec `kable()`
+4.  On fait la mise en forme de notre tableau avec `kable()`.
 
-5.  **Créer le graphique à partir du tableau avec** `barplot()`
+5.  Créer le graphique à partir du tableau avec `barplot()`.
 
-    -   Ajouter le titre et les noms des axes, et ajuster la limite de l’axe y selon la valeur maximale\
-    -   Changer la couleur des barres et mettre en évidence la valeur maximale\
-    -   Ajouter la valeur maximale au-dessus de la barre avec la fonction `text()`
+6.  Ajouter le titre et les noms des axes, et ajuster la limite de l’axe y selon la valeur maximale.
+
+7.  Changer la couleur des barres et mettre en évidence la valeur maximale.
+
+8.  Ajouter la valeur maximale au-dessus de la barre avec la fonction `text()`.
 
 ```{r}
 
