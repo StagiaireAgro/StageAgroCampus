@@ -246,12 +246,6 @@ moyenne_freq
 
 5.  Créer le graphique à partir du tableau avec `barplot()`.
 
-6.  Ajouter le titre et les noms des axes, et ajuster la limite de l’axe y selon la valeur maximale.
-
-7.  Changer la couleur des barres et mettre en évidence la valeur maximale.
-
-8.  Ajouter la valeur maximale au-dessus de la barre avec la fonction `text()`.
-
 ```{r}
 
 #(1)
@@ -273,6 +267,9 @@ print(tb_nb_tres_freq_pourcent)
 #(5)
 
 barplot(tb_nb_tres_freq_pourcent)
+```
+6.  Ajouter le titre et les noms des axes, et ajuster la limite de l’axe y selon la valeur maximale.
+```{r}
 
 max_val <- max(tb_nb_tres_freq_pourcent)
 
@@ -281,6 +278,9 @@ barplot(tb_nb_tres_freq_pourcent,
         ylab = "pourcentage",
         xlab = "nombre de lieux très fréquenté",
         ylim = c(0,max_val+5))
+```
+7.  Changer la couleur des barres et mettre en évidence la valeur maximale.
+```{r}
 
 coul <- rep("cyan3", length(tb_nb_tres_freq_pourcent))
 max_id <- which.max(tb_nb_tres_freq_pourcent)
@@ -293,6 +293,9 @@ barplot(tb_nb_tres_freq_pourcent,
         xlab = "nombre de lieux très fréquenté",
         ylim = c(0,max_val+5),
         col = coul)
+```
+8.  Ajouter la valeur maximale au-dessus de la barre avec la fonction `text()`.
+```{r}
 
 barplot(tb_nb_tres_freq_pourcent, 
         main = "Répartition selon le nombre de lieux fréquentés très régulièrement",
