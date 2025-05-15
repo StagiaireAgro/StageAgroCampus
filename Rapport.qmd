@@ -400,6 +400,7 @@ library(magrittr) # %T>%
   summarise(round((count(.)/nombre_francais)*100,2)))
 ```
 
+
 ### 7.Pour chaque lieu unique fréquenté quel est leur profil ? (socio + motivations
 
 #### Avec R natif
@@ -407,7 +408,8 @@ library(magrittr) # %T>%
 (1) Création des $12$ jeux de données par lieu d'achat filtrés par variables d'intérêt pour le profil sociologique ainsi que pour les motivations grâce à la fonction `subset()`
 (2) Développement d'une fonction avec `function()` pour automatiser les tâches suivantes. Pour chaque lieu d'achat, affichons la valeur la plus fréquente de chaque variable `avec which.max()` et de `names()`, modifions le nom de la colonne avec `names()` et attribuons un nom à la colonne (contenant le libellé des questions) avec `rownames_to_column()` qui n'en possède pas par défaut.
 (3) Application de la fonction sur tous les lieux d'achat
-(4) Afficher les tableaux avec `print()`
+(4) On renomme le contenu du tableau en transformant en facteur avec `factor()` et en affectant le bon renommage avec `<-`
+(5) Afficher les tableaux avec `print()`.
 
 ```{r}
 # (1) 
@@ -442,32 +444,52 @@ mode_data <- function(data) {
 
 # (3)
 modes_hypermarche <- mode_data(data_hypermarche)
-modes_Hard_discount <- mode_data(data_Hard_discount)
-modes_Epiceries_inde <- mode_data(data_Epiceries_inde)
-modes_magains_surgele <- mode_data(data_magains_surgele)
-modes_Bio <- mode_data(data_Bio)
-modes_Marche <- mode_data(data_Marche )
-modes_agriculteur <- mode_data(data_agriculteur)
-modes_Paniers_ligne <- mode_data(data_Paniers_ligne)
-modes_artisans_commerce_spe <- mode_data(data_artisans_commerce_spe)
-modes_Epicerie_participative <- mode_data(data_Epicerie_participative)
-modes_Magasin_alimentaire_spe_vrac <- mode_data(data_Magasin_alimentaire_spe_vrac)
-modes_Magasin_aide_alimentaire <- mode_data(data_Magasin_aide_alimentaire)
+# modes_Hard_discount <- mode_data(data_Hard_discount)
+# modes_Epiceries_inde <- mode_data(data_Epiceries_inde)
+# modes_magains_surgele <- mode_data(data_magains_surgele)
+# modes_Bio <- mode_data(data_Bio)
+# modes_Marche <- mode_data(data_Marche )
+# modes_agriculteur <- mode_data(data_agriculteur)
+# modes_Paniers_ligne <- mode_data(data_Paniers_ligne)
+# modes_artisans_commerce_spe <- mode_data(data_artisans_commerce_spe)
+# modes_Epicerie_participative <- mode_data(data_Epicerie_participative)
+# modes_Magasin_alimentaire_spe_vrac <- mode_data(data_Magasin_alimentaire_spe_vrac)
+# modes_Magasin_aide_alimentaire <- mode_data(data_Magasin_aide_alimentaire)
 
 # (4)
 
+modes_hypermarche$`Question posée` <- factor(modes_hypermarche$`Question posée`,
+                               levels = c("Q1","recode_age", "recode_csp", "Hypermarché", "Q10", "Q11", "Q12", "Q13", "Q14", "Q15", "Q16", "Q17",  "Q18", "Q19",   "Q20", "Q235",      
+"Q236", "Q237", "Q238", "Q239", "Q240"),
+                               labels = c("Sexe", "Tranches d'âge","Catégorie Socio-Professionnelle","Hypermarché",
+	"Raison principale de non-achat en grande surface", "Raison principale de non-achat en hard discount",
+"Raison principale de non-achat en épiceries indépendantes (y compris en ligne)",
+"Raison principale de non-achat en magasin de surgelés (y compris en ligne)", "Raison principale de non-achat en magasin bio spécialisé (y compris en ligne)", "Raison principale de non-achat sur les marchés", "Raison principale de non-achat auprès d’agriculteurs en direct (hors marchés, y compris en ligne)", "Raison principale de non-achat de paniers via un intermédiaire en ligne", "Raison principale de non-achat auprès d’artisans ou commerçants spécialisés", "Raison principale de non-achat en épicerie participative ou supermarché coopératif", "Raison principale de non-achat en magasin vrac ou local spécialisé","Nombre d'adultes dans le foyer", "Nombre d'enfants dans le foyer", "Age de l'enfant","Age des enfants",
+"Tranche de revenus nets mensuels du foyer","Niveau de diplôme"))
+
+
+modes_hypermarche$`Valeur la plus fréquente` <- as.factor(modes_hypermarche$`Valeur la plus fréquente`)
+
+levels(modes_hypermarche$`Valeur la plus fréquente`)[levels(modes_hypermarche$`Valeur la plus fréquente`) == 2] <- "Femme"
+
+levels(modes_hypermarche$`Valeur la plus fréquente`)[levels(modes_hypermarche$`Valeur la plus fréquente`) == "6"] <- "65 ans et plus"
+
+levels(modes_hypermarche$`Valeur la plus fréquente`)[levels(modes_hypermarche$`Valeur la plus fréquente`) == "4"] <- "Employé et Ouvrier"
+
+# (5)
+
 print(modes_hypermarche)
-print(modes_Hard_discount)
-print(modes_Epiceries_inde)
-print(modes_magains_surgele)
-print(modes_Bio)
-print(modes_Marche)
-print(modes_agriculteur)
-print(modes_Paniers_ligne)
-print(modes_artisans_commerce_spe)
-print(modes_Epicerie_participative)
-print(modes_Magasin_alimentaire_spe_vrac)
-print(modes_Magasin_aide_alimentaire)
+# print(modes_Hard_discount)
+# print(modes_Epiceries_inde)
+# print(modes_magains_surgele)
+# print(modes_Bio)
+# print(modes_Marche)
+# print(modes_agriculteur)
+# print(modes_Paniers_ligne)
+# print(modes_artisans_commerce_spe)
+# print(modes_Epicerie_participative)
+# print(modes_Magasin_alimentaire_spe_vrac)
+# print(modes_Magasin_aide_alimentaire)
 ```
 
 #### Avec usage de library
@@ -478,18 +500,16 @@ print(modes_Magasin_aide_alimentaire)
     (2) `%in%` : teste si un élément (ici, le nom de colonne) appartient à un vecteur (ici, les noms des colonnes du data).
     (3) `table()` : calcule la fréquence d'apparition de chaque valeur dans une variable (colonne).
     (4) `which.max()` : retourne l’indice de la valeur maximale (utilisé ici pour trouver la modalité la plus fréquente).
-    (5) `names()` : ici, permet d’extraire le nom (valeur) associée à la fréquence maximale dans la table.
+    (5) `names()` : ici, permet d’extraire le nom (valeur) associé à la fréquence maximale dans la table.
     (6) `do.call(rbind, ...)` : empile les résultats de la liste (res) en un tableau (data.frame) ligne par ligne.
     (7) `as.data.frame()` : convertit l'objet obtenu en un data.frame.
     (8) `names() (assignation)` : renomme la colonne du data frame avec le nom "Valeur la plus fréquente".
     (9) `tibble::rownames_to_column()` : transforme les noms de lignes en une vraie colonne, ici appelée "Question posée".
-    (10) `kable` : permet de mettre en forme le tableau
 (3) Application de la fonction sur tous les lieux d'achat
-(4) Afficher les tableaux avec `print()`
+(4) On renomme le contenu du tableau en transformant en facteur avec `factor()` et en affectant le bon renommage avec `<-`
+(5)  On affiche le résultat de façon élégante avec `kable()`
 
 ```{r}
-library(dplyr)
-library(tibble)
 
 # (1)
 
@@ -521,37 +541,46 @@ mode_data <- function(data) {
   res <- as.data.frame(do.call(rbind, res))
   names(res) <- "Valeur la plus fréquente"
   res <- tibble::rownames_to_column(res, var = "Question posée")
-  res <- kable(res)
   return(res)
 }
 
 # (3)
 modes_hypermarche <- mode_data(data_hypermarche)
-modes_Hard_discount <- mode_data(data_Hard_discount)
-modes_Epiceries_inde <- mode_data(data_Epiceries_inde)
-modes_magains_surgele <- mode_data(data_magains_surgele)
-modes_Bio <- mode_data(data_Bio)
-modes_Marche <- mode_data(data_Marche)
-modes_agriculteur <- mode_data(data_agriculteur)
-modes_Paniers_ligne <- mode_data(data_Paniers_ligne)
-modes_artisans_commerce_spe <- mode_data(data_artisans_commerce_spe)
-modes_Epicerie_participative <- mode_data(data_Epicerie_participative)
-modes_Magasin_alimentaire_spe_vrac <- mode_data(data_Magasin_alimentaire_spe_vrac)
-modes_Magasin_aide_alimentaire <- mode_data(data_Magasin_aide_alimentaire)
+# modes_Hard_discount <- mode_data(data_Hard_discount)
+# modes_Epiceries_inde <- mode_data(data_Epiceries_inde)
+# modes_magains_surgele <- mode_data(data_magains_surgele)
+# modes_Bio <- mode_data(data_Bio)
+# modes_Marche <- mode_data(data_Marche)
+# modes_agriculteur <- mode_data(data_agriculteur)
+# modes_Paniers_ligne <- mode_data(data_Paniers_ligne)
+# modes_artisans_commerce_spe <- mode_data(data_artisans_commerce_spe)
+# modes_Epicerie_participative <- mode_data(data_Epicerie_participative)
+# modes_Magasin_alimentaire_spe_vrac <- mode_data(data_Magasin_alimentaire_spe_vrac)
+# modes_Magasin_aide_alimentaire <- mode_data(data_Magasin_aide_alimentaire)
 
 # (4)
-print(modes_hypermarche)
-print(modes_Hard_discount)
-print(modes_Epiceries_inde)
-print(modes_magains_surgele)
-print(modes_Bio)
-print(modes_Marche)
-print(modes_agriculteur)
-print(modes_Paniers_ligne)
-print(modes_artisans_commerce_spe)
-print(modes_Epicerie_participative)
-print(modes_Magasin_alimentaire_spe_vrac)
-print(modes_Magasin_aide_alimentaire)
+
+modes_hypermarche$`Question posée` <- factor(modes_hypermarche$`Question posée`,
+                               levels = c(1:21),
+                               labels = c("Sexe", "Tranches d'âge","Catégorie Socio-Professionnelle","Hypermarché",
+	"Raison principale de non-achat en grande surface", "Raison principale de non-achat en hard discount",
+"Raison principale de non-achat en épiceries indépendantes (y compris en ligne)",
+"Raison principale de non-achat en magasin de surgelés (y compris en ligne)", "Raison principale de non-achat en magasin bio spécialisé (y compris en ligne)", "Raison principale de non-achat sur les marchés", "Raison principale de non-achat auprès d’agriculteurs en direct (hors marchés, y compris en ligne)", "Raison principale de non-achat de paniers via un intermédiaire en ligne", "Raison principale de non-achat auprès d’artisans ou commerçants spécialisés", "Raison principale de non-achat en épicerie participative ou supermarché coopératif", "Raison principale de non-achat en magasin vrac ou local spécialisé","Nombre d'adultes dans le foyer", "Nombre d'enfants dans le foyer", "Age de l'enfant","Age des enfants",
+"Tranche de revenus nets mensuels du foyer","Niveau de diplôme"))
+
+
+modes_hypermarche$`Valeur la plus fréquente` <- as.factor(modes_hypermarche$`Valeur la plus fréquente`)
+
+levels(modes_hypermarche$`Valeur la plus fréquente`)[levels(modes_hypermarche$`Valeur la plus fréquente`) == 2] <- "Femme"
+
+levels(modes_hypermarche$`Valeur la plus fréquente`)[levels(modes_hypermarche$`Valeur la plus fréquente`) == "6"] <- "65 ans et plus"
+
+levels(modes_hypermarche$`Valeur la plus fréquente`)[levels(modes_hypermarche$`Valeur la plus fréquente`) == "4"] <- "Employé et Ouvrier"
+
+# (5)
+
+kable(modes_hypermarche) %>% 
+  kable_styling(latex_options = "striped")
 
 ```
 
