@@ -2752,6 +2752,7 @@ kable(round(tb_freq,2), caption = "Fréquences des lieux délaissés par les con
 
 ```
 
+
 ### 39.modalités de vente que vous avez commencer à fréquenter
 
 #### Avec R natif
