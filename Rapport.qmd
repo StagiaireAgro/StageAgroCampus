@@ -2120,7 +2120,7 @@ paste("Le budget alimentaire moyen dépensé sur les marchés  est de", moy_Q29,
 
 ```
 
-### 31. Le budget médian dépensé sur les marchés
+### 32. Le budget médian dépensé sur les marchés
 
 #### Avec R natif
 
