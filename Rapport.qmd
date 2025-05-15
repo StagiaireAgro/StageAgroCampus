@@ -2336,7 +2336,9 @@ kable(round(tb_l_cc,2), caption = "Ces magasins proposent ils des produits locau
 (6) On ajoute la colonne du pourcentage des répondants par modalité. Pour calculer le pourcentage on utilise les opérateurs classiques de R (`/` pour la division et `sum()` pour la somme) qu'on arrondie à 2 chiffres après la virgule à l'aide de `round()`
 (7) Réorganisation des colonnes. On place la colonne contenant le pourcentage de répodnants en 2ème position
 (8) On transforme au format dataframe pour un meilleur affichage avec `as.data.frame()`
-(9) On affiche le tableau de résultat `print()`
+(9) On renomme les colonnes avec `names()` pour obtenir leur nom 
+(10) On renomme le contenu du tableau en transformant en facteur avec `factor()` et en affectant le bon renommage avec `<-`
+(11) On affiche le tableau de résultat `print()`
 
 ```{r}
 # (1) 
@@ -2378,6 +2380,56 @@ resultat <- as.data.frame(resultat)
 
 # (9)
 
+names(resultat) <-  c("Consommation de produits issus de sa propre production","Pourcentage de répondants", " Tranche d'âges" , "Sexe", 
+                  "Catégorie Socio-Professionnelle", "Dépenses moyennes mensuelles pour les achats alimentaires", "Niveau de diplôme", "Nombre d'habitants","Nombre d'enfants dans le foyer"
+                  ,"Nombre de personnes dans le foyer")
+
+# (10)
+
+resultat$` Tranche d'âges`<- as.factor(resultat$` Tranche d'âges`)
+
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 1] <- "20-24 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 2] <- "25-34 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 3] <- "35-44 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 4] <- "45-54 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 5] <- "55-64 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 6] <- "65 ans et plus"
+
+resultat$Sexe<- as.factor(resultat$Sexe)
+
+levels(resultat$Sexe)[levels(resultat$Sexe) == 1] <- "Homme"
+levels(resultat$Sexe)[levels(resultat$Sexe) == 2] <- "Femme"
+
+resultat$`Catégorie Socio-Professionnelle`<- as.factor(resultat$`Catégorie Socio-Professionnelle`)
+
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 1] <- "Agriculteur, Artisan, Commerçant, Chef d’entreprise"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 2] <- "Profession libérale, Cadre ou profession intellectuelle supérieure"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 3] <- "Profession intermédiaire"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 4] <- "Employé, Ouvrier"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 5] <- "Retraité"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 6] <- "Demandeur d’emploi, Homme ou Femme au foyer, Etudiant, lycéen, Autre"
+
+resultat$`Niveau de diplôme` <- as.factor(resultat$`Niveau de diplôme`)
+
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 1] <- "Sans diplôme"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 2] <- "BEPC, brevet élémentaire, brevet des collèges, DNB "
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 3] <- "CAP, BEP ou diplôme de niveau équivalent"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 4] <- "Baccalauréat, brevet professionnel"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 5] <- "BTS, DUT, Deug, Deust, diplôme de la santé ou du social de niveau bac+2, diplôme équivalent "
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 6] <- "Licence, licence professionnelle, maîtrise, diplôme équivalent de niveau bac+3 ou bac+4"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 7] <- "Master, DEA, DESS, diplôme de grande école de niveau bac+5, doctorat de santé "
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 1] <- "Doctorat de recherche (hors santé)"
+
+resultat$`Consommation de produits issus de sa propre production`<- as.factor(resultat$`Consommation de produits issus de sa propre production`)
+
+levels(resultat$`Consommation de produits issus de sa propre production`)[levels(resultat$`Consommation de produits issus de sa propre production`) == 1] <- "Non, je n'ai pas de jardin, verger ou élevage"
+
+levels(resultat$`Consommation de produits issus de sa propre production`)[levels(resultat$`Consommation de produits issus de sa propre production`) == 2] <- "Oui, souvent"
+
+levels(resultat$`Consommation de produits issus de sa propre production`)[levels(resultat$`Consommation de produits issus de sa propre production`) == 3] <- "Oui, de temps en temps"
+
+# (11)
+
 print(resultat)
 
 ```
@@ -2400,10 +2452,13 @@ print(resultat)
 
 (8) On transforme au format dataframe pour un meilleur affichage avec `as.data.frame()`
 
-(9) On affiche le résultat de façon élégante avec `kable()`
+(9) On renomme les colonnes avec `names()` pour obtenir leur nom 
+
+(10) On renomme le contenu du tableau en transformant en facteur avec `factor()` et en affectant le bon renommage avec `<-`
+
+(11) On affiche le résultat de façon élégante avec `kable()`
 
 ```{r}
-library(dplyr)
 
 # (1)
 vars <- c("Q227", "recode_age", "Q1", "recode_csp", "Q8", "Q240", "Q5_taille", "Q236", "Q235")
@@ -2443,9 +2498,59 @@ resultat <- resultat %>%
 
 resultat <- as.data.frame(resultat)
 
-# (9) On affiche le résultat de façon élégante avec `kable()`
 
 # (9)
+
+names(resultat) <-  c("Consommation de produits issus de sa propre production","Pourcentage de répondants", " Tranche d'âges" , "Sexe", 
+                  "Catégorie Socio-Professionnelle", "Dépenses moyennes mensuelles pour les achats alimentaires", "Niveau de diplôme", "Nombre d'habitants","Nombre d'enfants dans le foyer"
+                  ,"Nombre de personnes dans le foyer")
+
+# (10)
+
+resultat$` Tranche d'âges`<- as.factor(resultat$` Tranche d'âges`)
+
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 1] <- "20-24 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 2] <- "25-34 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 3] <- "35-44 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 4] <- "45-54 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 5] <- "55-64 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 6] <- "65 ans et plus"
+
+resultat$Sexe<- as.factor(resultat$Sexe)
+
+levels(resultat$Sexe)[levels(resultat$Sexe) == 1] <- "Homme"
+levels(resultat$Sexe)[levels(resultat$Sexe) == 2] <- "Femme"
+
+resultat$`Catégorie Socio-Professionnelle`<- as.factor(resultat$`Catégorie Socio-Professionnelle`)
+
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 1] <- "Agriculteur, Artisan, Commerçant, Chef d’entreprise"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 2] <- "Profession libérale, Cadre ou profession intellectuelle supérieure"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 3] <- "Profession intermédiaire"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 4] <- "Employé, Ouvrier"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 5] <- "Retraité"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 6] <- "Demandeur d’emploi, Homme ou Femme au foyer, Etudiant, lycéen, Autre"
+
+resultat$`Niveau de diplôme` <- as.factor(resultat$`Niveau de diplôme`)
+
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 1] <- "Sans diplôme"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 2] <- "BEPC, brevet élémentaire, brevet des collèges, DNB "
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 3] <- "CAP, BEP ou diplôme de niveau équivalent"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 4] <- "Baccalauréat, brevet professionnel"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 5] <- "BTS, DUT, Deug, Deust, diplôme de la santé ou du social de niveau bac+2, diplôme équivalent "
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 6] <- "Licence, licence professionnelle, maîtrise, diplôme équivalent de niveau bac+3 ou bac+4"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 7] <- "Master, DEA, DESS, diplôme de grande école de niveau bac+5, doctorat de santé "
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 1] <- "Doctorat de recherche (hors santé)"
+
+resultat$`Consommation de produits issus de sa propre production`<- as.factor(resultat$`Consommation de produits issus de sa propre production`)
+
+levels(resultat$`Consommation de produits issus de sa propre production`)[levels(resultat$`Consommation de produits issus de sa propre production`) == 1] <- "Non, je n'ai pas de jardin, verger ou élevage"
+
+levels(resultat$`Consommation de produits issus de sa propre production`)[levels(resultat$`Consommation de produits issus de sa propre production`) == 2] <- "Oui, souvent"
+
+levels(resultat$`Consommation de produits issus de sa propre production`)[levels(resultat$`Consommation de produits issus de sa propre production`) == 3] <- "Oui, de temps en temps"
+
+
+# (11)
 kable(resultat) %>% 
   kable_styling(latex_options = "striped")
 
