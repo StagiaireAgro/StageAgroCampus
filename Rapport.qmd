@@ -367,6 +367,8 @@ ggplot(df_nb_tres_freq)+aes(x=nb_tres_freq,y=Effectif)+geom_bar(stat = "identity
 ```
 
 ### 4.Nombre de lieux fréquentés régulièrement (réponses 1/2/3/4) en moyenne
+1. On sélectionne des bonnes colonnes.
+2. On compte le nombre de lieus régulièrement fréquenté par individu.
 
 ```{r}
 dt_nb_moy <- data %>% # selection des bonnes colonnes
