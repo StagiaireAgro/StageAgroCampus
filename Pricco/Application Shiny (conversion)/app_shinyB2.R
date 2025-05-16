@@ -230,7 +230,7 @@ server <- function(input, output, session) {
       valeurs_facteurs$data[[mod]] %||% NA
     })
     
-    df$kg <- df[[var_qt()]]/df$valeur_associee
+    df$kg <- as.numeric(df[[var_qt()]])/df$valeur_associee
     
     data_c_direct(df[!is.na(df$valeur_associee),]) # On affecte les données qui sont calculable directement
     data_nc_direct(df[is.na(df$valeur_associee),])
@@ -328,7 +328,7 @@ server <- function(input, output, session) {
       valeurs_facteurs2$data[[mod]] %||% NA
     })
     
-    df$kg <- df[[var_qt()]]*df$valeur_associee
+    df$kg <- as.numeric(df[[var_qt()]])*df$valeur_associee
     
     data_nc_direct_final(df[!is.na(df$valeur_associee),]) # On affecte les données qui ne sont pas calculable directement
     data_non_calc(df[is.na(df$valeur_associee),]) # Données non calculable
