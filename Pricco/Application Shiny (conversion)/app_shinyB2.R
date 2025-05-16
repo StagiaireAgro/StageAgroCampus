@@ -8,7 +8,13 @@ files_names <- list.files(path = "data")
 ui <- fluidPage(
   sidebarLayout(
     sidebarPanel("Calcul du Kg",
+                 
                  # Slection du fichier
+                 tags$hr(style = "border-top: 2px solid #999;"),
+                 h4("Jeu de données"),
+                 
+                 
+                 
                  uiOutput("file_list"),
                  
                  textInput("sep","Quel et le délimitateur ?", value = ","),
@@ -24,6 +30,8 @@ ui <- fluidPage(
                  
                  
                  # Transformation de valeurs en facteur
+                 tags$hr(style = "border-top: 2px solid #999;"),
+                 h4("Premier filtre"),
                  
                  uiOutput("trans_factor"),
                  actionButton("apply_trans_factor", "Transformer"),
@@ -37,11 +45,14 @@ ui <- fluidPage(
                  actionButton("apply_group", "Associer aux modalités sélectionnées"),
                  
                  # Deuxème transformation en facteur
+                 tags$hr(style = "border-top: 2px solid #999;"),
+                 h4("Deuxième filtre"),
                  
                  uiOutput("trans_factor2"),
                  actionButton("apply_trans_factor2", "Transformer"),
                  
                  # Deuxième affection valeur pour le facteurs 
+                 
                  uiOutput("var_categ2"),
                  
                  uiOutput("mod_selector2"),
@@ -91,7 +102,7 @@ server <- function(input, output, session) {
   # Slection du fichier
   
   output$file_list <- renderUI({
-    choice <- list.files(path = "data/cagette")
+    choice <- list.files(path = "data/coopcircuits") # On peut changer le chemin
     selectInput("select_file", "Sélectionnez un fichier", choices = choice)
   })
   
@@ -100,7 +111,7 @@ server <- function(input, output, session) {
     
     file_path <- input$select_file
     
-    dt <- read.csv(paste("data/cagette/", input$select_file, sep = ""), sep = input$sep, dec = input$dec)
+    dt <- read.csv(paste("data/coopcircuits/", input$select_file, sep = ""), sep = input$sep, dec = input$dec) # on peut changer le chemin
     
     data_select(dt)
     nom <- substr(input$select_file, 1, nchar(input$select_file)-4) # On enlève le .csv
