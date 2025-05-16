@@ -2,17 +2,21 @@
 library(shiny)
 library(DT)
 
+
 files_names <- list.files(path = "data")
 
 ui <- fluidPage(
   sidebarLayout(
     sidebarPanel("Calcul du Kg",
                  # Slection du fichier
-                 selectInput("select_file", "1. Selectionnez le fichier", choices = files_names, selected = NULL),
+                 uiOutput("file_list"),
+                 
+                 textInput("sep","Quel et le délimitateur ?", value = ","),
+                 textInput("dec","Quel et le séparateur de décimale ?", value = "."),
                  
                  actionButton("valide_file", "Valider le fichier selectione"),
                  textOutput("file_valide"),
-                 
+
                  # Slection de la varaible quantite
                  
                  uiOutput("selct_var_qt"),
@@ -86,15 +90,21 @@ server <- function(input, output, session) {
   
   # Slection du fichier
   
+  output$file_list <- renderUI({
+    choice <- list.files(path = "data/cagette")
+    selectInput("select_file", "Sélectionnez un fichier", choices = choice)
+  })
+  
   observeEvent(input$valide_file,{
     req(input$select_file)
     
     file_path <- input$select_file
     
-    dt <- read.csv(paste("data/", input$select_file, sep = ""))
+    dt <- read.csv(paste("data/cagette/", input$select_file, sep = ""), sep = input$sep, dec = input$dec)
     
     data_select(dt)
-    nom_data(input$select_file)
+    nom <- substr(input$select_file, 1, nchar(input$select_file)-4) # On enlève le .csv
+    nom_data(nom)
   })
   
   output$file_valide <- renderText({
@@ -347,7 +357,7 @@ server <- function(input, output, session) {
   
   output$download_calcule <- downloadHandler(
     filename = function() {
-      paste0("OK_",nom_data())
+      paste0(nom_data(),"_OK",".csv")
     },
     content = function(file) {
       write.csv(dt_final(), file, row.names = TRUE)
@@ -355,7 +365,7 @@ server <- function(input, output, session) {
   
   output$download_non_calcule <- downloadHandler(
     filename = function() {
-      paste0("PAS_OK_",nom_data())
+      paste0(nom_data(),"_PAS_OK",".csv")
     },
     content = function(file) {
       write.csv(data_non_calc(), file, row.names = TRUE)
