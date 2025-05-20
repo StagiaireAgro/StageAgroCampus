@@ -1,0 +1,150 @@
+library(shiny)
+library(DT)
+
+
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      
+      # Selection du fichier
+      tags$hr(style = "border-top: 2px solid #999;"),
+      
+      h4("Jeu de données"),
+      
+      fileInput("file","Choisissez un fichier", accept = ".csv"),
+      textInput("sep","Quel et le délimitateur ?", value = ","),
+      textInput("dec","Quel et le séparateur de décimale ?", value = "."),
+      actionButton("apply_csv","Appliquer"),
+      
+      # Selection du fichier des saisonalités
+      tags$hr(style = "border-top: 2px solid #999;"),
+      
+      fileInput("file_seasonality","Choisissez un fichier pour la saisonalité", accept = ".csv"),
+      textInput("sep2","Quel et le délimitateur ?", value = ","),
+      textInput("dec2","Quel et le séparateur de décimale ?", value = "."),
+      actionButton("apply_csv2","Appliquer"),
+      
+      # Test de la saisonalité sur le fichier 
+      tags$hr(style = "border-top: 2px solid #999;"),
+      
+      
+      uiOutput("name_product"),
+      uiOutput("date"),
+      uiOutput("name_product_s"),
+      actionButton("test_seasonality", "Tester la sainonalité")
+      
+    ),
+    mainPanel(
+      tabsetPanel(
+        tabPanel("Jeu de données",
+          DTOutput("dt_selected_file")),
+        tabPanel("Saisonalité",
+                 DTOutput("dt_selected_file_seasonality")),
+        tabPanel("Jeu de données testé",
+                 DTOutput("dt_filtred"))
+      )
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  data <- reactiveVal(NULL)
+  
+  # Selection du fichier
+  observeEvent(input$file,{
+    
+    dt <- read.csv(input$file$datapath , sep = input$sep, dec = input$dec)
+    data(dt)
+  })
+  
+  observeEvent(input$apply_csv,{
+    req(data())
+    
+    dt <- read.csv(input$file$datapath , sep = input$sep, dec = input$dec)
+    data(dt)
+  })
+  # Affichage données à tester 
+  output$dt_selected_file <- renderDT({
+    req(data())
+    
+    data()
+  })
+  
+  data_seasonallity <- reactiveVal(NULL)
+  
+  # Selection du fichier de saisonalité
+  observeEvent(input$file_seasonality,{
+    
+    dt <- read.csv(input$file_seasonality$datapath , sep = input$sep2, dec = input$dec2)
+    data_seasonallity(dt)
+  })
+  
+  observeEvent(input$apply_csv2,{
+    req(data_seasonallity())
+    
+    dt <- read.csv(input$file_seasonality$datapath , sep = input$sep2, dec = input$dec2)
+    data_seasonallity(dt)
+  })
+  
+  # Affichage données de saisonalité 
+  output$dt_selected_file_seasonality <- renderDT({
+    req(data_seasonallity())
+    
+    data_seasonallity()
+  })
+  
+  # Selection des colonnes de nom
+  
+  output$name_product <- renderUI({
+    req(data())
+    
+    choices <- names(data())
+    
+    selectInput("selected_name_product", "Choissisez le nom de produit pour le jeu de données", choices = choices)
+  })
+  
+  output$name_product_s <- renderUI({
+    req(data_seasonallity())
+    
+    choices <- names(data_seasonallity())
+    
+    selectInput("selected_name_product_s", "Choissisez le nom de produit pour les données de saisonalité", choices = choices)
+  })
+  
+  # Selection de la colonne de date pour le jeu de données
+  
+  output$date <- renderUI({
+    req(data())
+    
+    choices <- names(data())
+    
+    selectInput("selected_date", "Sélectionnez la colonne de date pour le jeu de données", choices = choices)
+  })
+  
+  # Application du filtre
+  
+  data_filtred <- reactiveVal(NULL)
+  
+  observeEvent(input$test_seasonality,{
+    req(data())
+    req(data_seasonallity())
+    
+    dt <- data()
+    ds <- data_seasonallity()
+    
+    names(ds) <- tolower(names(ds))
+    
+    dt$seasonal_product <- apply(dt, MARGIN = 1, FUN = function(x) ds[ds[[input$selected_name_product_s]] == x[[input$selected_name_product]],
+                                                                    months(as.Date(x[[input$selected_date]]))])
+    data_filtred(dt)
+  })
+  
+  output$dt_filtred <- renderDT({
+    req(data_filtred())
+    
+    data_filtred()
+  })
+  
+}
+
+shinyApp(ui, server)
