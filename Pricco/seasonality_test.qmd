@@ -1,0 +1,32 @@
+---
+title: "Untitled"
+format: html
+---
+
+# library
+```{r}
+
+```
+# Importation
+```{r}
+cagette_Abricot_2021_OK <- read.csv("clean_data/cagette/cagette_Abricot_2021_OK.csv")
+seasonal_list <- read.csv("saisons_productions.csv")
+```
+# tests
+```{r}
+
+names(seasonal_list) <- tolower(names(seasonal_list))
+
+
+
+seasonal_list[seasonal_list$fruit...leg == cagette_Abricot_2021_OK$nomProduit[400], months(as.Date(cagette_Abricot_2021_OK$orderDate))[600]]
+
+a <- apply(cagette_Abricot_2021_OK, MARGIN = 1, FUN = function(x) seasonal_list[seasonal_list$fruit...leg == x[["nomProduit"]],
+                                                                           months(as.Date(x[["orderDate"]]))] )
+
+cagette_Abricot_2021_OK$seaonality_product <- a
+```
+
+
+
+
