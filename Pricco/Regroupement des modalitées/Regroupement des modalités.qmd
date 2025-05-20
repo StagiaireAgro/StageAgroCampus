@@ -1,1 +1,87 @@
+---
+title: "Regroupement de modalités"
+format: html
+editor: visual
+---
+
+
+# Importation des librairies
+
+
+```{r,message=FALSE}
+library(tidyverse)
+library(stringr)
+library(stringi)
+```
+
+
+# Importation du fichier 
+
+```{r}
+data_socleo_2021 <- read.csv("data/socleo/2021.csv")
+```
+
+# Regroupement de modalités
+
+
+```{r}
+
+# On regarde les modalités possibible de la variable name 
+
+modalites_name <- data_socleo_2021 |> group_by(name) |>  count() |> arrange(name)
+
+```
+
+
+```{r}
+library(dplyr)
+
+regrouper_produit <- function(df, mot_cle) {
+  df %>%
+    mutate(
+      # I) Nettoyage du nom des modalités 
+      
+      # 1. Met en minuscule
+      name_clean = str_to_lower(name),
+      
+       # 2. Supprime les accents
+      name_clean = stri_trans_general(name_clean, "Latin-ASCII"),
+      
+       # 3. Supprime les caractères spéciaux éventuels
+      name_clean = str_replace_all(name_clean, "[^a-z ]", ""),
+      
+      # II) Détection du produit via grepl()
+      produit = ifelse(grepl(mot_cle, name_clean), mot_cle, NA)
+    ) %>%
+    
+      # III) On regroupe et on calcule les effectifs pour chacun des nouveaux groupes de modalités
+    
+      # 1. Filtre les noms de produit sans valeur manquantes
+    filter(!is.na(produit)) %>%
+    
+      # 2. On regroupe par nom de produit
+    group_by(produit) %>%
+    
+      # On calcule les effectifs pour chaque groupe de produit
+    summarise(n_total = sum(n, na.rm = FALSE))
+}
+
+
+# Tests de la fonction
+regrouper_produit(modalites_name, "amande")
+regrouper_produit(modalites_name, "persil")
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
 
