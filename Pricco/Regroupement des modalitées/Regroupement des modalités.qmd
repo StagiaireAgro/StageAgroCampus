@@ -32,7 +32,7 @@ data_ruche_oui_2021 <- read.csv("data/la ruche qui dit oui/historique_2021part1.
 ```{r}
 
 # Liste des mots-clés de produits
-liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", "Oignon", "Poireau", "Poivron", "Pomme de terre", "Potiron", "Tomate", "Lait", "Œuf", "Boeuf", "Porc", "Poulet", "Jus de Pomme", "Lentille")
+liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", "Pomme de terre", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Œuf", "Boeuf", "Porc", "Poulet", "Jus de Pomme", "Lentille")
 
 # Fonction
 regrouper_produits <- function(df) {
