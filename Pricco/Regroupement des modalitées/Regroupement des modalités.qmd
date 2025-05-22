@@ -36,6 +36,12 @@ liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Ki
                      "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", 
                      "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Œuf", "Boeuf", "Porc", "Poulet", "Lentille")
 
+# Liste des mots-clés de produits  (au pluriel)
+liste_mots_cles_pluriel <- c("Abricots", "Bananes", "Cerises", "Clémentines", "Fraises", "Kiwis", "Nectarines", "Noix", "Pêches", "Poires", 
+                     "Pommes de terre", "Jus de Pommes", "Pommes", "Prunes", "Raisins", "Asperges", "Aubergines", "Carottes", 
+                     "Céleri-branches", "Choux fleurs", "Concombres", "Courgettes", "Endives", "Haricots verts", "Laitues", "Melons", 
+                     "Oignons", "Poireaux", "Poivrons", "Potirons", "Tomates", "Laits", "Œufs", "Boeufs", "Porcs", "Poulets", "Lentilles")
+
 # Correspondance entre mots au pluriel et leur forme au singulier
 correspondance_pluriel <- c(
   "abricots" = "abricot", "bananes" = "banane", "cerises" = "cerise", "clémentines" = "clémentine",
