@@ -95,7 +95,9 @@ ui <- fluidPage(
                  dataTableOutput("data_non_calc")),
         tabPanel("Prix au kilo",
                  downloadButton("download_mean_per_months", "Télécharger"),
-                 dataTableOutput("prix_au_kilo"))
+                 dataTableOutput("prix_au_kilo"),
+                 h4("Jeu de données aberrantes"),
+                 dataTableOutput("dtout_vab"))
       )
       
     )
@@ -453,7 +455,7 @@ server <- function(input, output, session) {
     
     e_i_q <- quantile(dt$pp_kilo, 0.75) - quantile(dt$pp_kilo, 0.25)
     
-    dt_clean <- dt[!(dt$pp_kilo > quantile(dt$pp_kilo, 0.75) - 1.5*e_i_q | dt$pp_kilo < quantile(dt$pp_kilo, 0.25) - 1.5*e_i_q),]
+    dt_clean <- dt[dt$pp_kilo <= quantile(dt$pp_kilo, 0.75) + 1.5*e_i_q & dt$pp_kilo >= quantile(dt$pp_kilo, 0.25) - 1.5*e_i_q,]
     
     dt_nclean <- dt[(dt$pp_kilo > quantile(dt$pp_kilo, 0.75) - 1.5*e_i_q | dt$pp_kilo < quantile(dt$pp_kilo, 0.25) - 1.5*e_i_q),]
     
@@ -481,6 +483,13 @@ server <- function(input, output, session) {
     content = function(file) {
       write.csv(dt_months(), file, row.names = TRUE)
     })
+  
+  output$dtout_vab <- renderDT({
+    req(dt_vab())
+    
+    dt_vab()
+    
+  })
 }
 
 shinyApp(ui, server)
