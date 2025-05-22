@@ -168,9 +168,9 @@ server <- function(input, output, session) {
     
     e_i_q <- quantile(dt$pp_kilo, 0.75) - quantile(dt$pp_kilo, 0.25)
     
-    dt_clean <- dt[!(dt$pp_kilo > quantile(dt$pp_kilo, 0.75) + 1.5*e_i_q | dt$pp_kilo < quantile(dt$pp_kilo, 0.25) - 1.5*e_i_q),]
+    dt_clean <- dt[(dt$pp_kilo <= quantile(dt$pp_kilo, 0.75) + 1.5*e_i_q | dt$pp_kilo >= quantile(dt$pp_kilo, 0.25) - 1.5*e_i_q),]
     
-    dt_nclean <- dt[(dt$pp_kilo > quantile(dt$pp_kilo, 0.75) - 1.5*e_i_q | dt$pp_kilo < quantile(dt$pp_kilo, 0.25) - 1.5*e_i_q),]
+    dt_nclean <- dt[(dt$pp_kilo > quantile(dt$pp_kilo, 0.75) + 1.5*e_i_q | dt$pp_kilo < quantile(dt$pp_kilo, 0.25) - 1.5*e_i_q),]
     
     dt_vab(dt_nclean)
     
