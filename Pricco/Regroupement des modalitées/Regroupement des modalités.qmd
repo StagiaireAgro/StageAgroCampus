@@ -16,15 +16,27 @@ library(stringi)
 
 ```{r}
 
-# Socleo 
+########################## Socleo ########################## 
+
 data_socleo_2021 <- read.csv("data/socleo/2021.csv")
 data_socleo_2022 <- read.csv("data/socleo/2022.csv",sep = ";")
+data_socleo_2023 <- read.csv("data/socleo/2023.csv",sep = ";")
+data_socleo_2024 <- read.csv("data/socleo/2024.csv",sep = ";")
 
-# coop circuit
+########################## coop circuit ########################## 
+
 data_coop_circuit_2021 <- read.csv("data/coop circuit/par annee/2021.csv",sep = ",")
+data_coop_circuit_2022 <- read.csv("data/coop circuit/par annee/2022.csv",sep = ";")
+data_coop_circuit_2023 <- read.csv("data/coop circuit/par annee/2023.csv",sep = ";")
+data_coop_circuit_2024 <- read.csv("data/coop circuit/par annee/2024.csv",sep = ";")
 
-# la ruche qui dit oui
-data_ruche_oui_2021 <- read.csv("data/la ruche qui dit oui/historique_2021part1.csv",sep = ";")
+########################## la ruche qui dit oui ########################## 
+
+data_ruche_oui_2021_part_1 <- read.csv("data/la ruche qui dit oui/historique_2021part1.csv",sep = ";")
+data_ruche_oui_2021_part_2 <- read.csv("data/la ruche qui dit oui/historique_2021part1.csv",sep = ";")
+data_ruche_oui_2022 <- read.csv("data/la ruche qui dit oui/historique_2022.csv",sep = ";")
+data_ruche_oui_2023 <- read.csv("data/la ruche qui dit oui/historique_2023.csv",sep = ";")
+data_ruche_oui_2024 <- read.csv("data/la ruche qui dit oui/historique_2024.csv",sep = ";")
 ```
 
 # Séparation des fichiers
@@ -148,6 +160,8 @@ regrouper_produits <- function(df) {
   return(resultats_liste)
 }
 
+
+
 ```
 
 # Test pour la séparation des fichiers
@@ -159,18 +173,51 @@ regrouper_produits <- function(df) {
 #                                                       #
 ######################################################### 
 
-# Socleo 
+########################## Socleo ########################## 
+
 liste_resultats_socleo_2021 <- regrouper_produits(data_socleo_2021)
 liste_resultats_socleo_2022 <- regrouper_produits(data_socleo_2022)
 liste_resultats_socleo_2023 <- regrouper_produits(data_socleo_2023)
+liste_resultats_socleo_2024 <- regrouper_produits(data_socleo_2024)
 
-# coop circuit
+########################## coop circuit ########################## 
+
 liste_resultats_coop_circuit_2021 <- regrouper_produits(data_coop_circuit_2021)
+liste_resultats_coop_circuit_2022 <- regrouper_produits(data_coop_circuit_2022)
+liste_resultats_coop_circuit_2023 <- regrouper_produits(data_coop_circuit_2023)
+liste_resultats_coop_circuit_2024 <- regrouper_produits(data_coop_circuit_2024)
 
-# la ruche qui dit oui
-names(data_ruche_oui_2021)[8] <- c("name") # On renomme la variable du nom de produit pour que la fonction marche
+########################## la ruche qui dit oui ########################## 
 
-liste_resultats_ruche_oui_2021 <- regrouper_produits(data_ruche_oui_2021)
+ # On renomme la variable du nom de produit pour que la fonction marche
+names(data_ruche_oui_2021_part_1)[8] <- c("name")
+
+# On teste 
+liste_resultats_ruche_oui_2021_part_1 <- regrouper_produits(data_ruche_oui_2021_part_1)
+
+ # On renomme la variable du nom de produit pour que la fonction marche
+names(data_ruche_oui_2021_part_2)[8] <- c("name")
+
+# On teste 
+liste_resultats_ruche_oui_2021_part_2 <- regrouper_produits(data_ruche_oui_2021_part_2)
+
+ # On renomme la variable du nom de produit pour que la fonction marche
+names(data_ruche_oui_2022)[8] <- c("name")
+
+# On teste 
+liste_resultats_ruche_oui_2022 <- regrouper_produits(data_ruche_oui_2022)
+
+ # On renomme la variable du nom de produit pour que la fonction marche
+names(data_ruche_oui_2023)[8] <- c("name")
+
+# On teste 
+liste_resultats_ruche_oui_2023 <- regrouper_produits(data_ruche_oui_2023)
+
+ # On renomme la variable du nom de produit pour que la fonction marche
+names(data_ruche_oui_2024)[8] <- c("name")
+
+# On teste 
+liste_resultats_ruche_oui_2024 <- regrouper_produits(data_ruche_oui_2024)
 
 ###################################################################
 #                                                                 #
@@ -185,6 +232,217 @@ view(liste_resultats_socleo_2022$df_autres)
 view(liste_resultats_socleo_2023$df_autres)
 
 ```
+
+
+
+# Renommage des tables par rapport au nom des fournisseurs 
+
+```{r}
+
+###################################################################
+#                                                                 #
+#               Renommage des tables pour socleo                  #
+#                                                                 #
+################################################################### 
+
+# Noms des jeux de données de la liste de résultat
+noms_df <- names(liste_resultats_socleo_2021)
+
+# Renommage des noms en remplaçant 'df' par 'bulle'
+noms_socleo <- sub("^df", "socleo", noms_df)
+
+# Appliquer les nouveaux noms à la liste
+liste_resultats_socleo_2021 <- setNames(liste_resultats_socleo_2021, noms_socleo)
+
+########################## Année 2022 ########################## 
+
+# Noms des jeux de données de la liste de résultat
+noms_df <- names(liste_resultats_socleo_2022)
+
+# Renommage des noms en remplaçant 'df' par 'bulle'
+noms_socleo <- sub("^df", "socleo ", noms_df)
+
+# Appliquer les nouveaux noms à la liste
+liste_resultats_socleo_2022 <- setNames(liste_resultats_socleo_2022, noms_socleo)
+
+########################## Année 2023 ########################## 
+
+# Noms des jeux de données de la liste de résultat
+noms_df <- names(liste_resultats_socleo_2023)
+
+# Renommage des noms en remplaçant 'df' par 'bulle'
+noms_socleo <- sub("^df", "socleo ", noms_df)
+
+# Appliquer les nouveaux noms à la liste
+liste_resultats_socleo_2023 <- setNames(liste_resultats_socleo_2023, noms_socleo)
+
+########################## Année 2024 ########################## 
+
+# Noms des jeux de données de la liste de résultat
+noms_df <- names(liste_resultats_socleo_2024)
+
+# Renommage des noms en remplaçant 'df' par 'bulle'
+noms_socleo <- sub("^df", "socleo ", noms_df)
+
+# Appliquer les nouveaux noms à la liste
+liste_resultats_socleo_2024 <- setNames(liste_resultats_socleo_2024, noms_socleo)
+
+###################################################################
+#                                                                 #
+#         Renommage des tables pour coop circuit                  #
+#                                                                 #
+################################################################### 
+
+########################## Année 2021 ########################## 
+
+# Noms des jeux de données de la liste de résultat
+noms_df <- names(liste_resultats_coop_circuit_2021)
+
+# Renommage des noms en remplaçant 'df' par 'bulle'
+noms_coop_circuit <- sub("^df", "coop_circuit ", noms_df)
+
+# Appliquer les nouveaux noms à la liste
+liste_resultats_coop_circuit_2021 <- setNames(liste_resultats_coop_circuit_2021, noms_coop_circuit)
+
+########################## Année 2022 ########################## 
+
+# Noms des jeux de données de la liste de résultat
+noms_df <- names(liste_resultats_coop_circuit_2022)
+
+# Renommage des noms en remplaçant 'df' par 'bulle'
+noms_coop_circuit <- sub("^df", "coop_circuit ", noms_df)
+
+# Appliquer les nouveaux noms à la liste
+liste_resultats_coop_circuit_2022 <- setNames(liste_resultats_coop_circuit_2022, noms_coop_circuit)
+
+########################## Année 2023 ########################## 
+
+# Noms des jeux de données de la liste de résultat
+noms_df <- names(liste_resultats_coop_circuit_2023)
+
+# Renommage des noms en remplaçant 'df' par 'bulle'
+noms_coop_circuit <- sub("^df", "coop_circuit ", noms_df)
+
+# Appliquer les nouveaux noms à la liste
+liste_resultats_coop_circuit_2023 <- setNames(liste_resultats_coop_circuit_2023, noms_coop_circuit)
+
+########################## Année 2024 ########################## 
+
+# Noms des jeux de données de la liste de résultat
+noms_df <- names(liste_resultats_coop_circuit_2024)
+
+# Renommage des noms en remplaçant 'df' par 'bulle'
+noms_coop_circuit <- sub("^df", "coop_circuit ", noms_df)
+
+# Appliquer les nouveaux noms à la liste
+liste_resultats_coop_circuit_2024 <- setNames(liste_resultats_coop_circuit_2024, noms_coop_circuit)
+
+
+###################################################################
+#                                                                 #
+#     Renommage des tables pour la ruche qui dit oui              #
+#                                                                 #
+################################################################### 
+
+########################## Année 2021 ########################## 
+
+###################### Partie 1 : 
+
+# Noms des jeux de données de la liste de résultat
+noms_df <- names(liste_resultats_ruche_oui_2021_part_1)
+
+# Renommage des noms en remplaçant 'df' par 'bulle'
+noms_ruche_oui <- sub("^df", "ruche_qui_dit_oui ", noms_df)
+
+# Appliquer les nouveaux noms à la liste
+liste_resultats_ruche_oui_2021_part_1 <- setNames(liste_resultats_ruche_oui_2021_part_1, noms_ruche_oui)
+
+###################### Partie 2 : 
+
+# Noms des jeux de données de la liste de résultat
+noms_df <- names(liste_resultats_ruche_oui_2021_part_2)
+
+# Renommage des noms en remplaçant 'df' par 'bulle'
+noms_ruche_oui <- sub("^df", "ruche_qui_dit_oui ", noms_df)
+
+# Appliquer les nouveaux noms à la liste
+liste_resultats_ruche_oui_2021_part_2 <- setNames(liste_resultats_ruche_oui_2021_part_2, noms_ruche_oui)
+
+
+########################## Année 2022 ########################## 
+
+# Noms des jeux de données de la liste de résultat
+noms_df <- names(liste_resultats_ruche_oui_2022)
+
+# Renommage des noms en remplaçant 'df' par 'bulle'
+noms_ruche_oui <- sub("^df", "ruche_qui_dit_oui ", noms_df)
+
+# Appliquer les nouveaux noms à la liste
+liste_resultats_ruche_oui_2022 <- setNames(liste_resultats_ruche_oui_2022, noms_ruche_oui)
+
+
+########################## Année 2023 ########################## 
+
+# Noms des jeux de données de la liste de résultat
+noms_df <- names(liste_resultats_ruche_oui_2023)
+
+# Renommage des noms en remplaçant 'df' par 'bulle'
+noms_ruche_oui <- sub("^df", "ruche_qui_dit_oui ", noms_df)
+
+# Appliquer les nouveaux noms à la liste
+liste_resultats_ruche_oui_2023 <- setNames(liste_resultats_ruche_oui_2023, noms_ruche_oui)
+
+########################## Année 2024 ########################## 
+
+# Noms des jeux de données de la liste de résultat
+noms_df <- names(liste_resultats_ruche_oui_2024)
+
+# Renommage des noms en remplaçant 'df' par 'bulle'
+noms_ruche_oui <- sub("^df", "ruche_qui_dit_oui ", noms_df)
+
+# Appliquer les nouveaux noms à la liste
+liste_resultats_ruche_oui_2024 <- setNames(liste_resultats_ruche_oui_2024, noms_ruche_oui)
+
+
+```
+
+# Fusion des fichiers par produit avec toutes les années confondues 
+
+```{r}
+
+###################################################################
+#                                                                 #
+#               Fusion des tables pour socleo                     #
+#                                                                 #
+################################################################### 
+
+########################## Socleo ########################## 
+
+liste_resultats_socleo_tts_annees <- Map(bind_rows, 
+                                        liste_resultats_socleo_2021, 
+                                        liste_resultats_socleo_2022,
+                                        liste_resultats_socleo_2023,
+                                        liste_resultats_socleo_2024)
+
+########################## coop circuit ########################## 
+
+liste_resultats_coop_circuit_tts_annees <- Map(bind_rows, 
+                                        liste_resultats_coop_circuit_2021, 
+                                        liste_resultats_coop_circuit_2022,
+                                        liste_resultats_coop_circuit_2023,
+                                        liste_resultats_coop_circuit_2024)
+
+########################## la ruche qui dit oui ########################## 
+
+# liste_resultats_ruche_oui_tts_annees <- Map(bind_rows, 
+#                                         liste_resultats_ruche_oui_2021_part_1, 
+#                                         liste_resultats_ruche_oui_2021_part_2,
+#                                         liste_resultats_ruche_oui_2022,
+#                                         liste_resultats_ruche_oui_2023,
+#                                         liste_resultats_ruche_oui_2024)
+
+```
+
 
 # Export des fichiers séparés au format csv
 
@@ -206,8 +464,14 @@ export_fichiers_separes <- function(liste_df, dossier_export = "export_csv_legum
 
 }
 
-# Test 
+########################## Socleo ########################## 
 
-export_fichiers_separes(liste_resultats_socleo_2021, dossier_export = "export_csv_legumes")
+export_fichiers_separes(liste_resultats_socleo_tts_annees, dossier_export = "export_csv_socleo")
+
+########################## coop circuit ########################## 
+
+export_fichiers_separes(liste_resultats_coop_circuit_tts_annees, dossier_export = "export_csv_coop_circuit")
+
+########################## la ruche qui dit oui ########################## 
 
 ```
