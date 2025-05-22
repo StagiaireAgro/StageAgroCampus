@@ -463,6 +463,25 @@ export_fichiers_separes <- function(liste_df, dossier_export = "export_csv_legum
   }
 
 }
+recherche_termes <- function(dataset, liste_mots){
+  liste_mots <- stri_trans_general(str_to_lower(liste_mots), "Latin-ASCII")
+  res <- list()
+  for(i in 1:length(dataset)){
+    data <- dataset[[i]]
+    levels_names <- levels(as.factor(data[["name_clean"]]))
+    for(lv_name in levels_names){
+      for(word in liste_mots[liste_mots!=data[["produit"]][1]]){
+        if(grepl(word, lv_name)){
+          nom_table <- paste0("Nom de la table", data[["produit"]][1], sep=" ")
+          mot_trouve <- paste0("Mot trouve ", word, sep=" ")
+          phrase_ecrite <- paste0("Saisie user ", lv_name, sep=" ")
+          res[[data[["produit"]][1]]] <- paste0("Saisie user : ", lv_name, " Mot trouve : ", word, sep=" ")
+        }
+      }
+    }
+  }
+  return(res)
+}
 
 ########################## Socleo ########################## 
 
