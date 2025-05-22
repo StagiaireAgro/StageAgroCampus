@@ -46,13 +46,13 @@ data_ruche_oui_2024 <- read.csv("data/la ruche qui dit oui/historique_2024.csv",
 liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
                      "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", 
                      "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", 
-                     "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Œuf", "Boeuf", "Porc", "Poulet", "Lentille")
+                     "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait","Boeuf", "oeuf", "Porc", "Poulet", "Lentille")
 
 # Liste des mots-clés de produits  (au pluriel)
 liste_mots_cles_pluriel <- c("Abricots", "Bananes", "Cerises", "Clémentines", "Fraises", "Kiwis", "Nectarines", "Noix", "Pêches", "Poires", 
                      "Pommes de terre", "Jus de Pommes", "Pommes", "Prunes", "Raisins", "Asperges", "Aubergines", "Carottes", 
                      "Céleri-branches", "Choux fleurs", "Concombres", "Courgettes", "Endives", "Haricots verts", "Laitues", "Melons", 
-                     "Oignons", "Poireaux", "Poivrons", "Potirons", "Tomates", "Laits", "Œufs", "Boeufs", "Porcs", "Poulets", "Lentilles")
+                     "Oignons", "Poireaux", "Poivrons", "Potirons", "Tomates", "Laits","Boeufs", "oeuf","Porcs", "Poulets", "Lentilles")
 
 # Correspondance entre mots au pluriel et leur forme au singulier
 correspondance_pluriel <- c(
@@ -260,7 +260,7 @@ liste_resultats_socleo_2021 <- setNames(liste_resultats_socleo_2021, noms_socleo
 noms_df <- names(liste_resultats_socleo_2022)
 
 # Renommage des noms en remplaçant 'df' par 'bulle'
-noms_socleo <- sub("^df", "socleo ", noms_df)
+noms_socleo <- sub("^df", "socleo", noms_df)
 
 # Appliquer les nouveaux noms à la liste
 liste_resultats_socleo_2022 <- setNames(liste_resultats_socleo_2022, noms_socleo)
@@ -271,7 +271,7 @@ liste_resultats_socleo_2022 <- setNames(liste_resultats_socleo_2022, noms_socleo
 noms_df <- names(liste_resultats_socleo_2023)
 
 # Renommage des noms en remplaçant 'df' par 'bulle'
-noms_socleo <- sub("^df", "socleo ", noms_df)
+noms_socleo <- sub("^df", "socleo", noms_df)
 
 # Appliquer les nouveaux noms à la liste
 liste_resultats_socleo_2023 <- setNames(liste_resultats_socleo_2023, noms_socleo)
@@ -282,7 +282,7 @@ liste_resultats_socleo_2023 <- setNames(liste_resultats_socleo_2023, noms_socleo
 noms_df <- names(liste_resultats_socleo_2024)
 
 # Renommage des noms en remplaçant 'df' par 'bulle'
-noms_socleo <- sub("^df", "socleo ", noms_df)
+noms_socleo <- sub("^df", "socleo", noms_df)
 
 # Appliquer les nouveaux noms à la liste
 liste_resultats_socleo_2024 <- setNames(liste_resultats_socleo_2024, noms_socleo)
@@ -299,7 +299,7 @@ liste_resultats_socleo_2024 <- setNames(liste_resultats_socleo_2024, noms_socleo
 noms_df <- names(liste_resultats_coop_circuit_2021)
 
 # Renommage des noms en remplaçant 'df' par 'bulle'
-noms_coop_circuit <- sub("^df", "coop_circuit ", noms_df)
+noms_coop_circuit <- sub("^df", "coop_circuit", noms_df)
 
 # Appliquer les nouveaux noms à la liste
 liste_resultats_coop_circuit_2021 <- setNames(liste_resultats_coop_circuit_2021, noms_coop_circuit)
@@ -310,7 +310,7 @@ liste_resultats_coop_circuit_2021 <- setNames(liste_resultats_coop_circuit_2021,
 noms_df <- names(liste_resultats_coop_circuit_2022)
 
 # Renommage des noms en remplaçant 'df' par 'bulle'
-noms_coop_circuit <- sub("^df", "coop_circuit ", noms_df)
+noms_coop_circuit <- sub("^df", "coop_circuit", noms_df)
 
 # Appliquer les nouveaux noms à la liste
 liste_resultats_coop_circuit_2022 <- setNames(liste_resultats_coop_circuit_2022, noms_coop_circuit)
@@ -321,7 +321,7 @@ liste_resultats_coop_circuit_2022 <- setNames(liste_resultats_coop_circuit_2022,
 noms_df <- names(liste_resultats_coop_circuit_2023)
 
 # Renommage des noms en remplaçant 'df' par 'bulle'
-noms_coop_circuit <- sub("^df", "coop_circuit ", noms_df)
+noms_coop_circuit <- sub("^df", "coop_circuit", noms_df)
 
 # Appliquer les nouveaux noms à la liste
 liste_resultats_coop_circuit_2023 <- setNames(liste_resultats_coop_circuit_2023, noms_coop_circuit)
@@ -332,7 +332,7 @@ liste_resultats_coop_circuit_2023 <- setNames(liste_resultats_coop_circuit_2023,
 noms_df <- names(liste_resultats_coop_circuit_2024)
 
 # Renommage des noms en remplaçant 'df' par 'bulle'
-noms_coop_circuit <- sub("^df", "coop_circuit ", noms_df)
+noms_coop_circuit <- sub("^df", "coop_circuit", noms_df)
 
 # Appliquer les nouveaux noms à la liste
 liste_resultats_coop_circuit_2024 <- setNames(liste_resultats_coop_circuit_2024, noms_coop_circuit)
@@ -352,7 +352,7 @@ liste_resultats_coop_circuit_2024 <- setNames(liste_resultats_coop_circuit_2024,
 noms_df <- names(liste_resultats_ruche_oui_2021_part_1)
 
 # Renommage des noms en remplaçant 'df' par 'bulle'
-noms_ruche_oui <- sub("^df", "ruche_qui_dit_oui ", noms_df)
+noms_ruche_oui <- sub("^df", "ruche_qui_dit_oui", noms_df)
 
 # Appliquer les nouveaux noms à la liste
 liste_resultats_ruche_oui_2021_part_1 <- setNames(liste_resultats_ruche_oui_2021_part_1, noms_ruche_oui)
@@ -363,7 +363,7 @@ liste_resultats_ruche_oui_2021_part_1 <- setNames(liste_resultats_ruche_oui_2021
 noms_df <- names(liste_resultats_ruche_oui_2021_part_2)
 
 # Renommage des noms en remplaçant 'df' par 'bulle'
-noms_ruche_oui <- sub("^df", "ruche_qui_dit_oui ", noms_df)
+noms_ruche_oui <- sub("^df", "ruche_qui_dit_oui", noms_df)
 
 # Appliquer les nouveaux noms à la liste
 liste_resultats_ruche_oui_2021_part_2 <- setNames(liste_resultats_ruche_oui_2021_part_2, noms_ruche_oui)
@@ -375,7 +375,7 @@ liste_resultats_ruche_oui_2021_part_2 <- setNames(liste_resultats_ruche_oui_2021
 noms_df <- names(liste_resultats_ruche_oui_2022)
 
 # Renommage des noms en remplaçant 'df' par 'bulle'
-noms_ruche_oui <- sub("^df", "ruche_qui_dit_oui ", noms_df)
+noms_ruche_oui <- sub("^df", "ruche_qui_dit_oui", noms_df)
 
 # Appliquer les nouveaux noms à la liste
 liste_resultats_ruche_oui_2022 <- setNames(liste_resultats_ruche_oui_2022, noms_ruche_oui)
@@ -387,7 +387,7 @@ liste_resultats_ruche_oui_2022 <- setNames(liste_resultats_ruche_oui_2022, noms_
 noms_df <- names(liste_resultats_ruche_oui_2023)
 
 # Renommage des noms en remplaçant 'df' par 'bulle'
-noms_ruche_oui <- sub("^df", "ruche_qui_dit_oui ", noms_df)
+noms_ruche_oui <- sub("^df", "ruche_qui_dit_oui", noms_df)
 
 # Appliquer les nouveaux noms à la liste
 liste_resultats_ruche_oui_2023 <- setNames(liste_resultats_ruche_oui_2023, noms_ruche_oui)
@@ -398,7 +398,7 @@ liste_resultats_ruche_oui_2023 <- setNames(liste_resultats_ruche_oui_2023, noms_
 noms_df <- names(liste_resultats_ruche_oui_2024)
 
 # Renommage des noms en remplaçant 'df' par 'bulle'
-noms_ruche_oui <- sub("^df", "ruche_qui_dit_oui ", noms_df)
+noms_ruche_oui <- sub("^df", "ruche_qui_dit_oui", noms_df)
 
 # Appliquer les nouveaux noms à la liste
 liste_resultats_ruche_oui_2024 <- setNames(liste_resultats_ruche_oui_2024, noms_ruche_oui)
@@ -443,6 +443,256 @@ liste_resultats_coop_circuit_tts_annees <- Map(bind_rows,
 
 ```
 
+# Vérification des produits 
+
+```{r}
+recherche_termes <- function(dataset, liste_mots){
+  liste_mots <- stri_trans_general(str_to_lower(liste_mots), "Latin-ASCII")
+  res <- list()
+  for(i in 1:length(dataset)){
+    data <- dataset[[i]]
+    levels_names <- levels(as.factor(data[["name_clean"]]))
+    for(lv_name in levels_names){
+      for(word in liste_mots[liste_mots!=data[["produit"]][1]]){
+        if(grepl(word, lv_name)){
+          nom_table <- paste0("Nom de la table", data[["produit"]][1], sep=" ")
+          mot_trouve <- paste0("Mot trouve ", word, sep=" ")
+          phrase_ecrite <- paste0("Saisie user ", lv_name, sep=" ")
+          res[[data[["produit"]][1]]] <- paste0("Saisie user : ", lv_name, " Mot trouve : ", word, sep=" ")
+        }
+      }
+    }
+  }
+  return(res)
+}
+
+#############################################
+#                                           #
+#               Tests                       #
+#                                           #  
+#############################################
+
+########################## Socleo ########################## 
+
+############################## 2021
+
+# On retire le df_autres 
+liste_socleo_sans_autres_2021 <- liste_resultats_socleo_2021[names(liste_resultats_socleo_2021) != "socleo_autres"]
+
+# Liste des mots 
+liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
+                     "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", 
+                     "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", 
+                     "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Boeuf", "oeuf", "Porc", "Poulet", "Lentille")
+
+
+# On Teste la fonction
+verif_socleo_2021 <- recherche_termes(liste_socleo_sans_autres_2021,liste_mots_cles)
+
+# Nombre de jeux de données présent dans la liste de vérification 
+length(verif_socleo_2021)
+
+############################## 2022
+
+# On retire le df_autres 
+liste_socleo_sans_autres_2022 <- liste_resultats_socleo_2022[names(liste_resultats_socleo_2022) != "socleo_autres"]
+
+# Liste des mots 
+liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
+                     "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", 
+                     "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", 
+                     "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Boeuf", "oeuf", "Porc", "Poulet", "Lentille")
+
+
+# On Teste la fonction
+verif_socleo_2022 <- recherche_termes(liste_socleo_sans_autres_2022,liste_mots_cles)
+
+############################## 2023
+
+# On retire le df_autres 
+liste_socleo_sans_autres_2023 <- liste_resultats_socleo_2023[names(liste_resultats_socleo_2023) != "socleo _autres"]
+
+# Liste des mots 
+liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
+                     "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", 
+                     "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", 
+                     "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Boeuf", "oeuf", "Porc", "Poulet", "Lentille")
+
+
+# On Teste la fonction
+verif_socleo_2023 <- recherche_termes(liste_socleo_sans_autres_2023,liste_mots_cles)
+
+############################## 2024
+
+# On retire le df_autres 
+liste_socleo_sans_autres_2024 <- liste_resultats_socleo_2024[names(liste_resultats_socleo_2024) != "socleo _autres"]
+
+# Liste des mots 
+liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
+                     "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", 
+                     "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", 
+                     "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Boeuf", "oeuf", "Porc", "Poulet", "Lentille")
+
+
+# On Teste la fonction
+verif_socleo_2024 <- recherche_termes(liste_socleo_sans_autres_2024,liste_mots_cles)
+
+
+########################## coop circuit ########################## 
+
+############################## 2021
+
+# On retire le df_autres 
+liste_coop_circuit_sans_autres_2021 <- liste_resultats_coop_circuit_2021[names(liste_resultats_coop_circuit_2021) != "coop_circuit _autres"]
+
+# Liste des mots 
+liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
+                     "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", 
+                     "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", 
+                     "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Boeuf", "oeuf", "Porc", "Poulet", "Lentille")
+
+
+# On Teste la fonction
+verif_coop_circuit_2021 <- recherche_termes(liste_coop_circuit_sans_autres_2021,liste_mots_cles)
+
+############################## 2022
+
+# On retire le df_autres 
+liste_coop_circuit_sans_autres_2022 <- liste_resultats_coop_circuit_2022[names(liste_resultats_coop_circuit_2022) != "coop_circuit _autres"]
+
+# Liste des mots 
+liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
+                     "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", 
+                     "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", 
+                     "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Boeuf", "oeuf", "Porc", "Poulet", "Lentille")
+
+
+# On Teste la fonction
+verif_coop_circuit_2022 <- recherche_termes(liste_coop_circuit_sans_autres_2022,liste_mots_cles)
+
+############################## 2023
+
+# On retire le df_autres 
+liste_coop_circuit_sans_autres_2023 <- liste_resultats_coop_circuit_2023[names(liste_resultats_coop_circuit_2023) != "coop_circuit _autres"]
+
+# Liste des mots 
+liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
+                     "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", 
+                     "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", 
+                     "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Boeuf", "oeuf", "Porc", "Poulet", "Lentille")
+
+
+# On Teste la fonction
+verif_coop_circuit_2023 <- recherche_termes(liste_coop_circuit_sans_autres_2023,liste_mots_cles)
+
+############################## 2024
+
+# On retire le df_autres 
+liste_coop_circuit_sans_autres_2024 <- liste_resultats_coop_circuit_2024[names(liste_resultats_coop_circuit_2024) != "coop_circuit _autres"]
+
+# Liste des mots 
+liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
+                     "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", 
+                     "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", 
+                     "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Boeuf", "oeuf", "Porc", "Poulet", "Lentille")
+
+
+# On Teste la fonction
+verif_coop_circuit_2024 <- recherche_termes(liste_coop_circuit_sans_autres_2024,liste_mots_cles)
+
+
+########################## la ruche qui dit oui ########################## 
+
+############################## 2021
+
+################ Partie 1 : 
+
+# On retire le df_autres 
+liste_ruche_qui_dit_oui_sans_autres_2021_part_1 <- 
+  liste_resultats_ruche_oui_2021_part_1[names(liste_resultats_ruche_oui_2021_part_1) != 
+                                   "ruche_qui_dit_oui _autres"]
+
+# Liste des mots 
+liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
+                     "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", 
+                     "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", 
+                     "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Boeuf", "oeuf", "Porc", "Poulet", "Lentille")
+
+
+# On Teste la fonction
+verif_ruche_qui_dit_oui_2021_part_1 <- recherche_termes(liste_ruche_qui_dit_oui_sans_autres_2021_part_1,liste_mots_cles)
+
+################ Partie 2 : 
+
+# On retire le df_autres 
+liste_ruche_qui_dit_oui_sans_autres_2021_part_2 <- 
+  liste_resultats_ruche_oui_2021_part_2[names(liste_resultats_ruche_oui_2021_part_2) != 
+                                          "ruche_qui_dit_oui _autres"]
+
+# Liste des mots 
+liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
+                     "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", 
+                     "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", 
+                     "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Boeuf", "oeuf", "Porc", "Poulet", "Lentille")
+
+
+# On Teste la fonction
+verif_ruche_qui_dit_oui_2021_part_2 <- recherche_termes(liste_ruche_qui_dit_oui_sans_autres_2021_part_2,liste_mots_cles)
+
+
+############################## 2022
+
+# On retire le df_autres 
+liste_ruche_qui_dit_oui_sans_autres_2022 <- 
+  liste_resultats_ruche_oui_2022[names(liste_resultats_ruche_oui_2022) != 
+                                                                     "ruche_qui_dit_oui _autres"]
+
+# Liste des mots 
+liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
+                     "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", 
+                     "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", 
+                     "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Boeuf", "oeuf", "Porc", "Poulet", "Lentille")
+
+
+# On Teste la fonction
+verif_ruche_qui_dit_oui_2022 <- recherche_termes(liste_ruche_qui_dit_oui_sans_autres_2022,liste_mots_cles)
+
+############################## 2023
+
+# On retire le df_autres 
+liste_ruche_qui_dit_oui_sans_autres_2023 <- 
+  liste_resultats_ruche_oui_2023[names(liste_resultats_ruche_oui_2023) != 
+                                   "ruche_qui_dit_oui _autres"]
+
+# Liste des mots 
+liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
+                     "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", 
+                     "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", 
+                     "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Boeuf", "oeuf", "Porc", "Poulet", "Lentille")
+
+
+# On Teste la fonction
+verif_ruche_qui_dit_oui_2023 <- recherche_termes(liste_ruche_qui_dit_oui_sans_autres_2023,liste_mots_cles)
+
+############################## 2024
+
+# On retire le df_autres 
+liste_ruche_qui_dit_oui_sans_autres_2024 <- 
+  liste_resultats_ruche_oui_2024[names(liste_resultats_ruche_oui_2024) != 
+                                   "ruche_qui_dit_oui _autres"]
+
+# Liste des mots 
+liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
+                     "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", 
+                     "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", 
+                     "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Boeuf", "oeuf", "Porc", "Poulet", "Lentille")
+
+
+# On Teste la fonction
+verif_ruche_qui_dit_oui_2024 <- recherche_termes(liste_ruche_qui_dit_oui_sans_autres_2024,liste_mots_cles)
+
+```
+
 
 # Export des fichiers séparés au format csv
 
@@ -462,25 +712,6 @@ export_fichiers_separes <- function(liste_df, dossier_export = "export_csv_legum
     write.csv(liste_df[[nom_df]], file = chemin_fichier, row.names = FALSE, fileEncoding = "UTF-8")
   }
 
-}
-recherche_termes <- function(dataset, liste_mots){
-  liste_mots <- stri_trans_general(str_to_lower(liste_mots), "Latin-ASCII")
-  res <- list()
-  for(i in 1:length(dataset)){
-    data <- dataset[[i]]
-    levels_names <- levels(as.factor(data[["name_clean"]]))
-    for(lv_name in levels_names){
-      for(word in liste_mots[liste_mots!=data[["produit"]][1]]){
-        if(grepl(word, lv_name)){
-          nom_table <- paste0("Nom de la table", data[["produit"]][1], sep=" ")
-          mot_trouve <- paste0("Mot trouve ", word, sep=" ")
-          phrase_ecrite <- paste0("Saisie user ", lv_name, sep=" ")
-          res[[data[["produit"]][1]]] <- paste0("Saisie user : ", lv_name, " Mot trouve : ", word, sep=" ")
-        }
-      }
-    }
-  }
-  return(res)
 }
 
 ########################## Socleo ########################## 
