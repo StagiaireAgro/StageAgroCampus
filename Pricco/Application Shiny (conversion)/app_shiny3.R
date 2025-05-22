@@ -394,7 +394,7 @@ server <- function(input, output, session) {
       paste0(nom_data(),"_OK",".csv")
     },
     content = function(file) {
-      write.csv(dt_final(), file, row.names = TRUE)
+      write.csv(dt_final(), file, row.names = FALSE)
     })
   
   output$download_non_calcule <- downloadHandler(
@@ -402,7 +402,7 @@ server <- function(input, output, session) {
       paste0(nom_data(),"_PAS_OK",".csv")
     },
     content = function(file) {
-      write.csv(data_non_calc(), file, row.names = TRUE)
+      write.csv(data_non_calc(), file, row.names = FALSE)
     })
   
   # Selection de la vairable prix
@@ -455,9 +455,9 @@ server <- function(input, output, session) {
     
     e_i_q <- quantile(dt$pp_kilo, 0.75) - quantile(dt$pp_kilo, 0.25)
     
-    dt_clean <- dt[dt$pp_kilo <= quantile(dt$pp_kilo, 0.75) + 1.5*e_i_q & dt$pp_kilo >= quantile(dt$pp_kilo, 0.25) - 1.5*e_i_q,]
+    dt_clean <- dt[(dt$pp_kilo <= quantile(dt$pp_kilo, 0.75) + 1.5*e_i_q & dt$pp_kilo >= quantile(dt$pp_kilo, 0.25) - 1.5*e_i_q),]
     
-    dt_nclean <- dt[(dt$pp_kilo > quantile(dt$pp_kilo, 0.75) - 1.5*e_i_q | dt$pp_kilo < quantile(dt$pp_kilo, 0.25) - 1.5*e_i_q),]
+    dt_nclean <- dt[(dt$pp_kilo > quantile(dt$pp_kilo, 0.75) + 1.5*e_i_q | dt$pp_kilo < quantile(dt$pp_kilo, 0.25) - 1.5*e_i_q),]
     
     dt_vab(dt_nclean)
     
@@ -481,7 +481,7 @@ server <- function(input, output, session) {
       paste0(nom_data(),"mean_per_months",".csv")
     },
     content = function(file) {
-      write.csv(dt_months(), file, row.names = TRUE)
+      write.csv(dt_months(), file, row.names = FALSE)
     })
   
   output$dtout_vab <- renderDT({
