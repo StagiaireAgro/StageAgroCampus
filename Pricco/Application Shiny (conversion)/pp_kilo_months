@@ -1,0 +1,208 @@
+library(shiny)
+library(DT)
+library(dplyr)
+
+path <- "clean_data/cagette"
+
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel("Calcul du Kg conditionné",
+                 
+                 # Slection du fichier
+                 tags$hr(style = "border-top: 2px solid #999;"),
+                 h4("Jeu de données"),
+                 
+                 
+                 
+                 uiOutput("file_list"),
+                 
+                 textInput("sep","Quel est le délimitateur ?", value = ","),
+                 textInput("dec","Quel est le séparateur de décimale ?", value = "."),
+                 
+                 actionButton("valide_file", "Valider le fichier selectione"),
+                 textOutput("file_valide"),
+                 
+                 # Slection de la varaible quantite du conditionnement
+                 
+                 uiOutput("selct_var_kg"),
+                 
+                 # Selection du prix et du nombre d'achat et date
+                 
+                 uiOutput("price"),
+                 uiOutput("order_quantity"),
+                 uiOutput("date"),
+                 
+                 actionButton("apply_var", "Définir"),
+    ),
+    mainPanel(
+      tabsetPanel(
+        tabPanel("Jeu de données",
+                 dataTableOutput("file_csv")),
+        tabPanel("Prix au kilo",
+                 downloadButton("download_mean_per_months", "Télécharger"),
+                 dataTableOutput("prix_au_kilo"),
+                 h4("Jeu de données aberrantes"),
+                 dataTableOutput("dtout_vab"))
+    
+    
+  ))
+  ))
+  
+
+server <- function(input, output, session) {
+  
+  data_select <- reactiveVal(NULL)
+  nom_data <- reactiveVal(NULL)
+  
+  # Slection du fichier
+  
+  output$file_list <- renderUI({
+    choice <- list.files(path = path) # On peut changer le chemin
+    selectInput("select_file", "Sélectionnez un fichier", choices = choice)
+  })
+  
+  observeEvent(input$valide_file,{
+    req(input$select_file)
+    
+    file_path <- input$select_file
+    
+    dt <- read.csv(paste(path,"/", input$select_file, sep = ""), sep = input$sep, dec = input$dec) # on peut changer le chemin
+    
+    data_select(dt)
+    nom <- substr(input$select_file, 1, nchar(input$select_file)-4) # On enlève le .csv
+    nom_data(nom)
+  })
+  
+  output$file_valide <- renderText({
+    
+    if (is.null(data_select())){
+      "Aucun fichier selectione"
+    }
+    else{
+      paste("Fichier valide :", nom_data())
+    }
+  })
+  
+  output$file_csv <- renderDT({
+    req(input$valide_file)
+    data_select()
+  })
+  
+  # Selection du la variable quantite de 'unite
+  
+  output$selct_var_kg <- renderUI({
+    req(input$valide_file)
+    
+    dt <- data_select()
+    choice <- names(dt)
+    selectInput("var_kg", "Sélectionnez la vaiable de kg :", choices = choice, selected = NULL)
+    
+  })
+  
+  var_kg <- reactiveVal(NULL)
+  
+  order_qt <- reactiveVal(NULL)
+  
+  order_price <- reactiveVal(NULL)
+  
+  order_date <- reactiveVal(NULL)
+  
+  observeEvent(input$apply_var, {
+    
+    var_kg(input$var_kg)
+    
+    order_qt(input$selected_order_quantity)
+    
+    order_price(input$selected_price)
+    
+    order_date(input$selected_date)
+  })
+  
+  # Selection de la vairable prix
+  
+  output$price <- renderUI({
+    req(data_select())
+    
+    choices <- names(data_select())
+    
+    selectInput("selected_price", "Sélectionnez la variable de prix :", choices = choices)
+  })
+  
+  # Sélection du nombre d'achat du produit
+  
+  output$order_quantity <- renderUI({
+    req(data_select())
+    
+    choices <- names(data_select())
+    
+    selectInput("selected_order_quantity", "Sélectionnez la variable du nombre de produit acheté :", choices = choices)
+  })
+  
+  # Sélection de la date
+  
+  output$date <- renderUI({
+    req(data_select())
+    
+    choices <- names(data_select())
+    
+    selectInput("selected_date", "Sélectionnez la variable date :", choices = choices)
+  })
+  
+  # calcul du prix au kilo (moyenne ponderee par mois)
+  
+  dt_vab <- reactiveVal(NULL)
+  dt_months <- reactiveVal(NULL)
+  
+  output$prix_au_kilo <- renderDT({
+    req(data_select())
+    
+    dt <- data_select()
+    
+    dt$pp_kilo <- dt[[order_price()]]/dt[[var_kg()]]
+    
+    # Calcul des mois
+    
+    dt$month <- format(as.Date(dt[[order_date()]]), "%m-%Y")
+    
+    # ENLEVER VALEURS ABERANTES
+    
+    e_i_q <- quantile(dt$pp_kilo, 0.75) - quantile(dt$pp_kilo, 0.25)
+    
+    dt_clean <- dt[!(dt$pp_kilo > quantile(dt$pp_kilo, 0.75) + 1.5*e_i_q | dt$pp_kilo < quantile(dt$pp_kilo, 0.25) - 1.5*e_i_q),]
+    
+    dt_nclean <- dt[(dt$pp_kilo > quantile(dt$pp_kilo, 0.75) - 1.5*e_i_q | dt$pp_kilo < quantile(dt$pp_kilo, 0.25) - 1.5*e_i_q),]
+    
+    dt_vab(dt_nclean)
+    
+    # CALCUL MOYENNE PONDEREE PAR MOIS
+    
+    dt_m <-   dt_clean %>% 
+      group_by(month) %>% 
+      summarise(
+        moyenne_ponderee = sum(pp_kilo * .data[[order_qt()]], na.rm = TRUE) / 
+          sum(.data[[order_qt()]], na.rm = TRUE),
+        .groups = "drop"
+      )
+    
+    dt_months(data.frame(dt_m))
+    
+    return(dt_months())
+  })
+  
+  output$download_mean_per_months <- downloadHandler(
+    filename = function() {
+      paste0(nom_data(),"mean_per_months",".csv")
+    },
+    content = function(file) {
+      write.csv(dt_months(), file, row.names = TRUE)
+    })
+  
+  output$dtout_vab <- renderDT({
+    req(dt_vab())
+    
+    dt_vab()
+    
+  })
+}
+  
+shinyApp(ui, server)
