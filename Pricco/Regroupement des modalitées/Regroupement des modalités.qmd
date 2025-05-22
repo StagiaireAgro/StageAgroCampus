@@ -67,14 +67,14 @@ regrouper_produits <- function(df) {
       # 1. Mise en minuscule pour éviter les erreurs de casse
       name_clean = str_to_lower(name),
       
-      # 2. Suppression des accents (ex : "pêche" devient "peche")
+      # 2. Suppression des accents (ex : "pêche" → "peche")
       name_clean = stri_trans_general(name_clean, "Latin-ASCII"),
       
       # 3. Suppression des caractères spéciaux (ex : apostrophes, tirets)
       name_clean = str_replace_all(name_clean, "[^a-z ]", "")
     )
   
-  # Détection vectorielle des mots au pluriel. Exemple : pommes, abricots etc.
+  # Détection vectorielle des mots au pluriel (non utilisée ensuite dans le code, pourrait être supprimée)
   df <- df %>%
     mutate(
       pluriel_detecte = str_detect(name_clean, str_c("\\b(", str_c(liste_mots_cles_pluriel, collapse = "|"), ")\\b"))
@@ -93,7 +93,7 @@ regrouper_produits <- function(df) {
     ungroup() %>%
     # On garde uniquement les lignes qui contiennent 0 ou 1 mot-clé
     filter(mots_trouves <= 1)
-  
+
   
   # III) Création d’une variable vide pour indiquer le produit détecté
   df$produit <- NA_character_
@@ -107,7 +107,7 @@ regrouper_produits <- function(df) {
     # Création d’un masque logique pour détecter les lignes contenant ce mot (non encore assignées à un produit)
     mask <- str_detect(df$name_clean, regex(paste0("\\b", mot_cle, "\\b"), ignore_case = TRUE)) & is.na(df$produit)
     
-    # Si des lignes correspondent à ce mask
+    # Si des lignes correspondent
     if (any(mask)) {
       
       # On ramène la forme trouvée à son équivalent singulier
@@ -141,7 +141,6 @@ regrouper_produits <- function(df) {
   # VII) Retour de la liste complète des jeux de données
   return(resultats_liste)
 }
-
 
 ```
 
