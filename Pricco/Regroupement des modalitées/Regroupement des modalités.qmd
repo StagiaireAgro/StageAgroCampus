@@ -27,64 +27,125 @@ data_coop_circuit_2021 <- read.csv("data/coop circuit/par annee/2021.csv",sep = 
 data_ruche_oui_2021 <- read.csv("data/la ruche qui dit oui/historique_2021part1.csv",sep = ";")
 ```
 
-# Regroupement de modalités
+# Séparation des fichiers
 
 ```{r}
 # Liste des mots-clés de produits
-liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Œuf", "Boeuf", "Porc", "Poulet", "Lentille")
+liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
+                     "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", 
+                     "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", 
+                     "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Œuf", "Boeuf", "Porc", "Poulet", "Lentille")
 
-# Fonction
+# Correspondance entre mots au pluriel et leur forme au singulier
+correspondance_pluriel <- c(
+  "abricots" = "abricot", "bananes" = "banane", "cerises" = "cerise", "clémentines" = "clémentine",
+  "fraises" = "fraise", "kiwis" = "kiwi", "nectarines" = "nectarine", "noix" = "noix", "pêches" = "pêche",
+  "poires" = "poire", "pommes de terre" = "pomme de terre", "jus de pommes" = "jus de pomme",
+  "pommes" = "pomme", "prunes" = "prune", "raisins" = "raisin", "asperges" = "asperge",
+  "aubergines" = "aubergine", "carottes" = "carotte", "céleris-branches" = "céleri-branche",
+  "choux fleurs" = "chou fleur", "concombres" = "concombre", "courgettes" = "courgette",
+  "endives" = "endive", "haricots verts" = "haricot vert", "laitues" = "laitue", "melons" = "melon",
+  "oignons" = "oignon", "poireaux" = "poireau", "poivrons" = "poivron", "potirons" = "potiron",
+  "tomates" = "tomate", "laits" = "lait", "œufs" = "œuf", "bœufs" = "boeuf", "porcs" = "porc",
+  "poulets" = "poulet", "lentilles" = "lentille"
+)
+
+# On crée une liste combinée : mots au singulier et formes plurielles
+mots_clefs_etendus <- unique(c(liste_mots_cles, names(correspondance_pluriel)))
+
+# On trie les mots par ordre décroissant de longueur, pour éviter qu’un mot court capte une expression plus longue (ex : "pomme" avant "pomme de terre")
+mots_clefs_etendus <- mots_clefs_etendus[order(nchar(mots_clefs_etendus), decreasing = TRUE)]
+
+
+
+# Fonction principale de regroupement des produits
 regrouper_produits <- function(df) {
   
   # I) Nettoyage du nom des modalités 
   df <- df %>%
     mutate(
-      # 1. Met en minuscule
+      # 1. Mise en minuscule pour éviter les erreurs de casse
       name_clean = str_to_lower(name),
       
-      # 2. Supprime les accents
+      # 2. Suppression des accents (ex : "pêche" devient "peche")
       name_clean = stri_trans_general(name_clean, "Latin-ASCII"),
       
-      # 3. Supprime les caractères spéciaux éventuels
+      # 3. Suppression des caractères spéciaux (ex : apostrophes, tirets)
       name_clean = str_replace_all(name_clean, "[^a-z ]", "")
+    )
+  
+  # Détection vectorielle des mots au pluriel. Exemple : pommes, abricots etc.
+  df <- df %>%
+    mutate(
+      pluriel_detecte = str_detect(name_clean, str_c("\\b(", str_c(liste_mots_cles_pluriel, collapse = "|"), ")\\b"))
     )
   
   # II) Supprimer les lignes contenant plus d’un mot-clé
   df <- df %>%
     rowwise() %>%
     mutate(
-      mots_trouves = sum(str_to_lower(liste_mots_cles) %in% str_extract_all(name_clean, "\\b[a-z]+\\b")[[1]])
+      # On compte combien de mots-clés apparaissent dans chaque ligne (singulier + pluriel)
+      mots_trouves = sum(
+        str_to_lower(c(liste_mots_cles, names(correspondance_pluriel))) %in%
+          str_extract_all(name_clean, "\\b[a-z]+\\b")[[1]]
+      )
     ) %>%
     ungroup() %>%
-    filter(mots_trouves <= 1) # On garde les lignes avec 0 ou 1 mot-clé trouvé
+    # On garde uniquement les lignes qui contiennent 0 ou 1 mot-clé
+    filter(mots_trouves <= 1)
   
-  # III) Variables pour marquer les lignes déjà assignées
+  
+  # III) Création d’une variable vide pour indiquer le produit détecté
   df$produit <- NA_character_
   
-  # IV) Liste pour stocker les jeux de données filtrés
+  # IV) Initialisation d’une liste vide pour stocker les dataframes filtrés
   resultats_liste <- list()
   
-  # V) Boucle sur chaque mot-clé pour créer un sous-dataframe
-  for (mot_cle in liste_mots_cles) {
-    mask <- grepl(mot_cle, df$name_clean, ignore.case = TRUE) & is.na(df$produit)
+  # V) Boucle sur chaque mot-clé (singulier ou pluriel)
+  for (mot_cle in mots_clefs_etendus) {
     
+    # Création d’un masque logique pour détecter les lignes contenant ce mot (non encore assignées à un produit)
+    mask <- str_detect(df$name_clean, regex(paste0("\\b", mot_cle, "\\b"), ignore_case = TRUE)) & is.na(df$produit)
+    
+    # Si des lignes correspondent à ce mask
     if (any(mask)) {
-      df$produit[mask] <- mot_cle
       
+      # On ramène la forme trouvée à son équivalent singulier
+      mot_singulier <- ifelse(
+        mot_cle %in% names(correspondance_pluriel),
+        correspondance_pluriel[[mot_cle]],
+        mot_cle
+      )
+      
+      # Mise en minuscule du mot-clé pour cohérence
+      mot_singulier <- str_to_lower(mot_singulier)
+      
+      # On affecte le nom du produit à ces lignes
+      df$produit[mask] <- mot_singulier
+      
+      # On extrait les lignes correspondantes
       df_temp <- df[mask, ]
-      nom_objet <- paste0("df_", gsub(" ", "_", mot_cle))
-      resultats_liste[[nom_objet]] <- df_temp
+      
+      # On construit le nom de l’objet dans la liste, en remplaçant les espaces par des underscores
+      nom_objet <- paste0("df_", gsub(" ", "_", mot_singulier))
+      
+      # On ajoute ou on complète le sous-dataframe correspondant dans la liste de résultats
+      resultats_liste[[nom_objet]] <- bind_rows(resultats_liste[[nom_objet]], df_temp)
     }
   }
   
-  # VI) Gestion des modalités restantes (non reconnues)
+  # VI) Récupération des lignes restantes (produits non reconnus)
   df_autres <- df[is.na(df$produit), ]
   resultats_liste[["df_autres"]] <- df_autres
   
   # VII) Retour de la liste complète des jeux de données
   return(resultats_liste)
 }
+
+
 ```
+
+# Test pour la séparation des fichiers
 
 ```{r}
 #########################################################
@@ -102,8 +163,7 @@ liste_resultats_socleo_2023 <- regrouper_produits(data_socleo_2023)
 liste_resultats_coop_circuit_2021 <- regrouper_produits(data_coop_circuit_2021)
 
 # la ruche qui dit oui
-names(data_ruche_oui_2021)[8] <- c("name") # On renomme la variable du nom de produit pour
-# que la fonction marche
+names(data_ruche_oui_2021)[8] <- c("name") # On renomme la variable du nom de produit pour que la fonction marche
 
 liste_resultats_ruche_oui_2021 <- regrouper_produits(data_ruche_oui_2021)
 
@@ -119,25 +179,30 @@ view(liste_resultats_socleo_2022$df_autres)
 
 view(liste_resultats_socleo_2023$df_autres)
 
-#########################################################
-#                                                       #
-#   Voir les noms des produits dans df_autres           #
-#                                                       #
-######################################################### 
+```
 
-# socleo
-noms_produits_socleo_autres_2021 <- liste_resultats_socleo_2021$df_autres |> group_by(name) |> count()
+# Export des fichiers séparés au format csv
 
-noms_produits_df_autres_2022 <- liste_resultats_socleo_2022$df_autres |> group_by(name) |> count()
+```{r}
+export_fichiers_separes <- function(liste_df, dossier_export = "export_csv_legumes") {
+  # Crée le dossier s'il n'existe pas déjà
+  if (!dir.exists(dossier_export)) {
+    dir.create(dossier_export, recursive = TRUE)
+  }
 
-noms_produits_socleo_autres_2023 <- liste_resultats_socleo_2023$df_autres |> group_by(name) |> count()
+  # Boucle sur chaque élément de la liste
+  for (nom_df in names(liste_df)) {
+    # Construit le chemin de fichier (remplace les espaces par des underscores)
+    chemin_fichier <- file.path(dossier_export, paste0(gsub(" ", "_", nom_df), ".csv"))
+    
+    # Écrit le dataframe au format CSV avec encodage UTF-8
+    write.csv(liste_df[[nom_df]], file = chemin_fichier, row.names = FALSE, fileEncoding = "UTF-8")
+  }
 
+}
 
-# coop circuit
-noms_produits_coop_circuit_autres_2021 <- liste_resultats_coop_circuit_2021$df_autres |> group_by(name) |> count()
+# Test 
 
-
-# la ruche qui dit oui
-noms_produits_ruche_oui_autres_2021 <- liste_resultats_ruche_oui_2021$df_autres |> group_by(name) |> count()
+export_fichiers_separes(liste_resultats_socleo_2021, dossier_export = "export_csv_legumes")
 
 ```
