@@ -30,9 +30,8 @@ data_ruche_oui_2021 <- read.csv("data/la ruche qui dit oui/historique_2021part1.
 # Regroupement de modalités
 
 ```{r}
-
 # Liste des mots-clés de produits
-liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", "Pomme de terre", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Œuf", "Boeuf", "Porc", "Poulet", "Jus de Pomme", "Lentille")
+liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Œuf", "Boeuf", "Porc", "Poulet", "Lentille")
 
 # Fonction
 regrouper_produits <- function(df) {
@@ -50,35 +49,39 @@ regrouper_produits <- function(df) {
       name_clean = str_replace_all(name_clean, "[^a-z ]", "")
     )
   
-  # Variables pour marquer les lignes déjà assignées
+  # II) Supprimer les lignes contenant plus d’un mot-clé
+  df <- df %>%
+    rowwise() %>%
+    mutate(
+      mots_trouves = sum(str_to_lower(liste_mots_cles) %in% str_extract_all(name_clean, "\\b[a-z]+\\b")[[1]])
+    ) %>%
+    ungroup() %>%
+    filter(mots_trouves <= 1) # On garde les lignes avec 0 ou 1 mot-clé trouvé
+  
+  # III) Variables pour marquer les lignes déjà assignées
   df$produit <- NA_character_
   
-  # Liste pour stocker les jeux de données filtrés
+  # IV) Liste pour stocker les jeux de données filtrés
   resultats_liste <- list()
   
-  # II) Boucle sur chaque mot-clé pour créer un sous-dataframe
+  # V) Boucle sur chaque mot-clé pour créer un sous-dataframe
   for (mot_cle in liste_mots_cles) {
-    
-    # Détection du mot-clé dans le nom nettoyé
-    mask <- grepl(mot_cle, df$name_clean) & is.na(df$produit)
+    mask <- grepl(mot_cle, df$name_clean, ignore.case = TRUE) & is.na(df$produit)
     
     if (any(mask)) {
       df$produit[mask] <- mot_cle
       
-      # Création du jeu de données filtré pour ce mot-clé
       df_temp <- df[mask, ]
-      
-      # Ajout dans la liste avec un nom propre (underscore à la place des espaces)
       nom_objet <- paste0("df_", gsub(" ", "_", mot_cle))
       resultats_liste[[nom_objet]] <- df_temp
     }
   }
   
-  # IV) Gestion des modalités restantes (non reconnues)
+  # VI) Gestion des modalités restantes (non reconnues)
   df_autres <- df[is.na(df$produit), ]
   resultats_liste[["df_autres"]] <- df_autres
   
-  # V) Retour de la liste complète des jeux de données
+  # VII) Retour de la liste complète des jeux de données
   return(resultats_liste)
 }
 ```
