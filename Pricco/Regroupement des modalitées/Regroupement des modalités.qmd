@@ -412,7 +412,7 @@ liste_resultats_ruche_oui_2024 <- setNames(liste_resultats_ruche_oui_2024, noms_
 
 ###################################################################
 #                                                                 #
-#               Fusion des tables pour socleo                     #
+#                   Fusion des tables                             #
 #                                                                 #
 ################################################################### 
 
