@@ -631,3 +631,42 @@ export_fichiers_separes(liste_resultats_coop_circuit_tts_annees, dossier_export 
 ########################## la ruche qui dit oui ########################## 
 
 ```
+
+
+group_products <- function(data, ls_word){
+  # Nettoyage des noms de produits de la base
+  data[["clean_name"]] <- str_to_lower(data[["name"]])
+  data[["clean_name"]] <- stri_trans_general(data[["clean_name"]], "Latin-ASCII")
+  data[["clean_name"]] <- str_replace_all(data[["clean_name"]], "[^a-z ]", "")
+  # Pareil pour la liste de mots
+  ls_word <- stri_trans_general(str_to_lower(ls_word), "Latin-ASCII")
+  data[["produit"]] <- NA; res <- list() ; unique_name <- c() ; all_names <- c()
+  # Recherche des mots de la liste dans le nom des produits de la base
+  for(word in ls_word){
+    mask <- grepl(word, data[["clean_name"]])
+    if(any(mask)){
+      data[["produit"]][mask] <- word
+      new_res <- data[mask,]
+      levels_names <- levels(as.factor(new_res[["clean_name"]]))
+      for(lv_name in levels_names){
+        for(i_word in ls_word[ls_word!=word]){
+          if(grepl(i_word, lv_name)){
+            unique_name <- c(unique_name,lv_name)
+            all_names <- c(all_names,lv_name)
+          }
+        }
+      }
+      ob_name <- paste0("data_", word, sep="")
+      res[[ob_name]] <- new_res[!new_res[["clean_name"]] %in% unique_name,]
+    }
+    unique_name <- c()
+  }
+  
+  others_products <- rbind(new_res[new_res[["clean_name"]] %in% all_names,], data[is.na(data[["produit"]]), ])  
+  res[["data_autres"]] <- others_products
+  return(res)
+}
+
+
+
+
