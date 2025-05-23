@@ -474,10 +474,10 @@ recherche_termes <- function(dataset, liste_mots){
 
 ########################## Socleo ########################## 
 
-############################## 2021
+############################## 2021-2024
 
 # On retire le df_autres 
-liste_socleo_sans_autres_2021 <- liste_resultats_socleo_2021[names(liste_resultats_socleo_2021) != "socleo_autres"]
+liste_socleo_sans_autres <- liste_resultats_socleo_tts_annees[names(liste_resultats_socleo_tts_annees) != "socleo_autres"]
 
 # Liste des mots 
 liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
@@ -487,63 +487,15 @@ liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Ki
 
 
 # On Teste la fonction
-verif_socleo_2021 <- recherche_termes(liste_socleo_sans_autres_2021,liste_mots_cles)
-
-# Nombre de jeux de données présent dans la liste de vérification 
-length(verif_socleo_2021)
-
-############################## 2022
-
-# On retire le df_autres 
-liste_socleo_sans_autres_2022 <- liste_resultats_socleo_2022[names(liste_resultats_socleo_2022) != "socleo_autres"]
-
-# Liste des mots 
-liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
-                     "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", 
-                     "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", 
-                     "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Boeuf", "oeuf", "Porc", "Poulet", "Lentille")
-
-
-# On Teste la fonction
-verif_socleo_2022 <- recherche_termes(liste_socleo_sans_autres_2022,liste_mots_cles)
-
-############################## 2023
-
-# On retire le df_autres 
-liste_socleo_sans_autres_2023 <- liste_resultats_socleo_2023[names(liste_resultats_socleo_2023) != "socleo _autres"]
-
-# Liste des mots 
-liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
-                     "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", 
-                     "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", 
-                     "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Boeuf", "oeuf", "Porc", "Poulet", "Lentille")
-
-
-# On Teste la fonction
-verif_socleo_2023 <- recherche_termes(liste_socleo_sans_autres_2023,liste_mots_cles)
-
-############################## 2024
-
-# On retire le df_autres 
-liste_socleo_sans_autres_2024 <- liste_resultats_socleo_2024[names(liste_resultats_socleo_2024) != "socleo _autres"]
-
-# Liste des mots 
-liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
-                     "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", 
-                     "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", 
-                     "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Boeuf", "oeuf", "Porc", "Poulet", "Lentille")
-
-
-# On Teste la fonction
-verif_socleo_2024 <- recherche_termes(liste_socleo_sans_autres_2024,liste_mots_cles)
-
+verif_socleo <- recherche_termes(liste_socleo_sans_autres,liste_mots_cles)
 
 ########################## coop circuit ########################## 
 
-############################## 2021
+############################## 2021-2024
 
 # On retire le df_autres 
-liste_coop_circuit_sans_autres_2021 <- liste_resultats_coop_circuit_2021[names(liste_resultats_coop_circuit_2021) != "coop_circuit _autres"]
+liste_coop_circuit_sans_autres<- 
+  liste_resultats_coop_circuit_tts_annees[names(liste_resultats_coop_circuit_tts_annees) != "coop_circuit_autres"]
 
 # Liste des mots 
 liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
@@ -553,53 +505,7 @@ liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Ki
 
 
 # On Teste la fonction
-verif_coop_circuit_2021 <- recherche_termes(liste_coop_circuit_sans_autres_2021,liste_mots_cles)
-
-############################## 2022
-
-# On retire le df_autres 
-liste_coop_circuit_sans_autres_2022 <- liste_resultats_coop_circuit_2022[names(liste_resultats_coop_circuit_2022) != "coop_circuit _autres"]
-
-# Liste des mots 
-liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
-                     "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", 
-                     "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", 
-                     "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Boeuf", "oeuf", "Porc", "Poulet", "Lentille")
-
-
-# On Teste la fonction
-verif_coop_circuit_2022 <- recherche_termes(liste_coop_circuit_sans_autres_2022,liste_mots_cles)
-
-############################## 2023
-
-# On retire le df_autres 
-liste_coop_circuit_sans_autres_2023 <- liste_resultats_coop_circuit_2023[names(liste_resultats_coop_circuit_2023) != "coop_circuit _autres"]
-
-# Liste des mots 
-liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
-                     "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", 
-                     "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", 
-                     "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Boeuf", "oeuf", "Porc", "Poulet", "Lentille")
-
-
-# On Teste la fonction
-verif_coop_circuit_2023 <- recherche_termes(liste_coop_circuit_sans_autres_2023,liste_mots_cles)
-
-############################## 2024
-
-# On retire le df_autres 
-liste_coop_circuit_sans_autres_2024 <- liste_resultats_coop_circuit_2024[names(liste_resultats_coop_circuit_2024) != "coop_circuit _autres"]
-
-# Liste des mots 
-liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
-                     "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", 
-                     "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", 
-                     "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Boeuf", "oeuf", "Porc", "Poulet", "Lentille")
-
-
-# On Teste la fonction
-verif_coop_circuit_2024 <- recherche_termes(liste_coop_circuit_sans_autres_2024,liste_mots_cles)
-
+verif_coop_circuit <- recherche_termes(liste_coop_circuit_sans_autres,liste_mots_cles)
 
 ########################## la ruche qui dit oui ########################## 
 
@@ -610,7 +516,7 @@ verif_coop_circuit_2024 <- recherche_termes(liste_coop_circuit_sans_autres_2024,
 # On retire le df_autres 
 liste_ruche_qui_dit_oui_sans_autres_2021_part_1 <- 
   liste_resultats_ruche_oui_2021_part_1[names(liste_resultats_ruche_oui_2021_part_1) != 
-                                   "ruche_qui_dit_oui _autres"]
+                                   "ruche_qui_dit_oui_autres"]
 
 # Liste des mots 
 liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
@@ -627,7 +533,7 @@ verif_ruche_qui_dit_oui_2021_part_1 <- recherche_termes(liste_ruche_qui_dit_oui_
 # On retire le df_autres 
 liste_ruche_qui_dit_oui_sans_autres_2021_part_2 <- 
   liste_resultats_ruche_oui_2021_part_2[names(liste_resultats_ruche_oui_2021_part_2) != 
-                                          "ruche_qui_dit_oui _autres"]
+                                          "ruche_qui_dit_oui_autres"]
 
 # Liste des mots 
 liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
@@ -645,7 +551,7 @@ verif_ruche_qui_dit_oui_2021_part_2 <- recherche_termes(liste_ruche_qui_dit_oui_
 # On retire le df_autres 
 liste_ruche_qui_dit_oui_sans_autres_2022 <- 
   liste_resultats_ruche_oui_2022[names(liste_resultats_ruche_oui_2022) != 
-                                                                     "ruche_qui_dit_oui _autres"]
+                                                                     "ruche_qui_dit_oui_autres"]
 
 # Liste des mots 
 liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
@@ -662,7 +568,7 @@ verif_ruche_qui_dit_oui_2022 <- recherche_termes(liste_ruche_qui_dit_oui_sans_au
 # On retire le df_autres 
 liste_ruche_qui_dit_oui_sans_autres_2023 <- 
   liste_resultats_ruche_oui_2023[names(liste_resultats_ruche_oui_2023) != 
-                                   "ruche_qui_dit_oui _autres"]
+                                   "ruche_qui_dit_oui_autres"]
 
 # Liste des mots 
 liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
@@ -679,7 +585,7 @@ verif_ruche_qui_dit_oui_2023 <- recherche_termes(liste_ruche_qui_dit_oui_sans_au
 # On retire le df_autres 
 liste_ruche_qui_dit_oui_sans_autres_2024 <- 
   liste_resultats_ruche_oui_2024[names(liste_resultats_ruche_oui_2024) != 
-                                   "ruche_qui_dit_oui _autres"]
+                                   "ruche_qui_dit_oui_autres"]
 
 # Liste des mots 
 liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
