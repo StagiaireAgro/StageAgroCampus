@@ -4,7 +4,6 @@ format: html
 editor: visual
 ---
 
-
 # Importation des librairies
 
 ```{r,message=FALSE}
@@ -43,45 +42,47 @@ data_ruche_oui_2024 <- read.csv("data/la ruche qui dit oui/historique_2024.csv",
 # Séparation des fichiers et vérification de l'unicité des noms de produit
 
 ```{r}
-# Liste des mots-clés de produits
-liste_mots_cles <- c("Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine", "Noix", "Pêche", "Poire", 
-                     "Pomme de terre", "Jus de Pomme", "Pomme", "Prune", "Raisin", "Asperge", "Aubergine", "Carotte", 
-                     "Céleri-branche", "Chou fleur", "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon", 
-                     "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait","Boeuf", "oeuf", "Porc", "Poulet", "Lentille")
+# Liste des mots-clés de produits (spécifiques d'abord)
+liste_mots_cles <- c("pomme de terre", "jus de pomme", "pomme", "poire", 
+                     "abricot", "banane", "cerise", "clémentine", "fraise", "kiwi", 
+                     "nectarine", "noix", "pêche", "prune", "raisin", 
+                     "asperge", "aubergine", "carotte", "céleri-branche", 
+                     "chou fleur", "concombre", "courgette", "endive", 
+                     "haricot vert", "laitue", "melon", "oignon", "poireau", 
+                     "poivron", "potiron", "tomate", "lait", "boeuf", "oeuf", 
+                     "porc", "poulet", "lentille")
 
 group_products <- function(data, ls_word){
-  # Nettoyage des noms de produits de la base
+  # Nettoyage des noms de produits
   data[["clean_name"]] <- str_to_lower(data[["name"]])
   data[["clean_name"]] <- stri_trans_general(data[["clean_name"]], "Latin-ASCII")
   data[["clean_name"]] <- str_replace_all(data[["clean_name"]], "[^a-z ]", "")
-  # Pareil pour la liste de mots
+  
+  # Nettoyage des mots-clés
   ls_word <- stri_trans_general(str_to_lower(ls_word), "Latin-ASCII")
-  data[["produit"]] <- NA; res <- list() ; unique_name <- c() ; all_names <- c()
-  # Recherche des mots de la liste dans le nom des produits de la base
+  
+  data[["produit"]] <- NA
+  res <- list()
+  
   for(word in ls_word){
-    mask <- grepl(word, data[["clean_name"]])
+    pattern <- paste0("\\b", word, "\\b")
+    
+    # Sélectionne uniquement les lignes non encore catégorisées
+    mask <- is.na(data[["produit"]]) & grepl(pattern, data[["clean_name"]])
+    
     if(any(mask)){
       data[["produit"]][mask] <- word
-      new_res <- data[mask,]
-      levels_names <- levels(as.factor(new_res[["clean_name"]]))
-      for(lv_name in levels_names){
-        for(i_word in ls_word[ls_word!=word]){
-          if(grepl(i_word, lv_name)){
-            unique_name <- c(unique_name,lv_name)
-            all_names <- c(all_names,lv_name)
-          }
-        }
-      }
-      ob_name <- paste0("data_", word, sep="")
-      res[[ob_name]] <- new_res[!new_res[["clean_name"]] %in% unique_name,]
+      ob_name <- paste0("data_", word)
+      res[[ob_name]] <- data[mask, ]
     }
-    unique_name <- c()
   }
   
-  others_products <- rbind(new_res[new_res[["clean_name"]] %in% all_names,], data[is.na(data[["produit"]]), ])  
-  res[["data_autres"]] <- others_products
+  # Tout ce qui n’a pas pu être catégorisé
+  res[["data_autres"]] <- data[is.na(data[["produit"]]), ]
+  
   return(res)
 }
+
 
 ```
 
@@ -154,8 +155,7 @@ view(liste_resultats_socleo_2023$df_autres)
 
 ```
 
-
-# Renommage des tables par rapport au nom des fournisseurs 
+# Renommage des tables par rapport au nom des fournisseurs
 
 ```{r}
 
@@ -326,7 +326,7 @@ liste_resultats_ruche_oui_2024 <- setNames(liste_resultats_ruche_oui_2024, noms_
 
 ```
 
-# Fusion des fichiers par produit avec toutes les années confondues 
+# Fusion des fichiers par produit avec toutes les années confondues
 
 ```{r}
 
@@ -362,7 +362,6 @@ liste_resultats_coop_circuit_tts_annees <- Map(bind_rows,
 #                                         liste_resultats_ruche_oui_2024)
 
 ```
-
 
 # Export des fichiers séparés au format csv
 
