@@ -47,13 +47,13 @@ fruits <- c(
   "Noix", "Pêche", "Poireau", "Pomme de terre", "Jus de Pomme", "Pomme", "Prune",
   "Raisin", "Asperge", "Aubergine", "Carotte", "Céleri-branche", "Chou fleur",
   "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon",
-  "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Œuf", "Boeuf",
+  "Oignon", "Poire", "Poivron", "Potiron", "Tomate", "Lait", "Œuf", "Boeuf",
   "Porc", "Poulet", "Lentille"
 )
 
+# Nettoyage et transformation en minuscules ASCII
 fruits <- str_replace_all(stri_trans_general(str_to_lower(fruits), "Latin-ASCII"), "[^a-z ]", "")
 fruits_triee <- fruits[order(nchar(fruits), decreasing = TRUE)]
-
 fruits_triee <- as.factor(fruits_triee)
 
 ngroup_products <- function(data, ls_word){
@@ -68,34 +68,36 @@ ngroup_products <- function(data, ls_word){
   multiple_noms_produits_perm <- c() # Vecteur des noms de tous les produits ayant plus d'un nom
  
   for(word in ls_word){
-    pattern <- paste0("\\b", word, "\\b")
+    # LIKE '%word%' insensible à la casse
+    pattern <- word
     
     # Sélectionne uniquement les lignes non encore catégorisées
-    mask <- is.na(data[["produit"]]) & grepl(pattern, data[["clean_name"]])
+    mask <- is.na(data[["produit"]]) & grepl(pattern, data[["clean_name"]], ignore.case = TRUE)
     
     if(any(mask)){
       data[["produit"]][mask] <- word
       data_un_produit <- data[mask, ]
       levels_name_produit <- levels(as.factor(data_un_produit[["clean_name"]]))
+      
       for(un_nom_produit in levels_name_produit){
-        for(mots_cle in ls_word[ls_word!=word]){
-          # declinaison_nom_produit <- paste0("\\b", mots_cle, "\\b")
-          if(grepl(mots_cle, un_nom_produit)){
+        for(mots_cle in ls_word[ls_word != word]){
+          if(grepl(mots_cle, un_nom_produit, ignore.case = TRUE)){
             multiple_noms_produits_temp <- c(multiple_noms_produits_temp, un_nom_produit)
             multiple_noms_produits_perm <- c(multiple_noms_produits_perm, un_nom_produit)
           }
         }
       }
-      nom_table <- paste0("data_", word, sep="")
-      res[[nom_table]] <- data_un_produit[!data_un_produit[["clean_name"]] %in% multiple_noms_produits_temp,] # Noms produits unique
-      multiple_noms_produits_temp <- c() # On initialise à zéro
+      
+      nom_table <- paste0("data_", word)
+      res[[nom_table]] <- data_un_produit[!data_un_produit[["clean_name"]] %in% multiple_noms_produits_temp,]
+      multiple_noms_produits_temp <- c()
     }
     
     # Supprimer le mot actuel de ls_word après traitement
-    ls_word <- setdiff(ls_word, word)
+    ls_word <- setdiff(ls_word, word) # Plus rapide que ls_word[ls_word != word] (à changer dans le for à la fin)
   }
  
-  # Tout ce qui n’a pas pu être catégorisé
+  # Tout ce qui n’a pas pu être catégorisé ou est ambigu
   res[["data_autres"]] <- rbind(
     data[is.na(data[["produit"]]), ],
     data_un_produit[data_un_produit[["clean_name"]] %in% multiple_noms_produits_perm,])
@@ -397,7 +399,8 @@ export_fichiers_separes <- function(liste_data, dossier_export = "export_csv_leg
     chemin_fichier <- file.path(dossier_export, paste0(gsub(" ", "_", nom_data), ".csv"))
     
     # Écrit le dataframe au format CSV avec encodage UTF-8
-    write.csv(liste_data[[nom_data]], file = chemin_fichier, row.names = FALSE, fileEncoding = "UTF-8")
+    write.csv(liste_data[[nom_data]], file = chemin_fichier, row.names = FALSE, fileEncoding = "UTF-8",
+              sep = ";")
   }
 
 }
