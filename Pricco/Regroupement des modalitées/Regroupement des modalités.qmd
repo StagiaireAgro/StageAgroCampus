@@ -42,28 +42,32 @@ data_ruche_oui_2024 <- read.csv("data/la ruche qui dit oui/historique_2024.csv",
 # Séparation des fichiers et vérification de l'unicité des noms de produit
 
 ```{r}
-# Liste des mots-clés de produits (spécifiques d'abord)
-liste_mots_cles <- c("pomme de terre", "jus de pomme", "pomme", "poire", 
-                     "abricot", "banane", "cerise", "clémentine", "fraise", "kiwi", 
-                     "nectarine", "noix", "pêche", "prune", "raisin", 
-                     "asperge", "aubergine", "carotte", "céleri-branche", 
-                     "chou fleur", "concombre", "courgette", "endive", 
-                     "haricot vert", "laitue", "melon", "oignon", "poireau", 
-                     "poivron", "potiron", "tomate", "lait", "boeuf", "oeuf", 
-                     "porc", "poulet", "lentille")
+fruits <- c(
+  "Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine",
+  "Noix", "Pêche", "Poireau", "Pomme de terre", "Jus de Pomme", "Pomme", "Prune",
+  "Raisin", "Asperge", "Aubergine", "Carotte", "Céleri-branche", "Chou fleur",
+  "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon",
+  "Oignon", "Poireau", "Poivron", "Potiron", "Tomate", "Lait", "Œuf", "Boeuf",
+  "Porc", "Poulet", "Lentille"
+)
 
-group_products <- function(data, ls_word){
+fruits <- str_replace_all(stri_trans_general(str_to_lower(fruits), "Latin-ASCII"), "[^a-z ]", "")
+fruits_triee <- fruits[order(nchar(fruits), decreasing = TRUE)]
+
+fruits_triee <- as.factor(fruits_triee)
+
+ngroup_products <- function(data, ls_word){
   # Nettoyage des noms de produits
   data[["clean_name"]] <- str_to_lower(data[["name"]])
   data[["clean_name"]] <- stri_trans_general(data[["clean_name"]], "Latin-ASCII")
   data[["clean_name"]] <- str_replace_all(data[["clean_name"]], "[^a-z ]", "")
-  
-  # Nettoyage des mots-clés
-  ls_word <- stri_trans_general(str_to_lower(ls_word), "Latin-ASCII")
-  
+ 
   data[["produit"]] <- NA
   res <- list()
-  
+  i <- 1
+  multiple_noms_produits_temp <- c()
+  multiple_noms_produits_perm <- c() # Vecteur des noms de tous les produits ayant plus d'un nom
+ 
   for(word in ls_word){
     pattern <- paste0("\\b", word, "\\b")
     
@@ -72,17 +76,37 @@ group_products <- function(data, ls_word){
     
     if(any(mask)){
       data[["produit"]][mask] <- word
-      ob_name <- paste0("data_", word)
-      res[[ob_name]] <- data[mask, ]
+      data_un_produit <- data[mask, ]
+      levels_name_produit <- levels(as.factor(data_un_produit[["clean_name"]]))
+      for(un_nom_produit in levels_name_produit){
+        for(mots_cle in ls_word[ls_word!=word]){
+          # declinaison_nom_produit <- paste0("\\b", mots_cle, "\\b")
+          if(grepl(mots_cle, un_nom_produit)){
+            multiple_noms_produits_temp <- c(multiple_noms_produits_temp, un_nom_produit)
+            multiple_noms_produits_perm <- c(multiple_noms_produits_perm, un_nom_produit)
+            i <- i+1
+            if(i==40){
+              print(multiple_noms_produits_temp)
+              break
+            }
+          }
+        }
+      }
+      nom_table <- paste0("data_", word, sep="")
+      res[[nom_table]] <- data_un_produit[!data_un_produit[["clean_name"]] %in% multiple_noms_produits_temp,] # Noms produits unique
+      multiple_noms_produits_temp <- c() # On initialise à zéro
     }
   }
-  
+ 
   # Tout ce qui n’a pas pu être catégorisé
-  res[["data_autres"]] <- data[is.na(data[["produit"]]), ]
-  
+  res[["data_autres"]] <- rbind(
+    data[is.na(data[["produit"]]), ],
+    data_un_produit[data_un_produit[["clean_name"]] %in% multiple_noms_produits_perm,])
+ 
   return(res)
 }
 
+socleo_2021 <- ngroup_products(data_socleo_2021, fruits_triee)
 
 ```
 
