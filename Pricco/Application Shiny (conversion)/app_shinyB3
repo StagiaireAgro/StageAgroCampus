@@ -37,6 +37,7 @@ ui <- fluidPage(
                  uiOutput("order_quantity"),
                  uiOutput("date"),
                  uiOutput("organic"),
+                 uiOutput("name_product"),
                  
                  actionButton("apply_var", "Définir"),
                  
@@ -162,6 +163,14 @@ server <- function(input, output, session) {
     
   })
   
+  output$name_product <- renderUI({
+    req(input$valide_file)
+    
+    choices <- names(data_select())
+    
+    selectInput("selected_name_product", "S2lectionnez la variable du nom  du produit :", choices = choices, selected = NULL)
+  })
+  
   var_qt <- reactiveVal(NULL)
   
   order_qt <- reactiveVal(NULL)
@@ -171,6 +180,8 @@ server <- function(input, output, session) {
   order_date <- reactiveVal(NULL)
   
   organic <- reactiveVal(NULL)
+  
+  name_product <- reactiveVal(NULL)
   
   observeEvent(input$apply_var, {
     
@@ -183,6 +194,8 @@ server <- function(input, output, session) {
     order_date(input$selected_date)
     
     organic(input$selected_organic)
+    
+    name_product(input$selected_name_product)
   })
   
   # Transformation de valeurs en facteur
@@ -463,6 +476,7 @@ server <- function(input, output, session) {
   
   output$prix_au_kilo <- renderDT({
     req(dt_final())
+    req(name_product())
     
     dt <- dt_final()
     
@@ -485,7 +499,7 @@ server <- function(input, output, session) {
     # CALCUL MOYENNE PONDEREE PAR MOIS bio/non bio/total pour données non aberrantes
     
     dt_m <- dt_clean %>%
-      group_by(month) %>%
+      group_by(.data[[name_product()]], month) %>%
       summarise(
         moyenne_ponderee_totale = sum(pp_kilo * .data[[order_qt()]]*kg_condit, na.rm = TRUE) /
           sum(.data[[order_qt()]]*kg_condit, na.rm = TRUE),
@@ -508,7 +522,7 @@ server <- function(input, output, session) {
     # CALCUL MOYENNE PONDEREE PAR MOIS bio/non bio/total pour données aberrantes
     
     dt_m_ab <- dt_nclean %>%
-      group_by(month) %>%
+      group_by(.data[[name_product()]], month) %>%
       summarise(
         moyenne_ponderee_totale = sum(pp_kilo * .data[[order_qt()]]*kg_condit, na.rm = TRUE) /
           sum(.data[[order_qt()]]*kg_condit, na.rm = TRUE),
