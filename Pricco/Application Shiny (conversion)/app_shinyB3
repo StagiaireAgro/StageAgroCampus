@@ -91,6 +91,7 @@ ui <- fluidPage(
                  dataTableOutput("filtered_with_values2")),
        
         tabPanel("Jeux de données calculé en entier et non calculé",
+                 uiOutput("cols"),
                  h4("Jeux de données calculé"),
                  downloadButton("download_calcule","Télécharger"),
                  dataTableOutput("full_filtered"),
@@ -101,8 +102,9 @@ ui <- fluidPage(
         tabPanel("Prix au kilo",
                  downloadButton("download_mean_per_months", "Télécharger"),
                  dataTableOutput("prix_au_kilo"),
-                 sliderInput("mult_EIQ", "De combien de fois l'EIQ doit on s'eloigner :", min = 0, max = 10, value = 1.5, step = 0.25),
+                 
                  h3("Jeu de données aberrantes"),
+                 sliderInput("mult_EIQ", "De combien de fois l'EIQ doit on s'eloigner :", min = 0, max = 10, value = 1.5, step = 0.25),
                  dataTableOutput("prix_au_kilo_ab"),
                  dataTableOutput("dtout_vab"))
       )
@@ -140,10 +142,10 @@ server <- function(input, output, session) {
   output$file_valide <- renderText({
     
     if (is.null(data_select())){
-      "Aucun fichier selectione"
+      "Aucun fichier selectionné"
     }
     else{
-      paste("Fichier valide :", nom_data())
+      paste("Fichier validé :", nom_data())
     }
   })
   
@@ -168,7 +170,47 @@ server <- function(input, output, session) {
     
     choices <- names(data_select())
     
-    selectInput("selected_name_product", "S2lectionnez la variable du nom  du produit :", choices = choices, selected = NULL)
+    selectInput("selected_name_product", "Sélectionnez la variable du nom  du produit :", choices = choices, selected = NULL)
+  })
+  
+  # Selection de la vairable prix
+  
+  output$price <- renderUI({
+    req(data_select())
+    
+    choices <- names(data_select())
+    
+    selectInput("selected_price", "Sélectionnez la variable de prix :", choices = choices)
+  })
+  
+  # Sélection du nombre d'achat du produit
+  
+  output$order_quantity <- renderUI({
+    req(data_select())
+    
+    choices <- names(data_select())
+    
+    selectInput("selected_order_quantity", "Sélectionnez la variable du nombre de produit acheté :", choices = choices)
+  })
+  
+  # Sélection de la date
+  
+  output$date <- renderUI({
+    req(data_select())
+    
+    choices <- names(data_select())
+    
+    selectInput("selected_date", "Sélectionnez la variable date :", choices = choices)
+  })
+  
+  # Selection bio
+  
+  output$organic <- renderUI({
+    req(data_select())
+    
+    choices <- names(data_select())
+    
+    selectInput("selected_organic", "Sélectionnez la variable de bio :", choices = choices)
   })
   
   var_qt <- reactiveVal(NULL)
@@ -403,11 +445,21 @@ server <- function(input, output, session) {
     }
     
     dt_final(final_df) 
-    final_df
+    final_df[,input$selected_cols]
   })
   
   output$data_non_calc <- renderDT({
-    data_non_calc()
+    data_non_calc()[,input$selected_cols]
+  })
+  
+  # Colonnes que l'on garde
+  
+  output$cols <- renderUI({
+    req(dt_final())
+    
+    choices <-  names(dt_final())
+    
+    selectInput("selected_cols", "Sélectionnez les colonnes qui vous voulez garder :", choices = choices, selected = choices, multiple = T)
   })
   
   # Boutons de téléchargement
@@ -417,7 +469,7 @@ server <- function(input, output, session) {
       paste0(nom_data(),"_OK",".csv")
     },
     content = function(file) {
-      write.csv(dt_final(), file, row.names = FALSE)
+      write.csv(dt_final()[,input$selected_cols], file, row.names = FALSE)
     })
   
   output$download_non_calcule <- downloadHandler(
@@ -425,48 +477,8 @@ server <- function(input, output, session) {
       paste0(nom_data(),"_PAS_OK",".csv")
     },
     content = function(file) {
-      write.csv(data_non_calc(), file, row.names = FALSE)
+      write.csv(data_non_calc()[,input$selected_cols], file, row.names = FALSE)
     })
-  
-  # Selection de la vairable prix
-  
-  output$price <- renderUI({
-    req(data_select())
-    
-    choices <- names(data_select())
-    
-    selectInput("selected_price", "Sélectionnez la variable de prix :", choices = choices)
-  })
-  
-  # Sélection du nombre d'achat du produit
-  
-  output$order_quantity <- renderUI({
-    req(data_select())
-    
-    choices <- names(data_select())
-    
-    selectInput("selected_order_quantity", "Sélectionnez la variable du nombre de produit acheté :", choices = choices)
-  })
-  
-  # Sélection de la date
-  
-  output$date <- renderUI({
-    req(data_select())
-    
-    choices <- names(data_select())
-    
-    selectInput("selected_date", "Sélectionnez la variable date :", choices = choices)
-  })
-  
-  # Selection bio
-  
-  output$organic <- renderUI({
-    req(data_select())
-    
-    choices <- names(data_select())
-    
-    selectInput("selected_organic", "Sélectionnez la variable de bio :", choices = choices)
-  })
   
   # calcul du prix au kilo (moyenne ponderee par mois)
   
@@ -553,7 +565,7 @@ server <- function(input, output, session) {
   
   output$download_mean_per_months <- downloadHandler(
     filename = function() {
-      paste0(nom_data(),"mean_per_months",".csv")
+      paste0(nom_data(),"_mean_ppk_per_months",".csv")
     },
     content = function(file) {
       write.csv(dt_months(), file, row.names = FALSE)
