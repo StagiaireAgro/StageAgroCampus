@@ -56,7 +56,7 @@ fruits_triee <- fruits[order(nchar(fruits), decreasing = TRUE)]
 
 fruits_triee <- as.factor(fruits_triee)
 
-ngroup_products <- function(data, ls_word){
+nngroup_products <- function(data, ls_word){
   # Nettoyage des noms de produits
   data[["clean_name"]] <- str_to_lower(data[["name"]])
   data[["clean_name"]] <- stri_trans_general(data[["clean_name"]], "Latin-ASCII")
@@ -106,7 +106,7 @@ ngroup_products <- function(data, ls_word){
   return(res)
 }
 
-socleo_2021 <- ngroup_products(data_socleo_2021, fruits_triee)
+socleo_2021 <- nngroup_products(data_socleo_2021, fruits_triee)
 
 ```
 
@@ -121,17 +121,17 @@ socleo_2021 <- ngroup_products(data_socleo_2021, fruits_triee)
 
 ########################## Socleo ########################## 
 
-liste_resultats_socleo_2021 <- group_products(data_socleo_2021,liste_mots_cles)
-liste_resultats_socleo_2022 <- group_products(data_socleo_2022,liste_mots_cles)
-liste_resultats_socleo_2023 <- group_products(data_socleo_2023,liste_mots_cles)
-liste_resultats_socleo_2024 <- group_products(data_socleo_2024,liste_mots_cles)
+liste_resultats_socleo_2021 <- ngroup_products(data_socleo_2021,fruits_triee)
+liste_resultats_socleo_2022 <- ngroup_products(data_socleo_2022,fruits_triee)
+liste_resultats_socleo_2023 <- ngroup_products(data_socleo_2023,fruits_triee)
+liste_resultats_socleo_2024 <- ngroup_products(data_socleo_2024,fruits_triee)
 
 ########################## coop circuit ########################## 
 
-liste_resultats_coop_circuit_2021 <- group_products(data_coop_circuit_2021,liste_mots_cles)
-liste_resultats_coop_circuit_2022 <- group_products(data_coop_circuit_2022,liste_mots_cles)
-liste_resultats_coop_circuit_2023 <- group_products(data_coop_circuit_2023,liste_mots_cles)
-liste_resultats_coop_circuit_2024 <- group_products(data_coop_circuit_2024,liste_mots_cles)
+liste_resultats_coop_circuit_2021 <- ngroup_products(data_coop_circuit_2021,fruits_triee)
+liste_resultats_coop_circuit_2022 <- ngroup_products(data_coop_circuit_2022,fruits_triee)
+liste_resultats_coop_circuit_2023 <- ngroup_products(data_coop_circuit_2023,fruits_triee)
+liste_resultats_coop_circuit_2024 <- ngroup_products(data_coop_circuit_2024,fruits_triee)
 
 ########################## la ruche qui dit oui ########################## 
 
@@ -139,31 +139,31 @@ liste_resultats_coop_circuit_2024 <- group_products(data_coop_circuit_2024,liste
 names(data_ruche_oui_2021_part_1)[8] <- c("name")
 
 # On teste 
-liste_resultats_ruche_oui_2021_part_1 <- group_products(data_ruche_oui_2021_part_1,liste_mots_cles)
+liste_resultats_ruche_oui_2021_part_1 <- ngroup_products(data_ruche_oui_2021_part_1,fruits_triee)
 
  # On renomme la variable du nom de produit pour que la fonction marche
 names(data_ruche_oui_2021_part_2)[8] <- c("name")
 
 # On teste 
-liste_resultats_ruche_oui_2021_part_2 <- group_products(data_ruche_oui_2021_part_2,liste_mots_cles)
+liste_resultats_ruche_oui_2021_part_2 <- ngroup_products(data_ruche_oui_2021_part_2,fruits_triee)
 
  # On renomme la variable du nom de produit pour que la fonction marche
 names(data_ruche_oui_2022)[8] <- c("name")
 
 # On teste 
-liste_resultats_ruche_oui_2022 <- group_products(data_ruche_oui_2022,liste_mots_cles)
+liste_resultats_ruche_oui_2022 <- ngroup_products(data_ruche_oui_2022,fruits_triee)
 
  # On renomme la variable du nom de produit pour que la fonction marche
 names(data_ruche_oui_2023)[8] <- c("name")
 
 # On teste 
-liste_resultats_ruche_oui_2023 <- group_products(data_ruche_oui_2023,liste_mots_cles)
+liste_resultats_ruche_oui_2023 <- ngroup_products(data_ruche_oui_2023,fruits_triee)
 
  # On renomme la variable du nom de produit pour que la fonction marche
 names(data_ruche_oui_2024)[8] <- c("name")
 
 # On teste 
-liste_resultats_ruche_oui_2024 <- group_products(data_ruche_oui_2024,liste_mots_cles)
+liste_resultats_ruche_oui_2024 <- ngroup_products(data_ruche_oui_2024,fruits_triee)
 
 ###################################################################
 #                                                                 #
