@@ -2,7 +2,7 @@
   library(DT)
   library(dplyr)
   
-  path <- "clean_data/cagette"
+  path <- "clean_data/brute/cagette"
   
   ui <- fluidPage(
     sidebarLayout(
@@ -43,8 +43,9 @@
           tabPanel("Prix au kilo",
                    downloadButton("download_mean_per_months", "Télécharger"),
                    dataTableOutput("prix_au_kilo"),
-                   sliderInput("mult_EIQ", "De combien de fois l'EIQ doit on s'eloigner :", min = 0, max = 10, value = 1.5, step = 0.25),
+                   
                    h3("Jeu de données aberrantes"),
+                   sliderInput("mult_EIQ", "De combien de fois l'EIQ doit on s'eloigner :", min = 0, max = 10, value = 1.5, step = 0.25),
                    dataTableOutput("prix_au_kilo_ab"),
                    dataTableOutput("dtout_vab"))
       
@@ -80,10 +81,10 @@
     output$file_valide <- renderText({
       
       if (is.null(data_select())){
-        "Aucun fichier selectione"
+        "Aucun fichier selectionné"
       }
       else{
-        paste("Fichier valide :", nom_data())
+        paste("Fichier validé :", nom_data())
       }
     })
     
@@ -101,33 +102,6 @@
       choice <- names(dt)
       selectInput("var_kg", "Sélectionnez la vaiable de kg :", choices = choice, selected = NULL)
       
-    })
-    
-    kg <- reactiveVal(NULL)
-    
-    order_qt <- reactiveVal(NULL)
-    
-    order_price <- reactiveVal(NULL)
-    
-    order_date <- reactiveVal(NULL)
-    
-    organic <- reactiveVal(NULL)
-    
-    name_product <- reactiveVal(NULL)
-    
-    observeEvent(input$apply_var, {
-      
-      kg(input$var_kg)
-      
-      order_qt(input$selected_order_quantity)
-      
-      order_price(input$selected_price)
-      
-      order_date(input$selected_date)
-      
-      organic(input$selected_organic)
-      
-      name_product(input$selected_product_name)
     })
     
     # Selection de la vairable prix
@@ -160,7 +134,7 @@
       selectInput("selected_date", "Sélectionnez la variable date :", choices = choices)
     })
     
-    # Selection bio
+    # Selection var bio
     
     output$organic <- renderUI({
       req(data_select())
@@ -178,6 +152,35 @@
       choices <- names(data_select())
       
       selectInput("selected_product_name", "Sélectionnez le nom de produit :", choices = choices)
+    })
+    
+    kg <- reactiveVal(NULL)
+    
+    order_qt <- reactiveVal(NULL)
+    
+    order_price <- reactiveVal(NULL)
+    
+    order_date <- reactiveVal(NULL)
+    
+    organic <- reactiveVal(NULL)
+    
+    name_product <- reactiveVal(NULL)
+    
+    # appliquer les variable de colonne
+    
+    observeEvent(input$apply_var, {
+      
+      kg(input$var_kg)
+      
+      order_qt(input$selected_order_quantity)
+      
+      order_price(input$selected_price)
+      
+      order_date(input$selected_date)
+      
+      organic(input$selected_organic)
+      
+      name_product(input$selected_product_name)
     })
     
     # calcul du prix au kilo (moyenne ponderee par mois)
@@ -265,7 +268,7 @@
     
     output$download_mean_per_months <- downloadHandler(
       filename = function() {
-        paste0(nom_data(),"mean_per_months",".csv")
+        paste0(nom_data(),"_mean_ppk_per_months",".csv")
       },
       content = function(file) {
         write.csv(dt_months(), file, row.names = FALSE)
