@@ -37,7 +37,7 @@ produits <- read_yaml("products.yaml")
 
 
 # Socleo datasets ---------------------------------------------------------
-path = "Data/Résultats données triées/socleo"
+path = "data/socleo"
 socleo_contents <- list.files(path, full.names = TRUE)
 
 socleo_2021 <- vroom(socleo_contents[1])
@@ -53,14 +53,15 @@ split_data <- function(socleo_2021, produits){
   clean_produits <- clean(produits) # miniscule, gestion accents & carac spéciaux
   clean_produits_sans_espaces <- gsub(" ", "", clean_produits) # Supp espace
   # Classer le regex et les mots de la liste en decroissant en fonction du vecteur retiré d'espace
-  oder_clean_produits_sans_espaces <- order(nchar(clean_produits_sans_espaces), decreasing = TRUE) # Ordre
+  oder_clean_produits_sans_espaces <- order(nchar(clean_produits_sans_espaces), decreasing = TRUE) # Du plus long au plus court mot
   produits_regex <- sapply(clean_produits, transform_in_regex) # creation des regex de la liste des produits
   produits_regex <- produits_regex[oder_clean_produits_sans_espaces] # Ordonner de manière decroissante le regex
   clean_produits <- clean_produits[oder_clean_produits_sans_espaces] # Ordonner de manière decroissante la liste des produits
   
   socleo_2021[["clean_name"]] <- as.factor(socleo_2021[["name"]]) # Transformer la colonne name en facteur
   levels(socleo_2021[["clean_name"]]) <- clean(levels(socleo_2021[["clean_name"]])) # Nettoyage des levels 
-  levels(socleo_2021[["clean_name"]]) <- gsub("\\s+", "", levels(socleo_2021[["clean_name"]])) # Supprimer les espaces des levels
+  levels(socleo_2021[["clean_name"]]) <- gsub("\\s+", "|", levels(socleo_2021[["clean_name"]])) # Remplacer espaces par |
+
   
   # Filtre de dataset (eligible, non eligible)
   levels_pas_ok <- levels(socleo_2021[["clean_name"]])[!str_detect(levels(socleo_2021[["clean_name"]]), paste(clean_produits, collapse = "|"))]
