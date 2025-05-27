@@ -1,52 +1,100 @@
+library(yaml)
+library(vroom)
+library(stringr)
+library(stringi)
 
-res <- split_data(data_socleo_2021, fruits)
-res$clean_name <- gsub("\\s+", "", tolower(res$clean_name))
+clean <- function(variable){
+  x <- str_to_lower(variable)
+  x <- stri_trans_general(x, "Latin-ASCII")
+  x <- str_replace_all(x, "[^a-z ]", "")
+  return(x)
+}
 
+order_str_by_length <- function(variable, decreasing=TRUE){
+  ordre <- order(nchar(variable), decreasing = decreasing)
+  return(variable[ordre])
+}
 
-# Fonction pour transformer un mot-clé en regex souple
-transformer_en_regex <- function(mot) {
+found_levels <- function(variable){
+  return(levels(as.factor(variable)))
+}
+
+transform_in_regex <- function(mot) {
   mots <- str_split(mot, " ")[[1]]
   mots_regex <- sapply(mots, function(m) paste0(m, "(s)?"))
-  paste0(mots_regex, collapse = "")
+  return(paste0(mots_regex, collapse = ""))
 }
 
-# Préparation des mots-clés : regex souples
-mots_regex <- sapply(fruits, transformer_en_regex)
-mots_sans_espaces <- gsub(" ", "", tolower(fruits))
-
-# Trier du plus long au plus court
-ordre <- order(nchar(mots_sans_espaces), decreasing = TRUE)
-mots_regex <- mots_regex[ordre]
-fruits_triee <- fruits[ordre]
-mots_sans_espaces <- mots_sans_espaces[ordre]
-
-# Détection sans chevauchement
-res$classif <- sapply(res$clean_name, function(texte) {
-  detectes <- c()
-  texte_tmp <- texte
-  
-  for (i in seq_along(mots_regex)) {
-    pattern <- mots_regex[i]
-    if (str_detect(texte_tmp, regex(pattern, ignore_case = TRUE))) {
-      detectes <- c(detectes, fruits_triee[i])
-      # Supprimer la portion détectée du texte temporaire
-      texte_tmp <- str_replace(texte_tmp, regex(pattern, ignore_case = TRUE), "")
+search_product <- function(one_prod, ls_prod_ordered, ls_prod_regex){
+  prod_find <- c()
+  prod_tmp <- one_prod
+  for(indice in seq_along(ls_prod_regex)){
+    pattern <- ls_prod_regex[indice]
+    if(str_detect(prod_tmp, regex(pattern, ignore_case = TRUE))){
+      prod_find <- c(prod_find, ls_prod_ordered[indice])
+      prod_tmp <- str_replace(prod_tmp, regex(pattern, ignore_case = TRUE), "")
     }
   }
-  paste(unique(detectes), collapse = ", ")
-})
-
-liste_par_fruit <- list()
-
-# Ajouter les cas où un seul fruit est détecté
-for (fruit in fruits) {
-  liste_par_fruit[[fruit]] <- res[res$classif == fruit, ]
+  return(paste(unique(prod_find), collapse = ","))
 }
 
 
 
-ls(liste_par_fruit)
-View(liste_par_fruit$`pomme de terre`)
+produits <- read_yaml("products.yaml")
 
-# Ajouter les cas multi-fruits dans "autre"
-liste_par_fruit[["autre"]] <- res[str_count(res$classif, ",") >= 1, ]
+
+
+# Socleo datasets ---------------------------------------------------------
+path = "Data/Résultats données triées/socleo"
+socleo_contents <- list.files(path, full.names = TRUE)
+
+socleo_2021 <- vroom(socleo_contents[1])
+socleo_2022 <- vroom(socleo_contents[2])
+socleo_2023 <- vroom(socleo_contents[3])
+socleo_2024 <- vroom(socleo_contents[4])
+
+
+
+split_data <- function(socleo_2021, produits){
+  liste_par_fruit <- list()
+  # Nettoyage de la liste des mots produits
+  clean_produits <- clean(produits) # miniscule, gestion accents & carac spéciaux
+  clean_produits_sans_espaces <- gsub(" ", "", clean_produits) # Supp espace
+  # Classer le regex et les mots de la liste en decroissant en fonction du vecteur retiré d'espace
+  oder_clean_produits_sans_espaces <- order(nchar(clean_produits_sans_espaces), decreasing = TRUE) # Ordre
+  produits_regex <- sapply(clean_produits, transform_in_regex) # creation des regex de la liste des produits
+  produits_regex <- produits_regex[oder_clean_produits_sans_espaces] # Ordonner de manière decroissante le regex
+  clean_produits <- clean_produits[oder_clean_produits_sans_espaces] # Ordonner de manière decroissante la liste des produits
+  
+  socleo_2021[["clean_name"]] <- as.factor(socleo_2021[["name"]]) # Transformer la colonne name en facteur
+  levels(socleo_2021[["clean_name"]]) <- clean(levels(socleo_2021[["clean_name"]])) # Nettoyage des levels 
+  levels(socleo_2021[["clean_name"]]) <- gsub("\\s+", "", levels(socleo_2021[["clean_name"]])) # Supprimer les espaces des levels
+  
+  # Filtre de dataset (eligible, non eligible)
+  levels_pas_ok <- levels(socleo_2021[["clean_name"]])[!str_detect(levels(socleo_2021[["clean_name"]]), paste(clean_produits, collapse = "|"))]
+  socleo_2021_pas_ok <- socleo_2021[socleo_2021[["clean_name"]] %in% levels_pas_ok,]
+  socleo_2021_ok <- socleo_2021[!socleo_2021[["clean_name"]] %in% levels_pas_ok,]
+  
+  # 
+  levels_socleo_2021_ok <- levels(socleo_2021_ok[["clean_name"]])
+  classification <- sapply(levels_socleo_2021_ok, search_product, 
+                            ls_prod_ordered = clean_produits, 
+                            ls_prod_regex = produits_regex)
+  socleo_2021_ok[["classif"]] <- classification[as.character(socleo_2021_ok[["clean_name"]])]
+  
+  
+  for(fruit in clean_produits) {
+    liste_par_fruit[[paste0("data_",fruit, sep="")]] <- 
+      socleo_2021_ok[socleo_2021_ok[["classif"]] == fruit, ]
+  }
+  
+  socleo_2021_pas_ok$classif <- NA
+  
+  liste_par_fruit[["data_autre"]] <- rbind(
+    socleo_2021_pas_ok, socleo_2021_ok[str_count(socleo_2021_ok[["classif"]], ",") >= 1, ])
+  
+  return(liste_par_fruit)
+}
+
+s <- split_data(socleo_2021, produits)
+ls(s)
