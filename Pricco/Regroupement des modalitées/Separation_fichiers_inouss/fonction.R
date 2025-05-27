@@ -1,3 +1,4 @@
+
 library(yaml)
 library(vroom)
 library(stringr)
@@ -8,15 +9,6 @@ clean <- function(variable){
   x <- stri_trans_general(x, "Latin-ASCII")
   x <- str_replace_all(x, "[^a-z ]", "")
   return(x)
-}
-
-order_str_by_length <- function(variable, decreasing=TRUE){
-  ordre <- order(nchar(variable), decreasing = decreasing)
-  return(variable[ordre])
-}
-
-found_levels <- function(variable){
-  return(levels(as.factor(variable)))
 }
 
 transform_in_regex <- function(mot) {
