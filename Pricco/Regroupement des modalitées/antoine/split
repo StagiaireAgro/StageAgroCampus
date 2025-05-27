@@ -1,0 +1,71 @@
+
+```{r}
+library(stringi)
+library(stringr)
+
+library(readr)
+X2021 <- read_csv("data/socleo/2021.csv")
+View(X2021)
+
+fruits <- c(
+  "Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine",
+  "Noix", "Pêche", "Poireau", "Pomme de terre", "Jus de Pomme", "Pomme", "Prune",
+  "Raisin", "Asperge", "Aubergine", "Carotte", "Céleri-branche", "Chou fleur",
+  "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon",
+  "Oignon", "Poire", "Poivron", "Potiron", "Tomate", "Lait", "Œuf", "Boeuf",
+  "Porc", "Poulet", "Lentille"
+)
+
+
+
+tri <- function(data, num_name, list_fruits, sup_espace = 0) {
+  
+  list_fruits <- str_to_lower(list_fruits)
+  list_fruits <- stri_trans_general(list_fruits, "Latin-ASCII")
+  
+  noms <- data[[num_name]]
+  noms <- str_to_lower(noms)
+  noms <- stri_trans_general(noms, "Latin-ASCII")
+  
+  list_fruits_sans_s <- str_replace(list_fruits, "s", "")
+  noms_sans_s <- str_replace(noms, "s", "")
+  
+  if(sup_espace){
+    list_fruits_sans_s <- str_replace(list_fruits_sans_s, " ", "")
+    noms_sans_s <- str_replace(noms_sans_s, " ", "")
+  }
+  
+  presence <- sapply(list_fruits_sans_s, function(fruit) grepl(paste0("\\b", fruit, "\\b"), noms_sans_s))
+  
+  noms_mod <- apply(presence, 1, function(pre) {
+    if (sum(pre) == 1) {
+      list_fruits[pre]  # retourne une liste de vecteurs
+    } else {
+      NA_character_
+    }
+  })
+  
+  data$noms_mod <- noms_mod
+  
+  data_ok <- data[!is.na(data$noms_mod),]
+  data_pas_ok <- data[is.na(data$noms_mod),]
+  
+  return(list(data_ok, data_pas_ok))
+
+}
+
+a <- tri(X2021, 1, fruits, sup_espace = 1)
+a
+
+b <- a[[1]]
+```
+# fusion des deux fonctions
+```{r}
+tri()
+```
+
+
+
+
+
+
