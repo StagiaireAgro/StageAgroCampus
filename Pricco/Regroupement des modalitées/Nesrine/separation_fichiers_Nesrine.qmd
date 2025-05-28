@@ -4,11 +4,9 @@ format: html
 editor: visual
 ---
 
-# Importation des librairies
+# I) Chargement des bibliothèques nécessaires
 
 ```{r,message=FALSE}
-
-# I) Chargement des bibliothèques nécessaires --------------------------------------------
 
 # Le tidyverse est un méta-package qui regroupe plusieurs packages R
 # utiles pour la manipulation, la transformation, et la visualisation de données :
@@ -23,24 +21,15 @@ editor: visual
 
 library(tidyverse)
 
-# Chargement du package yaml pour lire les fichiers .yaml
-library(yaml)
-
-# Chargement du package vroom pour lecture rapide des fichiers plats
-library(vroom)
-
 # Chargement de stringr pour le traitement de chaînes de caractères
 library(stringr)
 
 # Chargement de stringi pour manipulation avancée de texte (ex. suppression des accents)
 library(stringi)
 
-# readr permet une lecture rapide et efficace des fichiers plats (CSV, TSV, etc.)
-library(readr)
-
 ```
 
-# Importation des fichiers
+# II) Importation des fichiers
 
 ```{r}
 
@@ -67,147 +56,183 @@ data_ruche_oui_2023 <- read.csv("data/la ruche qui dit oui/historique_2023.csv",
 data_ruche_oui_2024 <- read.csv("data/la ruche qui dit oui/historique_2024.csv",sep = ";")
 ```
 
-# II) Définition de la liste de produits
-
+# III) Définition de la liste de produits
 
 ```{r}
 # Liste des produits alimentaires à rechercher
-fruits <- c(
-  "Jus de Poire", "Jus de pêche", "Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine",
-  "Noix", "Pêche", "Poireau", "Pomme de terre", "Jus de Pomme", "Pomme", "Prune",
+produits <- c(
+  "Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine",
+  "Pêche", "Poireau", "Pomme de terre", "Jus de Pomme", "Pomme", "Prune","Prune",
   "Raisin", "Asperge", "Aubergine", "Carotte", "Céleri-branche", "Chou fleur",
   "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon",
   "Oignon", "Poire", "Poivron", "Potiron", "Tomate", "Lait", "Œuf", "Boeuf",
-  "Porc", "Poulet", "Lentille", "Cassis", "Framboise", "Noisette", "Confiture de fraise", "Miel"
+  "Porc", "Poulet", "Lentille", "Cassis", "Framboise"
 )
 
 ```
 
-# III) Fonction de tri des produits dans les données
+# IV) Fonction de tri des produits dans les données
+
 
 ```{r}
+# I) Fonction de nettoyage de texte
 
-# Fonction pour trier les produits présents dans les noms d’un dataset
-# data : le dataframe à traiter
-# num_name : l'indice ou nom de la colonne contenant les noms
-# list_fruits : la liste des produits de référence
-# sup_espace : option pour supprimer les espaces (par défaut à 0 = ne supprime pas)
-tri <- function(data, num_name, list_fruits, sup_espace = 0) {
+# Nettoie une chaîne de caractères : minuscules, sans accents, sans caractères spéciaux
+clean <- function(variable){
+  # Mise en minuscules
+  x <- str_to_lower(variable)
+  # Suppression des accents
+  x <- stri_trans_general(x, "Latin-ASCII")
+  # Suppression des caractères non alphabétiques sauf les espaces
+  x <- str_replace_all(x, "[^a-z ]", "")
+  return(x)
+}
+```
+
+
+```{r}
+# II) Fonction pour transformer un produit en expression régulière flexible 
+
+# Transforme un mot ou expression en une regex avec option pluriel sur chaque mot
+transform_in_regex <- function(mot) {
+  # Séparation des mots
+  mots <- str_split(mot, " ")[[1]]
+  # Ajoute une tolérance aux "s" (pluriel) pour chaque mot
+  mots_regex <- sapply(mots, function(m) paste0(m, "(s)?"))
+  # Combine en une seule regex
+  return(paste0(mots_regex, collapse = ""))
+}
+```
+
+```{r}
+# III) Fonction de détection de produit dans une ligne donnée 
+
+# Recherche les produits reconnus dans une seule chaîne de caractère (one_prod)
+search_product <- function(one_prod, ls_prod_ordered, ls_prod_regex){
+  # Initialisation de la liste des produits trouvés
+  prod_find <- c()
+  # Supprime doublons et reconstitue une phrase unique
+  prod_tmp <- paste(unique(unlist(strsplit(one_prod, " "))), collapse = " ")
+  # Parcours de la liste des regex
+  for(indice in seq_along(ls_prod_regex)){
+    pattern <- ls_prod_regex[indice]
+    # Si on détecte le pattern
+    if(str_detect(prod_tmp, regex(pattern, ignore_case = TRUE))){
+      # Ajouter le produit trouvé
+      prod_find <- c(prod_find, ls_prod_ordered[indice])
+      # Retirer le mot reconnu de la chaîne restante
+      prod_tmp <- str_replace(prod_tmp, regex(pattern, ignore_case = TRUE), "")
+    }
+  }
+  # Retourne les produits détectés, séparés par des virgules
+  return(paste(unique(prod_find), collapse = ","))
+}
+```
+
+
+```{r}
+# IV) Fonction principale de classification et de split des données
+
+# Fonction principale pour classifier les données de socleo_2021 en fonction des produits
+split_data <- function(socleo_2021, produits){
   
-  # Trier les produits par longueur décroissante pour éviter les confusions
-  list_fruits <- list_fruits[order(nchar(list_fruits), decreasing = TRUE)]
+  # Initialisation de la liste de résultats
+  liste_par_fruit <- list()
   
-  # Mettre en minuscule tous les noms de la liste
-  list_fruits <- str_to_lower(list_fruits)
+  # Nettoyage des noms des produits
+  clean_produits <- clean(produits)
   
-  # Enlever les accents
-  list_fruits <- stri_trans_general(list_fruits, "Latin-ASCII")
+  # Suppression des espaces
+  clean_produits_sans_espaces <- gsub(" ", "", clean_produits)
   
-  # Supprimer les "s" finaux (pluriels)
-  list_fruits_sans_s <- gsub("s\\b", "", list_fruits, ignore.case = TRUE)
+  # Tri des produits par longueur décroissante
+  oder_clean_produits_sans_espaces <- order(nchar(clean_produits_sans_espaces), decreasing = TRUE)
   
-  # Extraire la colonne des noms dans les données
-  noms <- data[[num_name]]
+  # Création des expressions régulières à partir des noms nettoyés
+  produits_regex <- sapply(clean_produits, transform_in_regex)
   
-  # Normaliser les noms dans les données (minuscule)
-  noms <- str_to_lower(noms)
+  # Réorganisation des listes selon l’ordre décroissant
+  produits_regex <- produits_regex[oder_clean_produits_sans_espaces]
+  clean_produits <- clean_produits[oder_clean_produits_sans_espaces]
   
-  # Remplacer les slash par des espaces
-  noms <- str_replace_all(noms, "/", " ")
+  # Transformation de la colonne "name" en facteur
+  socleo_2021[["clean_name"]] <- as.factor(socleo_2021[["name"]])
   
-  # Supprimer les accents
-  noms <- stri_trans_general(noms, "Latin-ASCII")
+  # Nettoyage des niveaux du facteur (minuscule, accents, etc.)
+  levels(socleo_2021[["clean_name"]]) <- clean(levels(socleo_2021[["clean_name"]]))
   
-  # Supprimer tous les "s" (pluriels)
-  noms_sans_s <- gsub("s", "", noms, ignore.case = TRUE)
+  # Suppression des espaces dans les noms
+  levels(socleo_2021[["clean_name"]]) <- gsub("\\s+", "", levels(socleo_2021[["clean_name"]])) 
   
-  # Option : supprimer aussi les espaces dans les produits et les noms
-  if (sup_espace) {
-    list_fruits_sans_s <- str_replace(list_fruits_sans_s, " ", "")
-    noms_sans_s <- str_replace(noms_sans_s, " ", "")
+  # Stocke les noms uniques nettoyés
+  levels_socleo_2021_ok <- levels(socleo_2021[["clean_name"]])
+  
+  # Classification de chaque nom avec les produits
+  classification <- sapply(levels_socleo_2021_ok, search_product, 
+                           ls_prod_ordered = clean_produits, 
+                           ls_prod_regex = produits_regex)
+  
+  # Ajoute la classification à la table
+  socleo_2021[["classif"]] <- classification[as.character(socleo_2021[["clean_name"]])]
+  
+  # Nettoie à nouveau les noms nettoyés
+  socleo_2021[["clean_name"]] <- clean(as.factor(socleo_2021[["name"]]))
+  
+  # Remplace les chaînes vides par NA
+  socleo_2021[["classif"]][!is.na(socleo_2021[["classif"]]) & socleo_2021[["classif"]] == ""] <- NA
+  
+  
+  # Séparation des données selon si une seule ou plusieurs catégories sont détectées
+  data_ok <- socleo_2021[!is.na(socleo_2021[["classif"]]) & str_count(socleo_2021[["classif"]], ",") == 0, ]  
+  data_pas_ok <- socleo_2021[is.na(socleo_2021[["classif"]]) | str_count(socleo_2021[["classif"]], ",") >= 1, ]
+  
+  # Création d’un sous-dataframe par fruit reconnu
+  for(fruit in clean_produits) {
+    liste_par_fruit[[paste0("data_",fruit, sep="")]] <- 
+      data_ok[data_ok[["classif"]] == fruit, ]
   }
   
-  # Créer une matrice logique indiquant la présence de chaque fruit dans chaque nom
-  presence <- sapply(list_fruits_sans_s, function(fruit) grepl(paste0("\\b", fruit, "\\b"), noms_sans_s))
+  # Tentative de reclassification des lignes ambigües
+  new_filter <- data_pas_ok[!is.na(data_pas_ok[["classif"]]),]
   
-  # Déterminer le produit dominant par ligne
-  moda <- apply(presence, 1, function(pre) {
-    
-    # Cas 1 : un seul produit reconnu → on garde celui-là
-    if (sum(pre) == 1) {
-      list_fruits[pre] 
-      
-    # Cas 2 : plusieurs produits détectés → on garde le 1er si les autres sont inclus dans lui
-    } else if (sum(pre) > 1) {
-      nb_mots <- length(list_fruits[pre])
-      autres <- list_fruits[pre][2:nb_mots]
-      
-      # Vérifie si tous les autres produits sont inclus dans le 1er
-      if (all(sapply(autres, function(f) grepl(f, list_fruits[pre][1])))) {
-        list_fruits[pre][1]
-      } else {
-        NA_character_
-      }
-    } else {
-      # Aucun produit reconnu
-      NA_character_
-    }
-  })
+  levels_new_filter <- levels(as.factor(new_filter[["clean_name"]]))
   
-  # Enregistrer tous les produits reconnus dans chaque ligne
-  noms_mod <- apply(presence, 1, function(pre) { 
-    if (sum(pre) >= 1) {
-      list_fruits[pre]
-    } else {
-      NA_character_
-    }
-  })
+  # Reclassification
+  new_classification <- sapply(levels_new_filter, search_product, 
+                          ls_prod_ordered = clean_produits, 
+                          ls_prod_regex = produits_regex)
   
-  # Ajouter les colonnes aux données originales
-  data$noms_sans_s <- noms_sans_s
-  data$moda <- moda
-  data$noms_mod <- noms_mod
+  new_filter[["classif"]] <- new_classification[new_filter[["clean_name"]]]
   
-  # Séparer les données selon la reconnaissance de produits
-  data_ok <- data[!is.na(data$noms_mod), ]
-  data_pas_ok <- data[is.na(data$noms_mod), ]
+  # Récupération des lignes maintenant bien classifiées
+  levels_new_filter_prod <-  new_filter[str_count(new_filter[["classif"]], ",") == 0, "classif"]
+  levels_new_filter_prod <- levels_new_filter_prod[["classif"]]
   
-  # Retourner la liste des deux dataframes (ok, pas ok)
-  return(list(data_ok, data_pas_ok))
+  # Réintégration dans les bons sous-tableaux
+  for(un_nom_produit in levels_new_filter_prod){
+    liste_nom <- paste0("data_",un_nom_produit, sep="")
+    new <- new_filter[new_filter[["classif"]] == un_nom_produit,]
+    liste_par_fruit[[liste_nom]] <- rbind(
+      liste_par_fruit[[liste_nom]], new)
+    lignes_a_supprimer <- which(new_filter[["classif"]] == un_nom_produit)
+    new_filter <- new_filter[-lignes_a_supprimer, ]
+  }
+  
+  # Regroupe tout ce qui reste dans la catégorie "autre"
+  liste_par_fruit[["data_autre"]] <- rbind(new_filter, data_pas_ok[is.na(data_pas_ok[["classif"]]),])
+  
+  return(liste_par_fruit)
 }
-
-```
-
-# IV) Utilisation de la fonction 
-
-```{r}
-
-# Appel de la fonction sur les données socleo
-# sup_espace = 0 : on ne retire pas les espaces
-a <- tri(data_socleo_2021, 1, fruits, sup_espace = 0)
-
-# Extraction du dataframe avec reconnaissance correcte
-b <- a[[1]] 
-
-# Extraction du dataframe avec reconnaissance incomplète ou absente
-c <- a[[2]] 
-
-# Regarde la liste de tous les dataframes
-liste_resultat <- split(b,b$moda)
-
-# Exemple d'accès à un jeu de données 
-view(liste_resultat$oignon)
 ```
 
 
-# Test pour la séparation des fichiers
-
 ```{r}
-#########################################################
-#                                                       #
-#   Tests de la fonction sur différents fichiers        #
-#                                                       #
-######################################################### 
+
+#############################################################
+#                                                           #
+#   V) Tests de la fonction split sur différents fichiers   #
+#                                                           #
+############################################################# 
 
 ########################## Socleo ########################## 
 
@@ -215,32 +240,6 @@ liste_resultats_socleo_2021 <- split_data(data_socleo_2021,produits)
 liste_resultats_socleo_2022 <- split_data(data_socleo_2022,produits)
 liste_resultats_socleo_2023 <- split_data(data_socleo_2023,produits)
 liste_resultats_socleo_2024 <- split_data(data_socleo_2024,produits)
-
-
-############# Vérification des produits 
-
-poireau <- liste_resultats_socleo_2021$data_poire |> filter(grepl("poireau",clean_name)) # ok --> rien
-poireau <- liste_resultats_socleo_2021$data_poireau |> filter(grepl("poireau",clean_name)) # ok --> rien 
-poireau <- liste_resultats_socleo_2021$data_autres |> filter(grepl("poireau",clean_name)) # ok --> rien
-
-pomme <- liste_resultats_socleo_2021$data_autres |> filter(grepl("pomme",clean_name)) # ok --> rien
-
-pdt <- liste_resultats_socleo_2021$data_pomme |> filter(grepl("pommes de terre",clean_name)) # dans data_pomme
-pdt <- liste_resultats_socleo_2021$`data_pomme de terre` |> filter(grepl("de terre",clean_name)) # dans data_pomme
-pdt <- liste_resultats_socleo_2021$data_autres |> filter(grepl("de terre",clean_name)) # ok --> rien
-
-jus_pomme <- liste_resultats_socleo_2021$data_pomme |> filter(grepl("jus",clean_name)) # dans data_pomme
-
-oeuf <- liste_resultats_socleo_2021$data_oeuf |> filter(grepl("oeuf",clean_name)) # ok --> rempli
-oeuf <- liste_resultats_socleo_2021$data_autres |> filter(grepl("oeuf",clean_name)) # ok --> rien
-
-boeuf <- liste_resultats_socleo_2021$data_autres |> filter(grepl("boeuf",clean_name)) # ok --> rien
-
-poire <- liste_resultats_socleo_2021$data_autres |> filter(grepl("poire",clean_name)) # ok --> rien
-poire <- liste_resultats_socleo_2021$data_poire |> filter(grepl("poire",clean_name)) # ok --> rempli
-
-prune <- liste_resultats_socleo_2021$data_prune |> filter(grepl("prune",clean_name)) # pruneau(x) présent dans data_prune
-
 
 ########################## coop circuit ########################## 
 
@@ -295,7 +294,7 @@ view(liste_resultats_socleo_2023$data_autres)
 
 ```
 
-# Renommage des tables par rapport au nom des fournisseurs
+# V) Renommage des tables par rapport au nom des fournisseurs
 
 ```{r}
 
@@ -466,7 +465,7 @@ liste_resultats_ruche_oui_2024 <- setNames(liste_resultats_ruche_oui_2024, noms_
 
 ```
 
-# Fusion des fichiers par produit avec toutes les années confondues
+# VI) Fusion des fichiers par produit avec toutes les années confondues
 
 ```{r}
 
@@ -517,7 +516,7 @@ liste_resultats_ruche_oui_tts_annees <- Map(bind_rows,
 
 ```
 
-# Export des fichiers séparés au format csv
+# VII) Export des fichiers séparés au format csv
 
 ```{r}
 export_fichiers_separes <- function(liste_data, dossier_export = "export_csv_legumes") {
