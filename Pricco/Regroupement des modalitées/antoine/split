@@ -15,7 +15,7 @@ fruits <- c(
   "Raisin", "Asperge", "Aubergine", "Carotte", "Céleri-branche", "Chou fleur",
   "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon",
   "Oignon", "Poire", "Poivron", "Potiron", "Tomate", "Lait", "Œuf", "Boeuf",
-  "Porc", "Poulet", "Lentille","Cassis","Framboise","Noisette","Confiture de fraise","Miel","pruneaux"
+  "Porc", "Poulet", "Lentille","Cassis","Framboise","Noisette","Confiture de fraise","Miel","Pruneaux"
 )
 
 
