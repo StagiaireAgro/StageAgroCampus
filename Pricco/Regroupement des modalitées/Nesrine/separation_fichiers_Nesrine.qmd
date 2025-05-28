@@ -1,1 +1,130 @@
+```{r}
 
+# I) Chargement des bibliothèques nécessaires --------------------------------------------
+# readr permet une lecture rapide et efficace des fichiers plats (CSV, TSV, etc.)
+library(readr)
+
+# II) Définition de la liste de produits --------------------------------------------------
+
+# Liste des produits alimentaires à rechercher
+fruits <- c(
+  "Jus de Poire", "Jus de pêche", "Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine",
+  "Noix", "Pêche", "Poireau", "Pomme de terre", "Jus de Pomme", "Pomme", "Prune",
+  "Raisin", "Asperge", "Aubergine", "Carotte", "Céleri-branche", "Chou fleur",
+  "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon",
+  "Oignon", "Poire", "Poivron", "Potiron", "Tomate", "Lait", "Œuf", "Boeuf",
+  "Porc", "Poulet", "Lentille", "Cassis", "Framboise", "Noisette", "Confiture de fraise", "Miel"
+)
+
+# III) Fonction de tri des produits dans les données ---------------------------------------
+
+# Fonction pour trier les produits présents dans les noms d’un dataset
+# data : le dataframe à traiter
+# num_name : l'indice ou nom de la colonne contenant les noms
+# list_fruits : la liste des produits de référence
+# sup_espace : option pour supprimer les espaces (par défaut à 0 = ne supprime pas)
+tri <- function(data, num_name, list_fruits, sup_espace = 0) {
+  
+  # Trier les produits par longueur décroissante pour éviter les confusions
+  list_fruits <- list_fruits[order(nchar(list_fruits), decreasing = TRUE)]
+  
+  # Mettre en minuscule tous les noms de la liste
+  list_fruits <- str_to_lower(list_fruits)
+  
+  # Enlever les accents
+  list_fruits <- stri_trans_general(list_fruits, "Latin-ASCII")
+  
+  # Supprimer les "s" finaux (pluriels)
+  list_fruits_sans_s <- gsub("s\\b", "", list_fruits, ignore.case = TRUE)
+  
+  # Extraire la colonne des noms dans les données
+  noms <- data[[num_name]]
+  
+  # Normaliser les noms dans les données (minuscule)
+  noms <- str_to_lower(noms)
+  
+  # Remplacer les slash par des espaces
+  noms <- str_replace_all(noms, "/", " ")
+  
+  # Supprimer les accents
+  noms <- stri_trans_general(noms, "Latin-ASCII")
+  
+  # Supprimer tous les "s" (pluriels)
+  noms_sans_s <- gsub("s", "", noms, ignore.case = TRUE)
+  
+  # Option : supprimer aussi les espaces dans les produits et les noms
+  if (sup_espace) {
+    list_fruits_sans_s <- str_replace(list_fruits_sans_s, " ", "")
+    noms_sans_s <- str_replace(noms_sans_s, " ", "")
+  }
+  
+  # Créer une matrice logique indiquant la présence de chaque fruit dans chaque nom
+  presence <- sapply(list_fruits_sans_s, function(fruit) grepl(paste0("\\b", fruit, "\\b"), noms_sans_s))
+  
+  # Déterminer le produit dominant par ligne
+  moda <- apply(presence, 1, function(pre) {
+    
+    # Cas 1 : un seul produit reconnu → on garde celui-là
+    if (sum(pre) == 1) {
+      list_fruits[pre] 
+      
+    # Cas 2 : plusieurs produits détectés → on garde le 1er si les autres sont inclus dans lui
+    } else if (sum(pre) > 1) {
+      nb_mots <- length(list_fruits[pre])
+      autres <- list_fruits[pre][2:nb_mots]
+      
+      # Vérifie si tous les autres produits sont inclus dans le 1er
+      if (all(sapply(autres, function(f) grepl(f, list_fruits[pre][1])))) {
+        list_fruits[pre][1]
+      } else {
+        NA_character_
+      }
+    } else {
+      # Aucun produit reconnu
+      NA_character_
+    }
+  })
+  
+  # Enregistrer tous les produits reconnus dans chaque ligne
+  noms_mod <- apply(presence, 1, function(pre) { 
+    if (sum(pre) >= 1) {
+      list_fruits[pre]
+    } else {
+      NA_character_
+    }
+  })
+  
+  # Ajouter les colonnes aux données originales
+  data$noms_sans_s <- noms_sans_s
+  data$moda <- moda
+  data$noms_mod <- noms_mod
+  
+  # Séparer les données selon la reconnaissance de produits
+  data_ok <- data[!is.na(data$noms_mod), ]
+  data_pas_ok <- data[is.na(data$noms_mod), ]
+  
+  # Retourner la liste des deux dataframes (ok, pas ok)
+  return(list(data_ok, data_pas_ok))
+}
+
+# IV) Utilisation de la fonction -----------------------------------------------------------
+
+# Appel de la fonction sur les données socleo
+# sup_espace = 0 : on ne retire pas les espaces
+a <- tri(data_socleo_2021, 1, fruits, sup_espace = 0)
+
+# Extraction du dataframe avec reconnaissance correcte
+b <- a[[1]] 
+
+# Extraction du dataframe avec reconnaissance incomplète ou absente
+c <- a[[2]] 
+```
+
+
+```{r}
+# Regarde la liste de tous les dataframes
+liste_resultat <- split(b,b$moda)
+
+# Exemple d'accès à un jeu de données 
+view(liste_resultat$oignon)
+```
