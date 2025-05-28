@@ -106,7 +106,9 @@ write.csv(b, "test_split.csv")
 ```
 # fusion des deux fonctions
 ```{r}
-split(b, b$moda)
+e <- split(b, b$moda)
+
+g <- e$Aubergine
 ```
 
 
