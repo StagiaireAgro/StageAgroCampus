@@ -1,5 +1,5 @@
 ---
-title: "separation_fichier"
+title: "separation_fichiers_v4"
 format: html
 editor: visual
 ---
@@ -8,36 +8,26 @@ editor: visual
 
 ```{r,message=FALSE}
 
-# Le tidyverse est un méta-package qui regroupe plusieurs packages R
-# utiles pour la manipulation, la transformation, et la visualisation de données :
-# - ggplot2 : pour la visualisation
-# - dplyr : pour la manipulation de données (filtrer, trier, grouper...)
-# - tidyr : pour le reshaping (pivot_longer, pivot_wider, etc.)
-# - readr : pour lire des fichiers plats (CSV, TSV...)
-# - purrr : pour la programmation fonctionnelle (map, etc.)
-# - tibble : pour manipuler des data frames modernes
-# - stringr : pour manipuler des chaînes de caractères
-# - forcats : pour manipuler des facteurs
-
-library(tidyverse)
-
 # Pour lire les fichiers CSV
 library(readr)
-
-# Pour gérer les accents et normaliser les chaînes
-library(stringi)
 
 # Pour manipuler et détecter les chaînes de caractères
 library(stringr)
 
+# Pour gérer les accents et normaliser les chaînes
+library(stringi)
+
+# Pour créer de sgraphiques plus sophistiqués
+library(ggplot2)
 
 ```
 
 # II) Importation des fichiers
 
-```{r}
-
+```{r,warning=FALSE}
 ########################## Socleo ########################## 
+
+data_socleo_2021 <- read.csv("data/socleo/toutsocleo_2021.csv",sep = ",")
 
 ########################## coop circuit ########################## 
 
@@ -48,8 +38,10 @@ data_coop_circuit_2024 <- read.csv("data/coop circuit/par annee/2024.csv",sep = 
 
 ########################## la ruche qui dit oui ########################## 
 
-data_ruche_oui_2021_part_1 <- read.csv("data/la ruche qui dit oui/historique_2021part1.csv",sep = ";")
-data_ruche_oui_2021_part_2 <- read.csv("data/la ruche qui dit oui/historique_2021part1.csv",sep = ";")
+data_ruche_oui_2021_part_1 <- 
+  read.csv("data/la ruche qui dit oui/historique_2021part1.csv",sep = ";")
+data_ruche_oui_2021_part_2 <- 
+  read.csv("data/la ruche qui dit oui/historique_2021part1.csv",sep = ";")
 data_ruche_oui_2022 <- read.csv("data/la ruche qui dit oui/historique_2022.csv",sep = ";")
 data_ruche_oui_2023 <- read.csv("data/la ruche qui dit oui/historique_2023.csv",sep = ";")
 data_ruche_oui_2024 <- read.csv("data/la ruche qui dit oui/historique_2024.csv",sep = ";")
@@ -60,463 +52,729 @@ data_ruche_oui_2024 <- read.csv("data/la ruche qui dit oui/historique_2024.csv",
 ```{r}
 # Liste des produits alimentaires à rechercher
 liste_produits <- c(
-  "Jus de Poire","Jus de pêche","Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine",
-  "Noix", "Pêche", "Poireau", "Pomme de terre", "Jus de Pomme", "Pomme", "Prune",
+  "Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine",
+  "Noix", "Pêche", "Poire", "Pomme de terre", "Jus de Pomme", "Pomme", "Prune",
   "Raisin", "Asperge", "Aubergine", "Carotte", "Céleri-branche", "Chou fleur",
   "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon",
-  "Oignon", "Poire", "Poivron", "Potiron", "Tomate", "Lait", "Œuf", "Boeuf",
-  "Porc", "Poulet", "Lentille","Cassis","Framboise","Noisette","Confiture de fraise","Miel","Pruneaux"
+  "Oignon", "Poireau","Poivron", "Potiron", "Tomate", "Lait", "Oeuf", "Boeuf",
+  "Porc", "Poulet", "Lentille"
 )
 
-```
+# Mise en minuscules pour correspondance plus facile
+liste_produits <- str_to_lower(liste_produits)
 
-# IV) Fonction de tri des produits dans les données
+# On supprime les tirets pour correspondance plus facile
+liste_produits <- gsub("-", " ", liste_produits, ignore.case = TRUE)
 
-```{r}
-
-# 1) Fonction de séparation de fichiers par rapport aux produits
-
-separation_fichiers <- function(data, num_name, list_produits, sup_espace = 0) {
-  
-  # Trie les noms de produits par longueur décroissante pour capturer d’abord les plus spécifiques
-  produits <- list_produits[order(nchar(list_produits), decreasing = TRUE)]
-  list_produits <- list_produits[order(nchar(list_produits), decreasing = TRUE)]
-  
-  # Normalisation de la liste de produits : minuscule, sans accents et sans pluriels
-  list_produits <- str_to_lower(list_produits)
-  list_produits <- stri_trans_general(list_produits, "Latin-ASCII")
-  list_produits_sans_s <- gsub("s\\b", "", list_produits, ignore.case = TRUE)
-  list_produits_sans_s <- gsub("x\\b", "", list_produits_sans_s, ignore.case = TRUE)
-  list_produits_sans_s <- gsub("-", " ", list_produits_sans_s, ignore.case = TRUE)
-  
-  # Normalisation des noms de produits dans la colonne désignée
-  noms <- data[[num_name]]
-  noms <- str_to_lower(noms)
-  noms <- str_replace_all(noms, "/", " ")
-  noms <- stri_trans_general(noms, "Latin-ASCII")
-  noms_sans_s <- gsub("s\\b", "", noms, ignore.case = TRUE)
-  noms_sans_s <- gsub("x\\b", "", noms_sans_s, ignore.case = TRUE)
-  noms_sans_s <- gsub("-", " ", noms_sans_s, ignore.case = TRUE)
-  
-  # Optionnel : suppression complète des espaces dans la liste des noms de produits
-  if(sup_espace){
-    list_produits_sans_s <- str_replace(list_produits_sans_s, " ", "")
-    noms_sans_s <- str_replace(noms_sans_s, " ", "")
-  }
-  
-  # Création de la matrice de présence : est-ce que chaque produit apparaît dans chaque ligne ?
-  presences_produits <- sapply(list_produits_sans_s, function(produit) grepl(paste0(produit), noms_sans_s))
-  
-  # Attribution du produit détecté selon 2 conditions
-  attribution_noms_produits <- apply(presences_produits, 1, function(presence_un_produit) {
-    if (sum(presence_un_produit) == 1) {
-      # Condition 1 : un seul produit détecté
-      produits[presence_un_produit] 
-    } else if (sum(presence_un_produit) > 1) {
-      # Condition 2 : plusieurs noms de produits détectés, on garde le premier seulement si les autres sont inclus dans celui-ci
-      # Le nombre de prdouits détectés dans chaque ligne
-      nb_mots <- length(list_produits_sans_s[presence_un_produit])
-      
-      # Sélectionne tous les produits détectés sauf le premier
-      autres <- list_produits_sans_s[presence_un_produit][2:nb_mots]
-      if (all(sapply(autres, function(un_fruit) grepl(un_fruit, list_produits_sans_s[presence_un_produit][1])))) {
-        produits[presence_un_produit][1]
-        
-      # Dans les cas ambigus, la valeur de retour est une valeur manquante de type character
-      } else {
-        NA_character_
-      }
-    } else {
-      # Dans les cas d'aucun produit détecté, la valeur de retour est une valeur manquante de type character
-      NA_character_
-    }
-  })
-  
-  # Liste complète des produits détectés pour chaque ligne
-  list_modalites <- apply(presences_produits, 1, function(presence_un_produit) { 
-    if (sum(presence_un_produit) >= 1) {
-      list_produits_sans_s[presence_un_produit]
-    } else {
-      NA_character_
-    }
-  })
-  
-  # Ajout des colonnes au tableau de données
-  data$noms_sans_s <- noms_sans_s
-  data$attribution_noms_produits <- attribution_noms_produits
-  data$list_modalites <- sapply(list_modalites, toString)
-  
-  # Séparation des données bien classifiées et celles ambigües
-  data_ok <- data[!is.na(data$attribution_noms_produits),]
-  data_pas_ok <- data[is.na(data$attribution_noms_produits),]
-  
-  # Retourne une liste contenant les deux ensembles
-  return(list(data_ok, data_pas_ok))
-}
+# On supprime les accents pour correspondance plus facile
+liste_produits <- stri_trans_general(liste_produits, "Latin-ASCII")
 
 ```
 
+# IV) Dermination de la liste des déclinaisons possibles des noms de produits
+
+## 2) Coop Circuit
+
+### a) Stockage des levels existant 
 
 ```{r}
+########################## coop circuit ########################## 
 
-# 2) Application de la fonction 
+########################## 2021 
 
-# On applique la fonction sur les données de 2021
-liste_data_ok_et_pas_ok <- separation_fichiers(data_coop_circuit_2021, 1, liste_produits, sup_espace = 0)
+# Étape 1 : Convertir en facteur
+data_coop_circuit_2021$name <- as.factor(data_coop_circuit_2021$name)
 
-# Données correctement classifiées
-data_ok <- liste_data_ok_et_pas_ok[[1]]
+# Étape 2 : Extraire les levels
+declinaison_coop_circuit_2021_noms_produits <- levels(data_coop_circuit_2021$name)
 
-# Données non classifiées (ambigües ou vides)
-data_pas_ok <- liste_data_ok_et_pas_ok[[2]]
+# Étape 3 : Mise en minuscules
+declinaison_coop_circuit_2021_noms_produits <- str_to_lower(declinaison_coop_circuit_2021_noms_produits)
 
-# Valeurs uniques présentes dans les lignes non classées
-liste_produits_pas_ok_uniques <- unique(data_pas_ok[[1]])
+# Étape 4 : Suppression des accents
+declinaison_coop_circuit_2021_noms_produits <- stri_trans_general(declinaison_coop_circuit_2021_noms_produits, "Latin-ASCII")
 
-# 3) Découpage par produit (fusion de split_data simplifiée) 
-# On divise le tableau selon les valeurs de la liste de fuits
-liste_data_ok <- split(data_ok, data_ok$attribution_noms_produits)
-
-# Exemple : on récupère toutes les lignes correspondant à "Aubergine"
-data_aubergine <- liste_data_ok$Aubergine
-
+# Étape 5 : Remplacement des tirets par un espace
+declinaison_coop_circuit_2021_noms_produits <- gsub("-", " ", declinaison_coop_circuit_2021_noms_produits)
 ```
 
 
-# V) Tests de la fonction de tri des produits
+### b) On regarde à l'oeil nu les variantes de noms de produits
 
 ```{r}
-
-#############################################################
-#                                                           #
-#   V) Tests de la fonction split sur différents fichiers   #
-#                                                           #
-############################################################# 
-
-########################## Socleo ########################## 
 
 ########################## coop circuit ########################## 
 
 ########################## 2021 
 
-# On applique la fonction sur les données de 2021
-liste_resultats_coop_circuit_2021 <- separation_fichiers(data_coop_circuit_2021, 1, liste_produits, sup_espace = 0)
+# abricot
 
-# Données correctement classifiées
-data_ok_coop_circuit_2021 <- liste_resultats_coop_circuit_2021[[1]]
+abricot <- declinaison_coop_circuit_2021_noms_produits[grepl("abricot",
+                                                                   declinaison_coop_circuit_2021_noms_produits)]
 
-# Données non classifiées (ambigües ou vides)
-data_pas_ok_coop_circuit_2021  <- liste_resultats_coop_circuit_2021[[2]]
+abricot
 
-# Valeurs uniques présentes dans les lignes non classées
-liste_produits_pas_ok_uniques <- unique(data_pas_ok_coop_circuit_2021[[1]])
+# banane
+banane <- declinaison_coop_circuit_2021_noms_produits[grepl("banane",
+                                                                   declinaison_coop_circuit_2021_noms_produits)]
 
-# 3) Découpage par produit (fusion de split_data simplifiée) 
-# On divise le tableau selon les valeurs de la liste de fuits
-liste_data_ok_coop_circuit_2021<- split(data_ok_coop_circuit_2021, data_ok_coop_circuit_2021$attribution_noms_produits)
+banane
 
-# Exemple : on récupère toutes les lignes correspondant à "Aubergine"
-data_aubergine <- liste_data_ok_coop_circuit_2021$Aubergine
+# cerise
+cerise <- declinaison_coop_circuit_2021_noms_produits[grepl("cerise",
+                                                                   declinaison_coop_circuit_2021_noms_produits)]
 
-########################## la ruche qui dit oui ########################## 
-# 
-# # On renomme la variable du nom de produit pour que la fonction marche
-# names(data_ruche_oui_2021_part_1)[8] <- c("name")
-# 
-# # On teste 
-# liste_resultats_ruche_oui_2021_part_1 <- split_data(data_ruche_oui_2021_part_1,produits)
-# 
-# # On renomme la variable du nom de produit pour que la fonction marche
-# names(data_ruche_oui_2021_part_2)[8] <- c("name")
-# 
-# # On teste 
-# liste_resultats_ruche_oui_2021_part_2 <- split_data(data_ruche_oui_2021_part_2,produits)
-# 
-# # On renomme la variable du nom de produit pour que la fonction marche
-# names(data_ruche_oui_2022)[8] <- c("name")
-# 
-# # On teste 
-# liste_resultats_ruche_oui_2022 <- split_data(data_ruche_oui_2022,produits)
-# 
-# # On renomme la variable du nom de produit pour que la fonction marche
-# names(data_ruche_oui_2023)[8] <- c("name")
-# 
-# # On teste 
-# liste_resultats_ruche_oui_2023 <- split_data(data_ruche_oui_2023,produits)
-# 
-# # On renomme la variable du nom de produit pour que la fonction marche
-# names(data_ruche_oui_2024)[8] <- c("name")
-# 
-# # On teste 
-# liste_resultats_ruche_oui_2024 <- split_data(data_ruche_oui_2024,produits)
+cerise
 
-###################################################################
-#                                                                 #
-#   Exemple d'accès à un sous-dataframe de la liste de résultat   #
-#                                                                 #
-################################################################### 
-# 
-# view(liste_resultats_socleo_2021$data_pomme)
-# 
-# view(liste_resultats_socleo_2022$data_autres)
-# 
-# view(liste_resultats_socleo_2023$data_autres)
+# clementine
+clementine <- declinaison_coop_circuit_2021_noms_produits[grepl("clementine",
+                                                                   declinaison_coop_circuit_2021_noms_produits)]
+
+clementine
+
+# fraise
+fraise <- declinaison_coop_circuit_2021_noms_produits[grepl("fraise",
+                                                                   declinaison_coop_circuit_2021_noms_produits)]
+
+fraise
+
+# kiwi
+kiwi <- declinaison_coop_circuit_2021_noms_produits[grepl("kiwi",
+                                                                   declinaison_coop_circuit_2021_noms_produits)]
+
+kiwi
+
+# nectarine
+nectarine <- declinaison_coop_circuit_2021_noms_produits[grepl("nectarine",
+                                                                   declinaison_coop_circuit_2021_noms_produits)]
+
+nectarine
+
+# noix
+noix <- declinaison_coop_circuit_2021_noms_produits[grepl("noix",
+                                                                   declinaison_coop_circuit_2021_noms_produits)]
+
+noix
+
+# peche
+peche <- declinaison_coop_circuit_2021_noms_produits[grepl("peche",
+                                                                   declinaison_coop_circuit_2021_noms_produits)]
+
+peche
+
+# poire
+motif_poire <- paste0("\\b", "poires", "\\b")
+
+poire <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_poire,
+                                                                   declinaison_coop_circuit_2021_noms_produits)]
+
+poire
+
+# pomme de terre
+
+### Ecriture 1 de pomme de terre
+motif_pdt <- paste0("\\b", "pomme de terre", "\\b")
+
+pomme_de_terre <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_pdt,
+                                                                   declinaison_coop_circuit_2021_noms_produits)]
+
+pomme_de_terre
+
+### Ecriture 2 de pommes de terre
+motif_pdt <- paste0("\\b", "pommes de terre", "\\b")
+
+pommes_de_terre <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_pdt,
+                                                                   declinaison_coop_circuit_2021_noms_produits)]
+
+pommes_de_terre
+
+### Ecriture 3 de pommes de terres
+motif_pdt <- paste0("\\b", "pommes de terres", "\\b")
+
+pommes_de_terres <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_pdt,
+                                                                   declinaison_coop_circuit_2021_noms_produits)]
+
+pommes_de_terres
+
+# jus de pomme
+
+### Ecriture 1 de jus de pomme
+motif_jus_pomme <- paste0("\\b", "jus des pomme", "\\b")
+
+jus_pomme <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_jus_pomme,
+                                                                   declinaison_coop_circuit_2021_noms_produits)]
+
+jus_pomme
+
+# jus de pomme
+
+### Ecriture 2 de jus de pommes
+motif_jus_pomme <- paste0("\\b", "jus des pommes", "\\b")
+
+jus_pommes <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_jus_pomme,
+                                                                   declinaison_coop_circuit_2021_noms_produits)]
+
+jus_pommes
+
+# pomme
+motif_pomme <- paste0("\\b", "pomme", "\\b")
+
+pomme <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_pomme,
+                                                                   declinaison_coop_circuit_2021_noms_produits)]
+
+pomme
+
+# prune
+motif_prune <- paste0("\\b", "prunes", "\\b")
+
+prune <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_prune,
+                                                                   declinaison_coop_circuit_2021_noms_produits)]
+
+prune
+
+# raisin
+motif_raisin <- paste0("\\b", "raisin", "\\b")
+
+raisin <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_raisin,
+                                                                   declinaison_coop_circuit_2021_noms_produits)]
+
+raisin
+
+# asperge
+motif_asperge <- paste0("\\b", "asperge", "\\b")
+
+asperge <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_asperge,
+                                                                   declinaison_coop_circuit_2021_noms_produits)]
+
+asperge
+
+
+# aubergine
+motif_aubergine <- paste0("\\b", "aubergines", "\\b")
+
+aubergine <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_aubergine,
+                                                        declinaison_coop_circuit_2021_noms_produits)]
+
+aubergine
+
+# carotte
+motif_carotte <- paste0("\\b", "carottes", "\\b")
+
+carotte <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_carotte,
+                                                        declinaison_coop_circuit_2021_noms_produits)]
+
+carotte
+
+# celeri branche
+motif_celeri <- paste0("\\b", "celeri branche", "\\b")
+
+celeri <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_celeri,
+                                                        declinaison_coop_circuit_2021_noms_produits)]
+
+celeri
+
+# chou fleur
+motif_chou_fleur <- paste0("\\b", "chou fleurs", "\\b")
+
+chou_fleur <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_chou_fleur,
+                                                        declinaison_coop_circuit_2021_noms_produits)]
+
+chou_fleur
+
+# concombre
+motif_concombre <- paste0("\\b", "concombres", "\\b")
+
+concombre <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_concombre,
+                                                        declinaison_coop_circuit_2021_noms_produits)]
+
+concombre
+
+# courgette
+motif_courgette <- paste0("\\b", "courgettes", "\\b")
+
+courgette <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_courgette,
+                                                        declinaison_coop_circuit_2021_noms_produits)]
+
+courgette
+
+# endive
+motif_endive <- paste0("\\b", "endive", "\\b")
+
+endive <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_endive,
+                                                        declinaison_coop_circuit_2021_noms_produits)]
+
+endive
+
+# haricot vert
+motif_haricot_vert <- paste0("\\b", "haricots vert", "\\b")
+
+haricot_vert <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_haricot_vert,
+                                                        declinaison_coop_circuit_2021_noms_produits)]
+
+haricot_vert
+
+# laitue
+motif_laitue <- paste0("\\b", "laitues", "\\b")
+
+laitue <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_laitue,
+                                                        declinaison_coop_circuit_2021_noms_produits)]
+
+laitue
+
+# melon
+motif_melon <- paste0("\\b", "melons", "\\b")
+
+melon <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_melon,
+                                                        declinaison_coop_circuit_2021_noms_produits)]
+
+melon
+
+# oignon
+motif_oignon <- paste0("\\b", "oignons", "\\b")
+
+oignon <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_oignon,
+                                                        declinaison_coop_circuit_2021_noms_produits)]
+
+oignon
+
+# poireau
+motif_poireau <- paste0("\\b", "poireaux", "\\b")
+
+poireau <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_poireau,
+                                                        declinaison_coop_circuit_2021_noms_produits)]
+
+poireau
+
+# poivron
+motif_poivron <- paste0("\\b", "poivron", "\\b")
+
+poivron <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_poivron,
+                                                        declinaison_coop_circuit_2021_noms_produits)]
+poivron
+
+# potiron
+motif_potiron <- paste0("\\b", "potirons", "\\b")
+
+potiron <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_potiron,
+                                                        declinaison_coop_circuit_2021_noms_produits)]
+
+potiron
+
+# tomate
+motif_tomate <- paste0("\\b", "tomate", "\\b")
+
+tomate <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_tomate,
+                                                        declinaison_coop_circuit_2021_noms_produits)]
+
+tomate
+
+# lait
+motif_lait <- paste0("\\b", "laits", "\\b")
+
+lait <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_lait,
+                                                        declinaison_coop_circuit_2021_noms_produits)]
+
+lait
+
+# oeuf
+motif_oeuf <- paste0("\\b", "oeufs", "\\b")
+
+oeuf <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_oeuf,
+                                                        declinaison_coop_circuit_2021_noms_produits)]
+
+oeuf
+
+# boeuf
+motif_boeuf <- paste0("\\b", "boeuf", "\\b")
+
+boeuf <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_boeuf,
+                                                        declinaison_coop_circuit_2021_noms_produits)]
+
+boeuf
+
+# porc
+motif_porc <- paste0("\\b", "porcs", "\\b")
+
+porc <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_porc,
+                                                        declinaison_coop_circuit_2021_noms_produits)]
+
+porc
+
+# poulet
+motif_poulet <- paste0("\\b", "poulet", "\\b")
+
+poulet <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_poulet,
+                                                        declinaison_coop_circuit_2021_noms_produits)]
+
+poulet
+
+# lentille
+motif_lentille <- paste0("\\b", "lentilles", "\\b")
+
+lentille <- declinaison_coop_circuit_2021_noms_produits[grepl(motif_lentille,
+                                                        declinaison_coop_circuit_2021_noms_produits)]
+
+lentille
 
 ```
 
-# VI) Renommage des tables par rapport au nom des fournisseurs
+# V) Création du vecteur des déclinaisons de nom de produit possibles
+
+## 1) Coop Circuit
+
+### a) Création pour chaque produit, son vecteur des variantes associé
 
 ```{r}
-
-###################################################################
-#                                                                 #
-#               Renommage des tables pour socleo                  #
-#                                                                 #
-################################################################### 
-
-# Noms des jeux de données de la liste de résultat
-noms_data <- names(liste_resultats_socleo_2021)
-
-# Renommage des noms en remplaçant 'data' par 'bulle'
-noms_socleo <- sub("^data", "socleo", noms_data)
-
-# Appliquer les nouveaux noms à la liste
-liste_resultats_socleo_2021 <- setNames(liste_resultats_socleo_2021, noms_socleo)
-
-########################## Année 2022 ########################## 
-
-# Noms des jeux de données de la liste de résultat
-noms_data <- names(liste_resultats_socleo_2022)
-
-# Renommage des noms en remplaçant 'data' par 'bulle'
-noms_socleo <- sub("^data", "socleo", noms_data)
-
-# Appliquer les nouveaux noms à la liste
-liste_resultats_socleo_2022 <- setNames(liste_resultats_socleo_2022, noms_socleo)
-
-########################## Année 2023 ########################## 
-
-# Noms des jeux de données de la liste de résultat
-noms_data <- names(liste_resultats_socleo_2023)
-
-# Renommage des noms en remplaçant 'data' par 'bulle'
-noms_socleo <- sub("^data", "socleo", noms_data)
-
-# Appliquer les nouveaux noms à la liste
-liste_resultats_socleo_2023 <- setNames(liste_resultats_socleo_2023, noms_socleo)
-
-########################## Année 2024 ########################## 
-
-# Noms des jeux de données de la liste de résultat
-noms_data <- names(liste_resultats_socleo_2024)
-
-# Renommage des noms en remplaçant 'data' par 'bulle'
-noms_socleo <- sub("^data", "socleo", noms_data)
-
-# Appliquer les nouveaux noms à la liste
-liste_resultats_socleo_2024 <- setNames(liste_resultats_socleo_2024, noms_socleo)
-
-###################################################################
-#                                                                 #
-#         Renommage des tables pour coop circuit                  #
-#                                                                 #
-################################################################### 
-
-########################## Année 2021 ########################## 
-
-# Noms des jeux de données de la liste de résultat
-noms_data <- names(liste_resultats_coop_circuit_2021)
-
-# Renommage des noms en remplaçant 'data' par 'bulle'
-noms_coop_circuit <- sub("^data", "coop_circuit", noms_data)
-
-# Appliquer les nouveaux noms à la liste
-liste_resultats_coop_circuit_2021 <- setNames(liste_resultats_coop_circuit_2021, noms_coop_circuit)
-
-########################## Année 2022 ########################## 
-
-# Noms des jeux de données de la liste de résultat
-noms_data <- names(liste_resultats_coop_circuit_2022)
-
-# Renommage des noms en remplaçant 'data' par 'bulle'
-noms_coop_circuit <- sub("^data", "coop_circuit", noms_data)
-
-# Appliquer les nouveaux noms à la liste
-liste_resultats_coop_circuit_2022 <- setNames(liste_resultats_coop_circuit_2022, noms_coop_circuit)
-
-########################## Année 2023 ########################## 
-
-# Noms des jeux de données de la liste de résultat
-noms_data <- names(liste_resultats_coop_circuit_2023)
-
-# Renommage des noms en remplaçant 'data' par 'bulle'
-noms_coop_circuit <- sub("^data", "coop_circuit", noms_data)
-
-# Appliquer les nouveaux noms à la liste
-liste_resultats_coop_circuit_2023 <- setNames(liste_resultats_coop_circuit_2023, noms_coop_circuit)
-
-########################## Année 2024 ########################## 
-
-# Noms des jeux de données de la liste de résultat
-noms_data <- names(liste_resultats_coop_circuit_2024)
-
-# Renommage des noms en remplaçant 'data' par 'bulle'
-noms_coop_circuit <- sub("^data", "coop_circuit", noms_data)
-
-# Appliquer les nouveaux noms à la liste
-liste_resultats_coop_circuit_2024 <- setNames(liste_resultats_coop_circuit_2024, noms_coop_circuit)
-
-
-###################################################################
-#                                                                 #
-#     Renommage des tables pour la ruche qui dit oui              #
-#                                                                 #
-################################################################### 
-
-########################## Année 2021 ########################## 
-
-###################### Partie 1 : 
-
-# Noms des jeux de données de la liste de résultat
-noms_data <- names(liste_resultats_ruche_oui_2021_part_1)
-
-# Renommage des noms en remplaçant 'data' par 'bulle'
-noms_ruche_oui <- sub("^data", "ruche_qui_dit_oui", noms_data)
-
-# Appliquer les nouveaux noms à la liste
-liste_resultats_ruche_oui_2021_part_1 <- setNames(liste_resultats_ruche_oui_2021_part_1, noms_ruche_oui)
-
-###################### Partie 2 : 
-
-# Noms des jeux de données de la liste de résultat
-noms_data <- names(liste_resultats_ruche_oui_2021_part_2)
-
-# Renommage des noms en remplaçant 'data' par 'bulle'
-noms_ruche_oui <- sub("^data", "ruche_qui_dit_oui", noms_data)
-
-# Appliquer les nouveaux noms à la liste
-liste_resultats_ruche_oui_2021_part_2 <- setNames(liste_resultats_ruche_oui_2021_part_2, noms_ruche_oui)
-
-
-########################## Année 2022 ########################## 
-
-# Noms des jeux de données de la liste de résultat
-noms_data <- names(liste_resultats_ruche_oui_2022)
-
-# Renommage des noms en remplaçant 'data' par 'bulle'
-noms_ruche_oui <- sub("^data", "ruche_qui_dit_oui", noms_data)
-
-# Appliquer les nouveaux noms à la liste
-liste_resultats_ruche_oui_2022 <- setNames(liste_resultats_ruche_oui_2022, noms_ruche_oui)
-
-
-########################## Année 2023 ########################## 
-
-# Noms des jeux de données de la liste de résultat
-noms_data <- names(liste_resultats_ruche_oui_2023)
-
-# Renommage des noms en remplaçant 'data' par 'bulle'
-noms_ruche_oui <- sub("^data", "ruche_qui_dit_oui", noms_data)
-
-# Appliquer les nouveaux noms à la liste
-liste_resultats_ruche_oui_2023 <- setNames(liste_resultats_ruche_oui_2023, noms_ruche_oui)
-
-########################## Année 2024 ########################## 
-
-# Noms des jeux de données de la liste de résultat
-noms_data <- names(liste_resultats_ruche_oui_2024)
-
-# Renommage des noms en remplaçant 'data' par 'bulle'
-noms_ruche_oui <- sub("^data", "ruche_qui_dit_oui", noms_data)
-
-# Appliquer les nouveaux noms à la liste
-liste_resultats_ruche_oui_2024 <- setNames(liste_resultats_ruche_oui_2024, noms_ruche_oui)
-
-
-```
-
-# VII) Fusion des fichiers par produit avec toutes les années confondues
-
-```{r}
-
-###################################################################
-#                                                                 #
-#                   Fusion des tables                             #
-#                                                                 #
-################################################################### 
-
-########################## Socleo ########################## 
-
-liste_resultats_socleo_tts_annees <- Map(bind_rows, 
-                                        liste_resultats_socleo_2021, 
-                                        liste_resultats_socleo_2022,
-                                        liste_resultats_socleo_2023,
-                                        liste_resultats_socleo_2024)
 
 ########################## coop circuit ########################## 
 
-liste_resultats_coop_circuit_tts_annees <- Map(bind_rows, 
-                                        liste_resultats_coop_circuit_2021, 
-                                        liste_resultats_coop_circuit_2022,
-                                        liste_resultats_coop_circuit_2023,
-                                        liste_resultats_coop_circuit_2024)
+########################## 2021 
 
-########################## la ruche qui dit oui ########################## 
+# abricot 
+abricot_declinaison <- c("abricot", "abricots")
 
-################ Transformer en nuùérique pour 2023 
+# banane 
+banane_declinaison <- c("banane", "bananes")
 
-library(purrr)
+# cerise 
+cerise_declinaison <- c("cerise", "cerises")
 
-liste_resultats_ruche_oui_2021_part_1 <- map(liste_resultats_ruche_oui_2021_part_1, ~ mutate(.x, weight_raw_item  = as.double(weight_raw_item )))
+# cerise 
+clementine_declinaison <- c("clementine", "clementines")
 
-liste_resultats_ruche_oui_2021_part_2 <- map(liste_resultats_ruche_oui_2021_part_2, ~ mutate(.x, weight_raw_item  = as.double(weight_raw_item )))
+# fraise 
+fraise_declinaison <- c("fraise", "fraises")
 
-liste_resultats_ruche_oui_2022 <- map(liste_resultats_ruche_oui_2022, ~ mutate(.x, weight_raw_item  = as.double(weight_raw_item )))
+# kiwis 
+kiwi_declinaison <- c("kiwi", "kiwis")
 
-liste_resultats_ruche_oui_2023 <- map(liste_resultats_ruche_oui_2023, ~ mutate(.x, weight_raw_item  = as.double(weight_raw_item )))
+# nectarine 
+nectarine_declinaison <- c("nectarine","nectarines")
 
-liste_resultats_ruche_oui_2024 <- map(liste_resultats_ruche_oui_2024, ~ mutate(.x, weight_raw_item  = as.double(weight_raw_item )))
+# noix 
+noix_declinaison <- c("noix","coquinoix")
 
-liste_resultats_ruche_oui_tts_annees <- Map(bind_rows,
-                                        liste_resultats_ruche_oui_2021_part_1,
-                                        liste_resultats_ruche_oui_2021_part_2,
-                                        liste_resultats_ruche_oui_2022,
-                                        liste_resultats_ruche_oui_2023,
-                                        liste_resultats_ruche_oui_2024)
+# peche 
+peche_declinaison <- c("peche","peches")
+
+# poire 
+poire_declinaison <- c("poire","poires")
+
+# pomme de terre 
+pdt_declinaison <- c("pomme de terre","pommes de terre","pommes de terres",
+                     "pomme de terres")
+
+# jus de pomme 
+jus_pomme_declinaison <- c("jus de pomme","jus de pommes")
+
+# pomme 
+pomme_declinaison <- c("pomme","pommes")
+
+# prune 
+prune_declinaison <- c("prune","prunes")
+
+# raisin 
+raisin_declinaison <- c("raisin","raisins")
+
+# asperge 
+asperge_declinaison <- c("asperge","asperges")
+
+# aubergine 
+aubergine_declinaison <- c("aubergine","aubergines")
+
+# carotte 
+carotte_declinaison <- c("carotte","carottes")
+
+# celeri branche 
+celeri_branche_declinaison <- c("celeri branche","celeris branches","celeris branche",
+                                "celeri branches")
+
+# chou fleur 
+chou_fleur_declinaison <- c("chou fleur","choux fleurs","chou fleurs",
+                            "choux fleur")
+
+# concombre 
+concombre_declinaison <- c("concombre","concombres")
+
+# courgette 
+courgette_declinaison <- c("courgette","courgettes")
+
+# endive 
+endive_declinaison <- c("endive","endives")
+
+# haricot vert 
+haricot_vert_declinaison <- c("haricot vert","haricots verts", "haricot verts",
+                              "haricots vert")
+
+# laitue 
+laitue_declinaison <- c("laitue","laitues")
+
+# melon 
+melon_declinaison <- c("melon","melons")
+
+# oignon 
+oignon_declinaison <- c("oignon","oignons")
+
+# poireau 
+poireau_declinaison <- c("poireau","poireaux")
+
+# poivron 
+poivron_declinaison <- c("poivron","poivrons")
+
+# potiron 
+potiron_declinaison <- c("potiron","potirons")
+
+# tomate 
+tomate_declinaison <- c("tomate","tomates")
+
+# lait 
+lait_declinaison <- c("lait","laits")
+
+# oeuf 
+oeuf_declinaison <- c("oeuf","oeufs")
+
+# boeuf 
+boeuf_declinaison <- c("boeuf","boeufs")
+
+# porc 
+porc_declinaison <- c("porc","porcs")
+
+# poulet 
+poulet_declinaison <- c("poulet","poulets")
+
+# lentille 
+lentille_declinaison <- c("lentille","lentilles")
 
 ```
 
-# VIII) Export des fichiers séparés au format csv
+
+### b) Liste contenant toutes les déclinaisons possibles pour chaque nom de produit
 
 ```{r}
-export_fichiers_separes <- function(liste_data, dossier_export = "export_csv_legumes") {
-  # Crée le dossier s'il n'existe pas déjà
-  if (!dir.exists(dossier_export)) {
-    dir.create(dossier_export, recursive = TRUE)
-  }
+# Liste contenant toutes les déclinaisons possibles pour chaque nom de produit
 
-  # Boucle sur chaque élément de la liste
-  for (nom_data in names(liste_data)) {
-    # Construit le chemin de fichier (remplace les espaces par des underscores)
-    chemin_fichier <- file.path(dossier_export, paste0(gsub(" ", "_", nom_data), ".csv"))
-    
-    # Écrit le dataframe au format CSV avec encodage UTF-8
-    write.csv(liste_data[[nom_data]], file = chemin_fichier, row.names = FALSE, fileEncoding = "UTF-8",
-              sep = ";")
-  }
+liste_declinai_noms_produits <- list(
+  abricot_declinaison,
+  banane_declinaison,
+  cerise_declinaison,
+  clementine_declinaison,
+  fraise_declinaison,
+  kiwi_declinaison,
+  nectarine_declinaison,
+  noix_declinaison,
+  peche_declinaison,
+  poire_declinaison,
+  pdt_declinaison,
+  jus_pomme_declinaison,
+  pomme_declinaison,
+  prune_declinaison,
+  raisin_declinaison,
+  asperge_declinaison,
+  aubergine_declinaison,
+  carotte_declinaison,
+  celeri_branche_declinaison,
+  chou_fleur_declinaison,
+  concombre_declinaison,
+  courgette_declinaison,
+  endive_declinaison,
+  haricot_vert_declinaison,
+  laitue_declinaison,
+  melon_declinaison,
+  oignon_declinaison,
+  poireau_declinaison,
+  poivron_declinaison,
+  potiron_declinaison,
+  tomate_declinaison,
+  lait_declinaison,
+  oeuf_declinaison,
+  boeuf_declinaison,
+  porc_declinaison,
+  poulet_declinaison,
+  lentille_declinaison
+)
+```
 
+# VI) Création de la fonction split par nom de produit
+
+## 1) Développement de la fonction split
+
+```{r}
+
+#  Fonction split par nom de produit
+separation_fichiers <- function(data, liste_produits, liste_declinai_noms_produits) {
+
+  #### Étape 0 : Ajout et nettoyage de la colonne `name_clean` dans `data`
+  data <- data %>%
+    mutate(
+      name_clean = name %>%
+        str_to_lower() %>%
+        stri_trans_general("Latin-ASCII") %>%
+        gsub("-", " ", ., ignore.case = TRUE)
+    )
+
+  #### Étape 1 : On extrait les levels des produits
+  levels_produits <- levels(as.factor(data$name_clean))
+
+  #### Étape 2 : Création de la matrice de présence
+  matrice_presence <- sapply(liste_declinai_noms_produits, function(declinaisons) {
+    sapply(levels_produits, function(level) {
+      any(str_detect(level, fixed(declinaisons))) * 1
+    })
+  })
+
+  # Transposition pour avoir les produits en colonnes
+  matrice_presence <- t(matrice_presence)
+
+  # Calcul du nombre de correspondances pour chaque level
+  nb_variantes_noms <- colSums(matrice_presence)
+
+  # Ajouter cette ligne en bas de la matrice
+  matrice_presence <- rbind(matrice_presence, nb_variantes_noms)
+
+  #### Étape 3 : Identifier les noms qui correspondent à un seul produit
+  levels_uniques <- names(nb_variantes_noms[nb_variantes_noms == 1])
+
+  # On garde uniquement les colonnes de la matrice où une seule correspondance existe
+  matrice_uniques <- matrice_presence[-nrow(matrice_presence), levels_uniques, drop = FALSE]
+
+  #### Étape 4 : Créer un vecteur nom_produit proprement
+  vecteur_nom_produit <- sapply(levels_uniques, function(level) {
+    idx <- which(matrice_uniques[, level] == 1)
+    if (length(idx) == 1) {
+      return(liste_produits[idx])
+    } else {
+      return(NA)
+    }
+  }, USE.NAMES = TRUE)
+
+  vecteur_nom_produit <- vecteur_nom_produit[!is.na(vecteur_nom_produit)]
+
+  # Créer le dataframe de correspondance
+  df_correspondance <- data.frame(
+    name_clean = names(vecteur_nom_produit),
+    nom_produit = unname(vecteur_nom_produit),
+    stringsAsFactors = FALSE
+  )
+
+  #### Étape 5 : Générer data_ok en ajoutant nom_produit
+  data_ok <- data %>%
+    filter(name_clean %in% df_correspondance$name_clean) %>%
+    left_join(df_correspondance, by = "name_clean")
+
+  #### Étape 6 : Extraire les noms avec 0 ou plusieurs correspondances
+  levels_pas_ok <- names(nb_variantes_noms[nb_variantes_noms != 1])
+
+  matrice_pas_ok <- matrice_presence[-nrow(matrice_presence), levels_pas_ok, drop = FALSE]
+
+  vecteur_nom_pas_ok <- sapply(levels_pas_ok, function(level) {
+    idx <- which(matrice_pas_ok[, level] == 1)
+    if (length(idx) == 0) {
+      return(NA)
+    } else {
+      return(paste(liste_produits[idx], collapse = ";"))
+    }
+  }, USE.NAMES = TRUE)
+
+  df_correspondance_pas_ok <- data.frame(
+    name_clean = names(vecteur_nom_pas_ok),
+    nom_produit = unname(vecteur_nom_pas_ok),
+    stringsAsFactors = FALSE
+  )
+
+  #### Étape 7 : Générer data_pas_ok
+  data_pas_ok <- data %>%
+    filter(name_clean %in% df_correspondance_pas_ok$name_clean) %>%
+    left_join(df_correspondance_pas_ok, by = "name_clean")
+
+  #### Étape 8 : Identifier les lignes avec plusieurs noms dans data_pas_ok
+  data_ambigus <- data_pas_ok %>%
+    filter(str_detect(nom_produit, ";"))
+
+  #### Étape 9 : Nettoyage des noms emboîtés
+  data_ambigus_clean <- data_ambigus %>%
+    rowwise() %>%
+    mutate(
+      noms_list = list(str_split(nom_produit, ";")[[1]] %>% str_trim())
+    ) %>%
+    mutate(
+      noms_clean = list({
+        noms <- noms_list
+        noms[!sapply(noms, function(x) any(noms != x & str_detect(noms, fixed(x))))]
+      })
+    ) %>%
+    mutate(
+      nom_produit_new = ifelse(length(noms_clean) == 1, noms_clean[[1]], paste(noms_clean, collapse = ";"))
+    ) %>%
+    ungroup()
+
+  #### Étape 10 : Extraire les lignes devenues "uniques" après nettoyage
+  data_deplaces <- data_ambigus_clean %>%
+    filter(!str_detect(nom_produit_new, ";")) %>%
+    select(-nom_produit, -noms_list, -noms_clean) %>%
+    rename(nom_produit = nom_produit_new)
+
+  #### Étape 11 : Mettre à jour data_ok
+  data_ok <- bind_rows(data_ok, data_deplaces)
+
+  #### Étape 12 : Mettre à jour data_pas_ok sans les lignes déplacées
+  data_pas_ok <- data_pas_ok %>%
+    filter(!(name_clean %in% data_deplaces$name_clean))
+
+  return(list(data_ok = data_ok, data_pas_ok = data_pas_ok))
 }
 
-########################## Socleo ########################## 
-
-export_fichiers_separes(liste_resultats_socleo_tts_annees, dossier_export = "export_csv_socleo")
-
-########################## coop circuit ########################## 
-
-export_fichiers_separes(liste_resultats_coop_circuit_tts_annees, dossier_export = "export_csv_coop_circuit")
-
-########################## la ruche qui dit oui ########################## 
 
 ```
 
+## 2) Application de la fonction split sur les fichiers
+
+```{r}
+
+# Test de la fonction : Fichier coop circuit 2021
+resultats <- separation_fichiers(
+  data = data_coop_circuit_2021,
+  liste_produits = liste_produits,
+  liste_declinai_noms_produits = liste_declinai_noms_produits
+)
+
+# On regarde séparemment le data_ok et data_pas_ok
+data_ok <- resultats$data_ok
+data_pas_ok <- resultats$data_pas_ok
+
+```
+
+
+# VII) Création de la fonction split de data_ok par nom de produit
+
+## 1) Développement de la fonction split de data_ok par nom de produit
+
+```{r}
+split_data_ok_par_produit <- function(data_ok) {
+  # Vérification de la présence de la colonne nom_produit
+  if (!"nom_produit" %in% colnames(data_ok)) {
+    stop("La colonne 'nom_produit' est absente de data_ok")
+  }
+
+  # Découpage automatique en liste de data frames, un par produit
+  liste_data_par_produit <- split(data_ok, data_ok$nom_produit)
+
+  return(liste_data_par_produit)
+}
+
+```
+
+
+## 2) Application de la fonction split de data_ok par nom de produit
+
+```{r}
+# Test de la fonction : data_ok de coop circuit 2021
+liste_data_par_produit <- split_data_ok_par_produit(data_ok)
+
+# Accéder au sous-dataframe pour le produit "pomme"
+data_pomme <- liste_data_par_produit[["pomme"]]
+
+# Voir tous les noms de produits
+names(liste_data_par_produit)
+
+```
 
