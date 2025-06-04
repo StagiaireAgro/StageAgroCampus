@@ -1,1 +1,245 @@
+```{r import_packages, echo = TRUE}
+# Packages ----------------------------------------------------------------
+library(tidyverse)
+library(stringi)
+library(stringr)
+library(vroom)
+library(yaml)
+library(purrr)
+library(fs)
+library(data.table)
+```
 
+# Détection automatiquement du nom de la colonne contenant les noms de produits
+
+```{r echo=TRUE}
+
+scanner_files <- function(dossier_racine, liste_produits, nrows=30) {
+  # Liste tous les fichiers csv dans dossier_racine et sous-dossiers
+  fichiers <- dir_ls(path = dossier_racine, recurse = TRUE, glob = "*.csv")
+  # Prépare le pattern regex à partir de la liste produits (en minuscule)
+  pattern <- paste0("(", paste0(tolower(liste_produits), collapse = "|"), ")")
+  
+  resultats <- lapply(fichiers, function(fichier) {
+    dt <- fread(fichier, encoding = "Latin-1", nrows = nrows, showProgress = FALSE)
+    if (is.null(dt)) {
+      return(data.table(
+        chemin_complet = as.character(fichier),
+        colonne_produit_detectee = NA_character_
+      ))
+    }
+    
+    # Colonnes de type character
+    colonnes_texte <- names(dt)[sapply(dt, is.character)]
+    if (length(colonnes_texte) == 0) {
+      return(data.table(
+        chemin_complet = as.character(fichier),
+        colonne_produit_detectee = NA_character_
+      ))
+    }
+    
+    # On met en minuscules les colonnes texte pour comparaison insensible à la casse
+    dt[, (colonnes_texte) := lapply(.SD, tolower), .SDcols = colonnes_texte]
+    
+    # Cherche colonnes contenant au moins un produit de la liste
+    colonnes_candidates <- colonnes_texte[
+      sapply(
+        as.list(dt[, ..colonnes_texte]), 
+        function(col) any(grepl(pattern, col, perl = TRUE))
+      )
+    ]
+    
+    if (length(colonnes_candidates) == 0) {
+      return(data.table(
+        chemin_complet = as.character(fichier),
+        colonne_produit_detectee = NA_character_
+      ))
+    }
+    
+    # Calcule la longueur max de cellule dans les colonnes candidates
+    longueurs <- sapply(
+      as.list(dt[, ..colonnes_candidates]), 
+      function(col) max(nchar(col, allowNA = TRUE), na.rm = TRUE)
+    )
+    
+    # Colonne avec la cellule la plus longue
+    col_max <- names(which.max(longueurs))
+    
+    data.table(
+      chemin_complet = as.character(fichier),
+      colonne_produit_detectee = col_max
+    )
+  })
+  
+  # Combine tout en un data.table
+  resultats_dt <- rbindlist(resultats)
+  return(resultats_dt)
+}
+```
+
+# Classification des produits du jeu de données
+
+```{r echo=TRUE}
+classification_produits_optimisee <- function(data, num_col, list_produits) {
+  # Nettoyage de texte
+  nettoyage <- function(x) {
+    x <- str_to_lower(x)
+    x <- stri_trans_general(x, "Latin-ASCII")
+    x <- str_replace_all(x, "[^a-z ]", "")
+    return(x)
+  }
+  
+  # Préparation des données
+  noms_orig <- data[[num_col]]
+  noms_nettoyes <- nettoyage(noms_orig)
+  list_nettoyee <- nettoyage(list_produits)
+  
+  liste_regex <- sapply(list_nettoyee, function(mot) {
+    mots <- str_split(mot, " ")[[1]] 
+    mots_regex <- paste0(mots, "(e?s)?") # "Pomme" -> "Pomme(s)?"
+    paste0(mots_regex, collapse = ".*")   # Permet mots intermédiaires
+  })
+  
+  # Trie des produits par longueur décroissante
+  ordre <- order(nchar(gsub(" ", "", list_nettoyee)), decreasing = TRUE)
+  list_produits_ord <- list_produits[ordre]
+  list_nettoyee_ord <- list_nettoyee[ordre]
+  liste_regex <- liste_regex[ordre]
+  
+  # Niveaux uniques des noms nettoyés
+  niveaux <- levels(factor(noms_nettoyes))
+  
+  # Calcul de la matrice présence sur niveaux uniques
+  presence_mat_niveaux <- sapply(liste_regex, function(prod) {
+    grepl(prod, niveaux, perl = TRUE)
+  })
+  
+  # Facteur des noms nettoyés (indices des niveaux)
+  fact_noms <- factor(noms_nettoyes, levels = niveaux)
+  
+  # Reconstruction matrice présence par ligne originale
+  presence_mat <- presence_mat_niveaux[as.integer(fact_noms), , drop = FALSE]
+  
+  # Attribution du produit dominant par ligne
+  attribution <- apply(presence_mat, 1, function(pres) {
+    if (sum(pres) == 1) {
+      list_produits_ord[pres][1]
+    } else if (sum(pres) > 1) {
+      candidats <- list_nettoyee_ord[pres]
+      premier <- candidats[1]
+      reste <- candidats[-1]
+      if (all(sapply(reste, function(r) grepl(r, premier)))) {
+        list_produits_ord[pres][1]
+      } else {
+        NA_character_
+      }
+    } else {
+      NA_character_
+    }
+  })
+  
+  # Liste complète des produits détectés concaténés
+  liste_detectee <- apply(presence_mat, 1, function(pres) {
+    if (any(pres)) paste(list_produits_ord[pres], collapse = ",") else NA_character_
+  })
+  
+  # Ajout des résultats au tableau
+  data$produit_normalise <- noms_nettoyes
+  data$produit_classe <- attribution
+  data$produits_detectes <- liste_detectee
+  
+  data_ok <- data[!is.na(data$produit_classe), ]
+  data_nok <- data[is.na(data$produit_classe), ]
+  
+  return(list(data_ok = data_ok, data_nok = data_nok))
+}
+```
+
+# Exportation en .csv les jeu de données classifiés
+
+```{r export, echo=TRUE}
+exports_datasets <- function(fichier_source, datasets, dossier) {
+  dir.create(dossier, showWarnings = FALSE, recursive = TRUE)
+  nom_base <- tools::file_path_sans_ext(path_file(fichier_source))
+  # Fonction d'export d’un data.frame
+  exporter_df <- function(df, nom_fichier) {
+    df[] <- lapply(df, function(col) {
+      if (is.character(col)) str_replace_all(col, "[\r\n]+", " ") else col
+    })
+    chemin <- file.path(dossier, nom_fichier)
+    write.table(df, file = chemin, sep = ";", row.names = FALSE, fileEncoding = "UTF-8")
+  }
+  if (is.list(datasets) && all(sapply(datasets, is.data.frame))) {
+    res <- sapply(names(datasets), function(nom) {
+      df <- datasets[[nom]]
+      nom_fichier <- paste0(nom_base, "_", gsub("[^a-zA-Z0-9_-]", "_", nom), ".csv")
+      exporter_df(df, nom_fichier)
+    })
+  }
+  else if (inherits(datasets, "data.frame")) {
+    nom_fichier <- paste0(nom_base, "_", "non_classe", ".csv")
+    exporter_df(datasets, nom_fichier)
+  }
+}
+```
+
+# Automatisation du processus sur tous les jeu de données
+
+```{r echo=TRUE}
+classification_depuis_chemins <- function(
+    tab_chemins, 
+    produits, 
+    encoding = "UTF-8", 
+    dossier_racine_export = "resultats") {
+  
+  traiter_fichier <- function(chemin, nom_colonne) {
+    # Lire fichier 
+    df <- vroom(chemin, locale = vroom::locale(encoding = encoding), 
+                show_col_types = FALSE)
+    if (is.null(df) || !(nom_colonne %in% names(df))) {
+      message("Colonne produit non trouvée dans fichier : ", chemin)
+      return(NULL)
+    }
+    # Appliquer la classification produits
+    res <- classification_produits_optimisee(df, nom_colonne, produits)
+    
+    # Extraction dataset nettoyé 
+    data_ok <- res[[1]]
+    data_pas_ok <- res[[2]]
+    
+    # Split par catégorie produit
+    datasets <- split(data_ok, data_ok[["produit_classe"]])
+    
+    # Construire dossier export à partir du chemin du fichier
+    # "Data/Cagette/cagette_Asperge_2021.csv" => export dans "exports/Data/Cagette"
+    dossier_origine <- path_dir(chemin)
+    dossier_export <- file.path(dossier_racine_export, dossier_origine)
+    dir_create(dossier_export)
+    
+    # Exporter datasets
+    exports_datasets(chemin, datasets, dossier_export)
+    exports_datasets(chemin, data_pas_ok, dossier_export)
+  }
+  
+  # Appliquer sur tous les fichiers
+  res_list <- purrr::pmap(list(tab_chemins[["chemin_complet"]], 
+         tab_chemins[["colonne_produit_detectee"]]), traiter_fichier)
+  return(res_list)
+}
+```
+
+# Exécution
+
+```{r}
+# Dossier contenant tous les jeu de données + liste de produits
+path = "Data/Résultats données triées/"
+produits <- yaml::read_yaml(file = "products.yaml")
+
+# Tableau récapitulatif (chemin + nom de la colonne du produit dans le db)
+tableau <- scanner_files(path, produits)
+
+# Execution de l'ensemble des jeu de données
+res <- classification_depuis_chemins(tableau, produits)
+```
+
+# Exécution
