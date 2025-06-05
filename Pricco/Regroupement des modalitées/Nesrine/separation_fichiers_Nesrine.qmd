@@ -563,7 +563,6 @@ lentille_declinaison <- c("lentille","lentilles")
 
 ```{r}
 # Liste contenant toutes les déclinaisons possibles pour chaque nom de produit
-
 liste_declinai_noms_produits <- list(
   abricot_declinaison,
   banane_declinaison,
@@ -611,7 +610,7 @@ liste_declinai_noms_produits <- list(
 
 ## 1) Développement de la fonction split
 
-### a) Version 1 : Avec le vecteur des variantes de n oms de produits obtenu manuellement
+### a) Version 1 : Avec le vecteur des variantes de noms de produits obtenu manuellement
 
 ```{r}
 
@@ -1580,4 +1579,3 @@ tomate_levels <- levels(as.factor(data_tomate$name_clean))
 tomate_levels
 
 ```
-
