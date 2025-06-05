@@ -800,13 +800,6 @@ noms_produits_autres <- data_pas_ok %>% filter(!is.na(nom_produit))
 
 ## 1) On regarde à l'oeil nu les produits transfomés 
 
-ATTENTION !! Revoir la liste des onthologies pour la première fonction car oublie de certaines variétés de nom de produits comme tomates cerises pour la catégorie tomate.
-
-ATTENTION !! Exclure la table jus de pomme 
-
-Se baser sur le fichier des onthologies des fournisseurs. Puis, imaginer des grandes familles
-génériques comme compte, confiture. Attention, ne pas oublier des cas "plus spécifiques" mais non négligeable dans certaines tables comme pruneau(x) dans la table prune à retirer ou toutes les variétés de chou (pommé etc.) qui n'ont pas leur place dans les tables.
-
 ```{r}
 # On regarde à l'oeil nu, les potentielles familles de produits transformées 
 
@@ -964,13 +957,6 @@ nectarine_levels <- levels(as.factor(data_nectarine$name_clean))
 
 nectarine_levels
 
-######### nectarine
-data_nectarine <- liste_data_par_produit[["nectarine"]]
-
-nectarine_levels <- levels(as.factor(data_nectarine$name_clean))
-
-nectarine_levels
-
 ######### noix
 data_noix <- liste_data_par_produit[["noix"]]
 
@@ -1076,14 +1062,20 @@ tomate_levels <- levels(as.factor(data_tomate$name_clean))
 
 tomate_levels
 
+######### jus de pomme
+data_jus_de_pomme <- liste_data_par_produit[["jus de pomme"]]
+
+jus_de_pommee_levels <- levels(as.factor(data_jus_de_pomme$name_clean))
+
+jus_de_pommee_levels
+
 ```
 
 
 ## 2) Création de la liste des produits transformés 
 
 ```{r}
-liste_produits_transformes <- c("beurre","fromage","yaourt", "crème", "dessert", "jus", "smoothie", "soupe", "chou pomme", "pruneau","confiture","nectar", "tarte", "pain", "amande", "potage","caviar","riste", "brownie", "chips", "axoa", "pot au feu", "bourguignon", "brochette", "bolognaise", "carbonade", "carpaccio", "chou coeur", "veau", "burger", "lasagne",
-"plat", "savon", "saute", "sauce", "terrine", "blette", "rape","limoune", "citron", "petits pois", "tartinade", "biscuit", "veloute", "vaisselle", "tarocco", "marines", "pickle", "provencale", "epice", "curry", "piment", "vegetal","soupe","guimauve","lavande","menthe","sirop","sorbet","coulis", "betterave", "cassis","framboise","groseille", "mure","myrtille","rhubarbe","cidre","coing","gingembre","melisse", "orange","ortie", "cr�me",
+liste_produits_transformes <- c("beurre","fromage","yaourt", "crème", "dessert", "jus", "smoothie", "soupe", "chou pomme", "pruneau","confiture","nectar", "tarte", "pain", "amande", "potage","caviar","riste", "brownie", "chips", "axoa", "pot au feu", "bourguignon", "brochette", "bolognaise", "carbonade", "carpaccio", "chou coeur", "veau", "burger", "lasagne", "savon", "saute", "sauce", "terrine", "blette", "rape","limoune", "citron", "petits pois", "tartinade", "biscuit", "veloute", "vaisselle", "tarocco", "marines", "pickle", "provencale", "epice", "curry", "piment", "vegetal","soupe","guimauve","lavande","menthe","sirop","sorbet","coulis", "betterave", "cassis","framboise","groseille", "mure","myrtille","rhubarbe","cidre","coing","gingembre","melisse", "orange","ortie", "cr�me",
 "produits laitiers","parmesan","chocolat","beaudoin","cr�pes","faisselle","gwell","kefir","corporel","hydratant","le bleu","meringues","moinet","morbier","gallois","raclette","riz","saint","tablette","tisane","tomette","farine","p�te","torsade","melonnette","pain","aux noix","aperitif","miel","cookie","fumee","de noix","caramelisees","salees","sucres","pesto","torrefies","truffe","l�gumes","shampoing","tagliatelle","confit","maquereau","panier de legumes","potage","safran","gelee","creme","moelleux","pur�e","p�tillant","vinaigrette","tartelette","tapas","cake","bougie","ch�taigne","caramel","chausson","choux rouge","compote","guerzoni","petillant","s�ch�es","puree","pur�e","vinaigre","frites","gratin","p�t�","cordon","pate","paupiette","moutarde","roti","r�ti","ail","cepes","fume","herbe","noisette","poivre","tartiflette","saut�","verrine","echalion","�chalion","conserve","farce","galettes","rillettes","supreme","�chalote","pruneau","tourte","biere","bi�re","cinsault","moule","huile","mouzakis","muscat","chutney","concentre","pulpe","ketchup","basilic","apero", "ap�ro","hydrolat")
 ```
 
@@ -1099,7 +1091,7 @@ liste_data_par_produit[["jus de pomme"]] <- NULL
 
 ```
 
-## 4) Développement de la fonction pour supprimer les 
+## 4) Développement de la fonction pour supprimer les produits transformés
 
 ```{r}
 supp_produits_transfor <- function(liste_produits_transformes, liste_data_par_produit) {
@@ -1133,25 +1125,52 @@ supp_produits_transfor <- function(liste_produits_transformes, liste_data_par_pr
 ```
 
 
+## 5) Suppression des produits transformés pour le jus de pomme 
+
+```{r}
+liste_produits_transformes_jus_pomme <- c("cranberries","cassis","coing","framboise","groseille","mure","myrtille","rhubarbe","cidre","epices","gingembre","menthe","orange","ortie")
+```
+
+## 6) Création d'une liste pour y placer le data_jus_de_pomme
+
+```{r}
+
+# On initialise une liste
+liste_jus_pomme <- list()
+
+# On ajoute à cette liste vide le jeu de données du jus de pomme
+liste_jus_pomme[["jus de pomme"]] <- data_jus_de_pomme
+```
+
+## 7) Application de la fonction sur tous les jeux de données
+
 ```{r,warning=FALSE}
 
-# Application de la fonction 
+# Application de la fonction sur les 36 jeux de données 
 resultat <- supp_produits_transfor(liste_produits_transformes, liste_data_par_produit)
+
+# Application de la fonction sur le jeu de données jus de pomme
+resultat_jus_pomme <- 
+  supp_produits_transfor(liste_produits_transformes_jus_pomme, liste_jus_pomme)
 
 # On ne garde que les 36 jeux de données d'intérêt
 liste_data_propre <- resultat[names(resultat) != "data_produits_transformes"]
 
+# On extrait la table jus de pomme de la liste resultat_jus_pomme
+data_jus_pomme <- resultat_jus_pomme[["jus de pomme"]]
+
 # On retire le jeu de données data_produits_transformes de la liste de résultat
 data_produits_transformes <- resultat$data_produits_transformes
 
-# On ajoute la table dui jus de pomme dans notre liste de résultat
-liste_data_propre[["jus de pomme"]] <- data_jus_de_pomme
+# On retire le jeu de données data_produits_transformes de la liste de resultat_jus_pomme
+data_produits_transformes_jus_pomme <- resultat_jus_pomme$data_produits_transformes
 
-# On fusionne la table des produits transformés avec la table autre
-data_pas_ok <- rbind(data_pas_ok,data_produits_transformes)
+# On ajoute la table du jus de pomme dans notre liste de résultat
+liste_data_propre[["jus de pomme"]] <- data_jus_pomme
 
+# On fusionne les 2  tables des produits transformés avec la table autre
+data_pas_ok <- rbind(data_pas_ok,data_produits_transformes,data_produits_transformes_jus_pomme)
 ```
-
 
 # IX) Vérification de la présence de produits bruts 
 
