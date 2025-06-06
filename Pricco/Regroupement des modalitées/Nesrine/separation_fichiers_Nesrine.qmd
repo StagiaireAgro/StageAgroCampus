@@ -9,7 +9,7 @@ editor: visual
 ```{r,message=FALSE}
 
 # Pour lire les fichiers CSV
-library(readr)
+library(vroom)
 
 # Pour manipuler et détecter les chaînes de caractères
 library(stringr)
@@ -34,27 +34,25 @@ library(tidyverse)
 
 # II) Importation des fichiers
 
-```{r,warning=FALSE}
+```{r,warning=FALSE,message=FALSE}
 ########################## Socleo ########################## 
 
-data_socleo_2021 <- read.csv("data/socleo/toutsocleo_2021.csv",sep = ",")
+data_socleo_2021 <- vroom("data/la ruche qui dit oui/toutsocleo_2021.csv")
 
 ########################## coop circuit ########################## 
 
-data_coop_circuit_2021 <- read.csv("data/coop circuit/par annee/2021.csv",sep = ",")
-data_coop_circuit_2022 <- read.csv("data/coop circuit/par annee/2022.csv",sep = ";")
-data_coop_circuit_2023 <- read.csv("data/coop circuit/par annee/2023.csv",sep = ";")
-data_coop_circuit_2024 <- read.csv("data/coop circuit/par annee/2024.csv",sep = ";")
+data_coop_circuit_2021 <- vroom("data/coop circuit/par annee/2021.csv")
+data_coop_circuit_2022 <- vroom("data/coop circuit/par annee/2022.csv")
+data_coop_circuit_2023 <- vroom("data/coop circuit/par annee/2023.csv")
+data_coop_circuit_2024 <- vroom("data/coop circuit/par annee/2024.csv")
 
 ########################## la ruche qui dit oui ########################## 
 
-data_ruche_oui_2021_part_1 <- 
-  read.csv("data/la ruche qui dit oui/historique_2021part1.csv",sep = ";")
-data_ruche_oui_2021_part_2 <- 
-  read.csv("data/la ruche qui dit oui/historique_2021part1.csv",sep = ";")
-data_ruche_oui_2022 <- read.csv("data/la ruche qui dit oui/historique_2022.csv",sep = ";")
-data_ruche_oui_2023 <- read.csv("data/la ruche qui dit oui/historique_2023.csv",sep = ";")
-data_ruche_oui_2024 <- read.csv("data/la ruche qui dit oui/historique_2024.csv",sep = ";")
+data_ruche_oui_2021_part_1 <- vroom("data/la ruche qui dit oui/historique_2021part1.csv")
+data_ruche_oui_2021_part_2 <- vroom("data/la ruche qui dit oui/historique_2021part2.csv")
+data_ruche_oui_2022 <- vroom("data/la ruche qui dit oui/historique_2022.csv")
+data_ruche_oui_2023 <- vroom("data/la ruche qui dit oui/historique_2023.csv")
+data_ruche_oui_2024 <- vroom("data/la ruche qui dit oui/historique_2024.csv")
 ```
 
 # III) Définition de la liste de produits
@@ -514,7 +512,7 @@ endive_declinaison <- c("endive","endives")
 
 # haricot vert 
 haricot_vert_declinaison <- c("haricot vert","haricots verts", "haricot verts",
-                              "haricots vert")
+                              "haricots vert", "haricot melange vert")
 
 # laitue 
 laitue_declinaison <- c("laitue","laitues")
@@ -873,7 +871,7 @@ separation_fichiers <- function(data, liste_produits, liste_declinai_noms_produi
 
 ## 2) Application de la fonction split sur les fichiers
 
-```{r}
+```{r,message=FALSE,warning=FALSE}
 
 # Test de la fonction : Fichier coop circuit 2021
 resultats <- separation_fichiers(
@@ -1265,7 +1263,14 @@ supp_produits_transfor <- function(liste_produits_transformes, liste_data_par_pr
 liste_produits_transformes_jus_pomme <- c("cranberries","cassis","coing","framboise","groseille","mure","myrtille","rhubarbe","cidre","epices","gingembre","menthe","orange","ortie")
 ```
 
-## 6) Création d'une liste pour y placer le data_jus_de_pomme
+## 6) Suppression des produits transformés pour les pêches
+
+```{r}
+liste_produits_transformes_peche <- c("confiture", "coulis", "jus","nectar")
+```
+
+
+## 7) Création d'une liste pour y placer le data_jus_de_pomme
 
 ```{r}
 
@@ -1276,7 +1281,45 @@ liste_jus_pomme <- list()
 liste_jus_pomme[["jus de pomme"]] <- data_jus_de_pomme
 ```
 
-## 7) Application de la fonction sur tous les jeux de données
+## 8) Création d'une liste pour y placer le data_peche
+
+```{r}
+
+# On initialise une liste
+liste_peche <- list()
+
+# On ajoute à cette liste vide le jeu de données peche
+liste_peche[["peche"]] <- data_peche
+```
+
+## 9) Création d'une liste pour y placer le data_nectarine
+
+```{r}
+
+# On initialise une liste
+liste_nectarine <- list()
+
+# On ajoute à cette liste vide le jeu de données nectarine
+liste_nectarine[["nectarine"]] <- data_nectarine
+
+```
+
+## 10) Retirer data_jus_de_pomme, data_nectarine et data_peche de la liste de résultat
+
+```{r}
+# On retire le jeu de données nectarine de liste_data_produits_bruts
+liste_data_par_produit[["nectarine"]] <- NULL
+
+# On retire le jeu de données peche de liste_data_produits_bruts
+liste_data_par_produit[["peche"]] <- NULL
+
+# On retire le jeu de données jus de pomme de liste_data_produits_bruts
+liste_data_par_produit[["jus de pomme"]] <- NULL
+
+```
+
+
+## 11) Application de la fonction sur tous les jeux de données
 
 ```{r,warning=FALSE}
 
@@ -1287,11 +1330,18 @@ resultat <- supp_produits_transfor(liste_produits_transformes, liste_data_par_pr
 resultat_jus_pomme <- 
   supp_produits_transfor(liste_produits_transformes_jus_pomme, liste_jus_pomme)
 
-# On ne garde que les 36 jeux de données d'intérêt
-liste_data_propre <- resultat[names(resultat) != "data_produits_transformes"]
+# Application de la fonction sur le jeu de données peche
+resultat_peche <- 
+  supp_produits_transfor(liste_produits_transformes_peche, liste_peche)
+
+# On ne garde que les 34 jeux de données d'intérêt
+liste_data_produits_bruts <- resultat[names(resultat) != "data_produits_transformes"]
 
 # On extrait la table jus de pomme de la liste resultat_jus_pomme
 data_jus_pomme <- resultat_jus_pomme[["jus de pomme"]]
+
+# On extrait la table jus de pomme de la liste resultat_peche
+data_peche <- resultat_peche[["peche"]]
 
 # On retire le jeu de données data_produits_transformes de la liste de résultat
 data_produits_transformes <- resultat$data_produits_transformes
@@ -1299,283 +1349,294 @@ data_produits_transformes <- resultat$data_produits_transformes
 # On retire le jeu de données data_produits_transformes de la liste de resultat_jus_pomme
 data_produits_transformes_jus_pomme <- resultat_jus_pomme$data_produits_transformes
 
+# On retire le jeu de données data_produits_transformes de la liste de resultat_peche
+data_produits_transformes_peche<- resultat_peche$data_produits_transformes
+
 # On ajoute la table du jus de pomme dans notre liste de résultat
-liste_data_propre[["jus de pomme"]] <- data_jus_pomme
+liste_data_produits_bruts[["jus de pomme"]] <- data_jus_pomme
+
+# On ajoute la table peche dans notre liste de résultat
+liste_data_produits_bruts[["peche"]] <- data_peche
+
+# On ajoute la table nectarine dans notre liste de résultat
+liste_data_produits_bruts[["nectarine"]] <- data_nectarine
 
 # On fusionne les 2  tables des produits transformés avec la table autre
-data_pas_ok <- rbind(data_pas_ok,data_produits_transformes,data_produits_transformes_jus_pomme)
+data_pas_ok <- 
+  rbind(data_pas_ok,data_produits_transformes,data_produits_transformes_jus_pomme,
+        data_produits_transformes_peche)
 ```
 
 # IX) Vérification de la présence de produits bruts 
-
 
 ```{r}
 # On regarde à l'oeil nu pour savoir si les produits sont bien bruts
 
 ######### abricot
-data_abricot <- liste_data_propre[["abricot"]]
+data_abricot <- liste_data_produits_bruts[["abricot"]]
 
 abricot_levels <- levels(as.factor(data_abricot$name_clean))
 
 abricot_levels
 
 ######### asperge
-data_asperge <- liste_data_propre[["asperge"]]
+data_asperge <- liste_data_produits_bruts[["asperge"]]
 
 asperge_levels <- levels(as.factor(data_asperge$name_clean))
 
 asperge_levels
 
 ######### aubergine
-data_aubergine <- liste_data_propre[["aubergine"]]
+data_aubergine <- liste_data_produits_bruts[["aubergine"]]
 
 aubergine_levels <- levels(as.factor(data_aubergine$name_clean))
 
 aubergine_levels
 
 ######### banane
-data_banane <- liste_data_propre[["banane"]]
+data_banane <- liste_data_produits_bruts[["banane"]]
 
 banane_levels <- levels(as.factor(data_banane$name_clean))
 
 banane_levels
 
 ######### boeuf
-data_boeuf <- liste_data_propre[["boeuf"]]
+data_boeuf <- liste_data_produits_bruts[["boeuf"]]
 
 boeuf_levels <- levels(as.factor(data_boeuf$name_clean))
 
 boeuf_levels
 
 ######### carotte
-data_carotte <- liste_data_propre[["carotte"]]
+data_carotte <- liste_data_produits_bruts[["carotte"]]
 
 carotte_levels <- levels(as.factor(data_carotte$name_clean))
 
 carotte_levels
 
 ######### celeri branche
-data_celeri_branche <- liste_data_propre[["celeri branche"]]
+data_celeri_branche <- liste_data_produits_bruts[["celeri branche"]]
 
 celeri_branche_levels <- levels(as.factor(data_celeri_branche$name_clean))
 
 celeri_branche_levels
 
 ######### cerise
-data_cerise <- liste_data_propre[["cerise"]]
+data_cerise <- liste_data_produits_bruts[["cerise"]]
 
 cerise_levels <- levels(as.factor(data_cerise$name_clean))
 
 cerise_levels
 
 ######### chou fleur
-data_chou_fleur <- liste_data_propre[["chou fleur"]]
+data_chou_fleur <- liste_data_produits_bruts[["chou fleur"]]
 
 chou_fleur_levels <- levels(as.factor(data_chou_fleur$name_clean))
 
 chou_fleur_levels
 
 ######### clementine
-data_clementine <- liste_data_propre[["clementine"]]
+data_clementine <- liste_data_produits_bruts[["clementine"]]
 
 clementine_levels <- levels(as.factor(data_clementine$name_clean))
 
 clementine_levels
 
 ######### concombre
-data_concombre <- liste_data_propre[["concombre"]]
+data_concombre <- liste_data_produits_bruts[["concombre"]]
 
 concombre_levels <- levels(as.factor(data_concombre$name_clean))
 
 concombre_levels
 
 ######### courgette
-data_courgette <- liste_data_propre[["courgette"]]
+data_courgette <- liste_data_produits_bruts[["courgette"]]
 
 courgette_levels <- levels(as.factor(data_courgette$name_clean))
 
 courgette_levels
 
 ######### endive
-data_endive <- liste_data_propre[["endive"]]
+data_endive <- liste_data_produits_bruts[["endive"]]
 
 endive_levels <- levels(as.factor(data_endive$name_clean))
 
 endive_levels
 
 ######### fraise
-data_fraise <- liste_data_propre[["fraise"]]
+data_fraise <- liste_data_produits_bruts[["fraise"]]
 
 fraise_levels <- levels(as.factor(data_fraise$name_clean))
 
 fraise_levels
 
 ######### haricot vert
-data_haricot_vert <- liste_data_propre[["haricot vert"]]
+data_haricot_vert <- liste_data_produits_bruts[["haricot vert"]]
 
 haricot_vert_levels <- levels(as.factor(data_haricot_vert$name_clean))
 
 haricot_vert_levels
 
 ######### jus de pomme
-data_jus_de_pomme <- liste_data_propre[["jus de pomme"]]
+data_jus_de_pomme <- liste_data_produits_bruts[["jus de pomme"]]
 
 jus_de_pomme_levels <- levels(as.factor(data_jus_de_pomme$name_clean))
 
 jus_de_pomme_levels
 
 ######### kiwi
-data_kiwi <- liste_data_propre[["kiwi"]]
+data_kiwi <- liste_data_produits_bruts[["kiwi"]]
 
 kiwi_levels <- levels(as.factor(data_kiwi$name_clean))
 
 kiwi_levels
 
 ######### lait
-data_lait <- liste_data_propre[["lait"]]
+data_lait <- liste_data_produits_bruts[["lait"]]
 
 lait_levels <- levels(as.factor(data_lait$name_clean))
 
 lait_levels
 
 ######### laitue
-data_laitue <- liste_data_propre[["laitue"]]
+data_laitue <- liste_data_produits_bruts[["laitue"]]
 
 laitue_levels <- levels(as.factor(data_laitue$name_clean))
 
 laitue_levels
 
 ######### lentille
-data_lentille <- liste_data_propre[["lentille"]]
+data_lentille <- liste_data_produits_bruts[["lentille"]]
 
 lentille_levels <- levels(as.factor(data_lentille$name_clean))
 
 lentille_levels
 
 ######### melon
-data_melon <- liste_data_propre[["melon"]]
+data_melon <- liste_data_produits_bruts[["melon"]]
 
 melon_levels <- levels(as.factor(data_melon$name_clean))
 
 melon_levels
 
 ######### nectarine
-data_nectarine <- liste_data_propre[["nectarine"]]
+data_nectarine <- liste_data_produits_bruts[["nectarine"]]
 
 nectarine_levels <- levels(as.factor(data_nectarine$name_clean))
 
 nectarine_levels
 
 ######### nectarine
-data_nectarine <- liste_data_propre[["nectarine"]]
+data_nectarine <- liste_data_produits_bruts[["nectarine"]]
 
 nectarine_levels <- levels(as.factor(data_nectarine$name_clean))
 
 nectarine_levels
 
 ######### noix
-data_noix <- liste_data_propre[["noix"]]
+data_noix <- liste_data_produits_bruts[["noix"]]
 
 noix_levels <- levels(as.factor(data_noix$name_clean))
 
 noix_levels
 
 ######### oeuf
-data_oeuf <- liste_data_propre[["oeuf"]]
+data_oeuf <- liste_data_produits_bruts[["oeuf"]]
 
 oeuf_levels <- levels(as.factor(data_oeuf$name_clean))
 
 oeuf_levels
 
 ######### oignon
-data_oignon <- liste_data_propre[["oignon"]]
+data_oignon <- liste_data_produits_bruts[["oignon"]]
 
 oignon_levels <- levels(as.factor(data_oignon$name_clean))
 
 oignon_levels
 
 ######### peche
-data_peche <- liste_data_propre[["peche"]]
+data_peche <- liste_data_produits_bruts[["peche"]]
 
 peche_levels <- levels(as.factor(data_peche$name_clean))
 
 peche_levels
 
 ######### poire 
-data_poire <- liste_data_propre[["poire"]]
+data_poire <- liste_data_produits_bruts[["poire"]]
 
 poire_levels <- levels(as.factor(data_poire$name_clean))
 
 poire_levels
 
 ######### poireau 
-data_poireau <- liste_data_propre[["poireau"]]
+data_poireau <- liste_data_produits_bruts[["poireau"]]
 
 poireau_levels <- levels(as.factor(data_poireau$name_clean))
 
 poireau_levels
 
 ######### poivron 
-data_poivron <- liste_data_propre[["poivron"]]
+data_poivron <- liste_data_produits_bruts[["poivron"]]
 
 poivron_levels <- levels(as.factor(data_poivron$name_clean))
 
 poivron_levels
 
 ######### pomme 
-data_pomme <- liste_data_propre[["pomme"]]
+data_pomme <- liste_data_produits_bruts[["pomme"]]
 
 pomme_levels <- levels(as.factor(data_pomme$name_clean))
 
 pomme_levels
 
 ######### pomme de terre
-data_pomme_de_terre <- liste_data_propre[["pomme de terre"]]
+data_pomme_de_terre <- liste_data_produits_bruts[["pomme de terre"]]
 
 pomme_de_terre_levels <- levels(as.factor(data_pomme_de_terre$name_clean))
 
 pomme_de_terre_levels
 
 ######### porc
-data_porc <- liste_data_propre[["porc"]]
+data_porc <- liste_data_produits_bruts[["porc"]]
 
 porc_levels <- levels(as.factor(data_porc$name_clean))
 
 porc_levels
 
 ######### potiron
-data_potiron <- liste_data_propre[["potiron"]]
+data_potiron <- liste_data_produits_bruts[["potiron"]]
 
 potiron_levels <- levels(as.factor(data_potiron$name_clean))
 
 potiron_levels
 
 ######### poulet
-data_poulet <- liste_data_propre[["poulet"]]
+data_poulet <- liste_data_produits_bruts[["poulet"]]
 
 poulet_levels <- levels(as.factor(data_poulet$name_clean))
 
 poulet_levels
 
 ######### prune
-data_prune <- liste_data_propre[["prune"]]
+data_prune <- liste_data_produits_bruts[["prune"]]
 
 prune_levels <- levels(as.factor(data_prune$name_clean))
 
 prune_levels
 
 ######### raisin
-data_raisin <- liste_data_propre[["raisin"]]
+data_raisin <- liste_data_produits_bruts[["raisin"]]
 
 raisin_levels <- levels(as.factor(data_raisin$name_clean))
 
 raisin_levels
 
 ######### tomate
-data_tomate <- liste_data_propre[["tomate"]]
+data_tomate <- liste_data_produits_bruts[["tomate"]]
 
 tomate_levels <- levels(as.factor(data_tomate$name_clean))
 
 tomate_levels
 
 ```
+
