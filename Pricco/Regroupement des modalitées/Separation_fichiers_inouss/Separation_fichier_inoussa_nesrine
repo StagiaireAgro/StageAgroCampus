@@ -1,5 +1,5 @@
 ---
-title: "separation_fichiers_Inoussa_Nesrine"
+title: "separation_fichiers_Inoussa_v1"
 format: html
 editor: visual
 ---
@@ -83,9 +83,7 @@ liste_produits <- stri_trans_general(liste_produits, "Latin-ASCII")
 
 # IV) Dermination de la liste des déclinaisons possibles des noms de produits
 
-## 2) Coop Circuit
-
-### a) Stockage des levels existant
+## 1) Stockage des levels existant
 
 ```{r}
 ########################## coop circuit ########################## 
@@ -108,7 +106,7 @@ declinaison_coop_circuit_2021_noms_produits <- stri_trans_general(declinaison_co
 declinaison_coop_circuit_2021_noms_produits <- gsub("-", " ", declinaison_coop_circuit_2021_noms_produits)
 ```
 
-### b) On regarde à l'oeil nu les variantes de noms de produits
+## 2) On regarde à l'oeil nu les variantes de noms de produits
 
 ```{r}
 
@@ -429,7 +427,7 @@ lentille
 
 # V) Création du vecteur des déclinaisons de nom de produit possibles
 
-## 1) Coop Circuit
+## 1) Version 1 : Liste contenant toutes les déclinaisons possibles pour chaque nom de produit
 
 ### a) Création pour chaque produit, son vecteur des variantes associé
 
@@ -557,7 +555,7 @@ lentille_declinaison <- c("lentille","lentilles")
 
 ```
 
-### b) Version 1 : Liste contenant toutes les déclinaisons possibles pour chaque nom de produit
+### b) Liste contenant toutes les déclinaisons possibles pour chaque nom de produit
 
 ```{r}
 # Liste contenant toutes les déclinaisons possibles pour chaque nom de produit
@@ -600,7 +598,7 @@ liste_declinai_noms_produits <- list(
 )
 ```
 
-### c) Version 2 : Liste contenant toutes les déclinaisons possibles pour chaque nom de produit
+## 2) Version 2 : Liste contenant toutes les déclinaisons possibles pour chaque nom de produit
 
 ```{r}
 # Fonction : declinaisons -----------------------------------------------------
@@ -719,7 +717,7 @@ classification_produits_avec_listes <- function(vecteur, list_produits) {
 
 ## 1) Développement de la fonction split
 
-## a) Version 1 : Avec le vecteur des variantes de noms de produits obtenu manuellement
+### a) Version 1 : Avec le vecteur des variantes de noms de produits obtenu manuellement
 
 ```{r}
 
@@ -847,7 +845,7 @@ separation_fichiers <- function(data, liste_produits, liste_declinai_noms_produi
 }
 ```
 
-## b) Version 2 : Avec le vecteur des variantes de noms de produits obtenu avec la machine
+### b) Version 2 : Avec le vecteur des variantes de noms de produits obtenu avec la machine
 
 ```{r}
 declinaisons <- declinaisons_noms_produits(data_coop_circuit_2021, "name", liste_produits)
@@ -983,7 +981,8 @@ separation_fichiers <- function(data, liste_produits, liste_declinai_noms_produi
 
 ## 2) Application de la fonction split sur les fichiers
 
-### Version 1 : 
+### a) Version 1
+
 ```{r,message=FALSE,warning=FALSE}
 
 # Test de la fonction : Fichier coop circuit 2021
@@ -999,7 +998,7 @@ data_pas_ok <- resultats$data_pas_ok
 
 ```
 
-### Version 2 : 
+### b) Version 2
 
 ```{r,message=FALSE,warning=FALSE}
 
@@ -1040,7 +1039,7 @@ split_data_ok_par_produit <- function(data_ok) {
 
 ## 2) Application de la fonction split de data_ok par nom de produit
 
-### a) Version 1 
+### a) Version 1
 
 ```{r}
 # Test de la fonction : data_ok de coop circuit 2021
@@ -1352,22 +1351,12 @@ jus_de_pommee_levels
 
 ```{r}
 liste_produits_transformes <- c("beurre","fromage","yaourt", "crème", "dessert", "jus", "smoothie", "soupe", "chou pomme", "pruneau","confiture","nectar", "tarte", "pain", "amande", "potage","caviar","riste", "brownie", "chips", "axoa", "pot au feu", "bourguignon", "brochette", "bolognaise", "carbonade", "carpaccio", "chou coeur", "veau", "burger", "lasagne", "savon", "saute", "sauce", "terrine", "blette", "rape","limoune", "citron", "petits pois", "tartinade", "biscuit", "veloute", "vaisselle", "tarocco", "marines", "pickle", "provencale", "epice", "curry", "piment", "vegetal","soupe","guimauve","lavande","menthe","sirop","sorbet","coulis", "betterave", "cassis","framboise","groseille", "mure","myrtille","rhubarbe","cidre","coing","gingembre","melisse", "orange","ortie", "cr�me",
-"produits laitiers","parmesan","chocolat","beaudoin","cr�pes","faisselle","gwell","kefir","corporel","hydratant","le bleu","meringues","moinet","morbier","gallois","raclette","riz","saint","tablette","tisane","tomette","farine","p�te","torsade","melonnette","pain","aux noix","aperitif","miel","cookie","fumee","de noix","caramelisees","salees","sucres","pesto","torrefies","truffe","l�gumes","shampoing","tagliatelle","confit","maquereau","panier de legumes","potage","safran","gelee","creme","moelleux","pur�e","p�tillant","vinaigrette","tartelette","tapas","cake","bougie","ch�taigne","caramel","chausson","choux rouge","compote","guerzoni","petillant","s�ch�es","puree","pur�e","vinaigre","frites","gratin","p�t�","cordon","pate","paupiette","moutarde","roti","r�ti","ail","cepes","fume","herbe","noisette","poivre","tartiflette","saut�","verrine","echalion","�chalion","conserve","farce","galettes","rillettes","supreme","�chalote","pruneau","tourte","biere","bi�re","cinsault","moule","huile","mouzakis","muscat","chutney","concentre","pulpe","ketchup","basilic","apero", "ap�ro","hydrolat")
+"produits laitiers","parmesan","chocolat","beaudoin","cr�pes","faisselle","gwell","kefir","corporel","hydratant","le bleu","meringues","moinet","morbier","gallois","raclette","riz","saint","tablette","tisane","tomette","farine","p�te","torsade","melonnette","pain","aux noix","aperitif","miel","cookie","fumee","de noix","caramelisees","salees","sucres","pesto","torrefies","truffe","l�gumes","shampoing","tagliatelle","confit","maquereau","panier de legumes","potage","safran","gelee","creme","moelleux","pur�e","p�tillant","vinaigrette","tartelette","tapas","cake","bougie","ch�taigne","caramel","chausson","choux rouge","compote","guerzoni","petillant","s�ch�es","puree","pur�e","vinaigre","frites","gratin","p�t�","cordon","pate","paupiette","moutarde","roti","r�ti","ail","cepes","fume","herbe","noisette","poivre","tartiflette","saut�","verrine","echalion","�chalion","conserve","farce","galettes","rillettes","supreme","�chalote","pruneau","tourte","biere","bi�re","cinsault","moule","huile","mouzakis","muscat","chutney","concentre","pulpe","ketchup","basilic","apero", "ap�ro","hydrolat","cuire", "fondu","merguez","saucisson","hache",
+"boulettes","tripes", "saucisses","preparation","m�lange","ap�ritif","farcir"
+, "melange","m�lange","caram�lis�es","torr�fi�s","saumon","truites", "poisson","mer","jaune et rouge","a cuire","gel�e","et/ou","sac mix","m�lang�es","melangees","variees","vari�es")
 ```
 
-## 3) Exclure le jeu de données contenant le jus de pomme de la liste des résultats
-
-```{r}
-
-# On stocke la table jus de pomme dans la variable data_jus_de_pomme
-data_jus_de_pomme <- liste_data_par_produit[["jus de pomme"]]
-
-# Suppression de la table jus de pomme de la liste des résultats
-liste_data_par_produit[["jus de pomme"]] <- NULL
-
-```
-
-## 4) Développement de la fonction pour supprimer les produits transformés
+## 3) Développement de la fonction pour supprimer les produits transformés
 
 ```{r}
 supp_produits_transfor <- function(liste_produits_transformes, liste_data_par_produit) {
@@ -1400,19 +1389,7 @@ supp_produits_transfor <- function(liste_produits_transformes, liste_data_par_pr
 
 ```
 
-## 5) Suppression des produits transformés pour le jus de pomme
-
-```{r}
-liste_produits_transformes_jus_pomme <- c("cranberries","cassis","coing","framboise","groseille","mure","myrtille","rhubarbe","cidre","epices","gingembre","menthe","orange","ortie")
-```
-
-## 6) Suppression des produits transformés pour les pêches
-
-```{r}
-liste_produits_transformes_peche <- c("confiture", "coulis", "jus","nectar")
-```
-
-## 7) Création d'une liste pour y placer le data_jus_de_pomme
+## 4) Création d'une liste pour y placer le data_jus_de_pomme
 
 ```{r}
 
@@ -1423,7 +1400,7 @@ liste_jus_pomme <- list()
 liste_jus_pomme[["jus de pomme"]] <- data_jus_de_pomme
 ```
 
-## 8) Création d'une liste pour y placer le data_peche
+## 5) Création d'une liste pour y placer le data_peche
 
 ```{r}
 
@@ -1434,7 +1411,7 @@ liste_peche <- list()
 liste_peche[["peche"]] <- data_peche
 ```
 
-## 9) Création d'une liste pour y placer le data_nectarine
+## 6) Création d'une liste pour y placer le data_nectarine
 
 ```{r}
 
@@ -1446,7 +1423,7 @@ liste_nectarine[["nectarine"]] <- data_nectarine
 
 ```
 
-## 10) Retirer data_jus_de_pomme, data_nectarine et data_peche de la liste de résultat
+## 7) Retirer data_jus_de_pomme, data_nectarine et data_peche de la liste de résultat
 
 ```{r}
 # On retire le jeu de données nectarine de liste_data_produits_bruts
@@ -1460,38 +1437,93 @@ liste_data_par_produit[["jus de pomme"]] <- NULL
 
 ```
 
-## 11) Application de la fonction sur tous les jeux de données
+## 8) Suppression des produits transformés pour le jus de pomme
+
+```{r}
+liste_produits_transformes_jus_pomme <- c("cranberries","cassis","coing","framboise","groseille","mure","myrtille","rhubarbe","cidre","epices","gingembre","menthe","orange","ortie")
+```
+
+## 9) Suppression des produits transformés pour les pêches
+
+```{r}
+liste_produits_transformes_peche <- c("confiture", "coulis", "jus","nectar")
+```
+
+## 10) Application de la fonction sur tous les jeux de données
 
 ```{r,warning=FALSE}
-
 # Application de la fonction sur les 36 jeux de données 
 resultat <- supp_produits_transfor(liste_produits_transformes, liste_data_par_produit)
+```
 
+## 11) Application de la fonction  sur les cas spécifiques
+
+### a) Sur jus de pomme
+
+```{r,warning=FALSE}
 # Application de la fonction sur le jeu de données jus de pomme
 resultat_jus_pomme <- 
   supp_produits_transfor(liste_produits_transformes_jus_pomme, liste_jus_pomme)
+```
 
+### b) Sur peche
+
+```{r,warning=FALSE}
 # Application de la fonction sur le jeu de données peche
 resultat_peche <- 
   supp_produits_transfor(liste_produits_transformes_peche, liste_peche)
+```
 
+# 12) On ne garde que les 34 jeux de données d'intérêt
+
+```{r}
 # On ne garde que les 34 jeux de données d'intérêt
 liste_data_produits_bruts <- resultat[names(resultat) != "data_produits_transformes"]
+```
 
+
+# 13) Pour les cas spécifiques, on extrait les tables de produits bruts 
+
+### a) Pour jus de pomme
+
+```{r}
 # On extrait la table jus de pomme de la liste resultat_jus_pomme
 data_jus_pomme <- resultat_jus_pomme[["jus de pomme"]]
+```
 
+### b) Pour peche
+
+```{r}
 # On extrait la table jus de pomme de la liste resultat_peche
 data_peche <- resultat_peche[["peche"]]
+```
 
+# 14) On retire le jeu de données des produits transformés pour le cas général
+
+```{r}
 # On retire le jeu de données data_produits_transformes de la liste de résultat
 data_produits_transformes <- resultat$data_produits_transformes
+```
 
+# 15) On retire le jeu de données des produits transformés pour les cas spécifiques
+
+### a) Pour jus de pomme
+
+```{r}
 # On retire le jeu de données data_produits_transformes de la liste de resultat_jus_pomme
 data_produits_transformes_jus_pomme <- resultat_jus_pomme$data_produits_transformes
+```
 
+### b) Pour peche
+
+```{r}
 # On retire le jeu de données data_produits_transformes de la liste de resultat_peche
 data_produits_transformes_peche<- resultat_peche$data_produits_transformes
+```
+
+# 16) On ajoute les tables spécifiques dans la liste de produits bruts final
+
+```{r,warning=FALSE}
 
 # On ajoute la table du jus de pomme dans notre liste de résultat
 liste_data_produits_bruts[["jus de pomme"]] <- data_jus_pomme
@@ -1501,7 +1533,11 @@ liste_data_produits_bruts[["peche"]] <- data_peche
 
 # On ajoute la table nectarine dans notre liste de résultat
 liste_data_produits_bruts[["nectarine"]] <- data_nectarine
+```
 
+# 17) On ajoute les lignes des tables de produits transformés dans la table data_pas_ok
+
+```{r}
 # On fusionne les 2  tables des produits transformés avec la table autre
 data_pas_ok <- 
   rbind(data_pas_ok2,data_produits_transformes,data_produits_transformes_jus_pomme,
