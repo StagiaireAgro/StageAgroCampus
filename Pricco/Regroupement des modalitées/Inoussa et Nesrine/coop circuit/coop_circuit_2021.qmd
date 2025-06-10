@@ -52,9 +52,7 @@ liste_produits <- c(
   "Laitue", "Lentille", "Abricot", "Pomme de terre", "Oignon",
   "Courgette", "Aubergine", "Asperge", "Banane", "Poivron",
   "Jus de pomme", "Celeri branche", "Concombre", "Prune",
-  "Peche", "Potiron", "Melon", "Endive", "Nectarine"
-)
-
+  "Peche", "Potiron", "Melon", "Endive", "Nectarine")
 
 # Mise en minuscules pour correspondance plus facile
 liste_produits <- str_to_lower(liste_produits)
@@ -64,6 +62,11 @@ liste_produits <- gsub("-", " ", liste_produits, ignore.case = TRUE)
 
 # On supprime les accents pour correspondance plus facile
 liste_produits <- stri_trans_general(liste_produits, "Latin-ASCII")
+
+# On ordonne la liste des noms de produits de manière decroissante selon
+# le nombre de caractere de chaque mots
+ordre <- order(nchar(gsub(" ", "", liste_produits)), decreasing = TRUE)
+liste_produits <- liste_produits[ordre]
 ```
 
 # IV) Dermination de la liste des déclinaisons possibles des noms de produits
@@ -421,7 +424,6 @@ lentille
 ########################## coop circuit ########################## 
 
 ########################## 2021 
-
 # abricot 
 abricot_declinaison <- c("abricot", "abricots")
 
@@ -545,156 +547,83 @@ lentille_declinaison <- c("lentille","lentilles")
 ```{r}
 # Liste contenant toutes les déclinaisons possibles pour chaque nom de produit
 liste_declinai_noms_produits <- list(
-  abricot_declinaison,
-  banane_declinaison,
-  cerise_declinaison,
-  clementine_declinaison,
-  fraise_declinaison,
-  kiwi_declinaison,
-  nectarine_declinaison,
-  noix_declinaison,
-  peche_declinaison,
-  poire_declinaison,
-  pdt_declinaison,
-  jus_pomme_declinaison,
-  pomme_declinaison,
-  prune_declinaison,
-  raisin_declinaison,
-  carotte_declinaison,
-  celeri_branche_declinaison,
-  chou_fleur_declinaison,
-  concombre_declinaison,
-  courgette_declinaison,
-  endive_declinaison,
-  haricot_vert_declinaison,
-  laitue_declinaison,
-  melon_declinaison,
-  oignon_declinaison,
-  poireau_declinaison,
-  poivron_declinaison,
-  potiron_declinaison,
-  tomate_declinaison,
-  lait_declinaison,
-  oeuf_declinaison,
-  boeuf_declinaison,
-  porc_declinaison,
-  poulet_declinaison,
-  lentille_declinaison
-)
+  "abricot" = abricot_declinaison,
+  "banane" = banane_declinaison,
+  "cerise" = cerise_declinaison,
+  "clementine" = clementine_declinaison,
+  "fraise" = fraise_declinaison,
+  "kiwi" = kiwi_declinaison,
+  "nectarine" = nectarine_declinaison,
+  "noix" = noix_declinaison,
+  "peche" = peche_declinaison,
+  "poire" = poire_declinaison,
+  "pomme de terre" = pdt_declinaison,
+  "jus de pomme" = jus_pomme_declinaison,
+  "pomme" = pomme_declinaison,
+  "prune" = prune_declinaison,
+  "raisin" = raisin_declinaison,
+  "carotte" = carotte_declinaison,
+  "celeri branche" = celeri_branche_declinaison,
+  "chou fleur" = chou_fleur_declinaison,
+  "concombre" = concombre_declinaison,
+  "courgette" = courgette_declinaison,
+  "endive" = endive_declinaison,
+  "haricot vert" = haricot_vert_declinaison,
+  "laitue" = laitue_declinaison,
+  "melon" = melon_declinaison,
+  "oignon" = oignon_declinaison,
+  "poireau" = poireau_declinaison,
+  "poivron" = poivron_declinaison,
+  "potiron" = potiron_declinaison,
+  "tomate" = tomate_declinaison,
+  "lait" = lait_declinaison,
+  "oeuf" = oeuf_declinaison,
+  "boeuf" = boeuf_declinaison,
+  "porc" = porc_declinaison,
+  "poulet" = poulet_declinaison,
+  "lentille" = lentille_declinaison
+  )
+# On va ordonner la liste saisie manuellement en fonction de la taille des noms du produit
+## Comptons la taille de chaque nom de produit dans la liste
+lengths <- nchar(gsub(" ", "", names(liste_declinai_noms_produits)))
+## Ordonnons maintenant de manière decroissante
+liste_declinai_noms_produits <- liste_declinai_noms_produits[order(lengths, decreasing = TRUE)]
 ```
 
 ## 2) Version 2 : Liste contenant toutes les déclinaisons possibles pour chaque nom de produit
 
 ```{r}
-# Fonction : declinaisons -----------------------------------------------------
-# Principe : Trouver toutes les déclinaisons possibles des noms de produits
-#            présentes dans un jeu de données
-
-nettoyage <- function(x) {
-  x <- stri_trans_general(str_to_lower(x), "Latin-ASCII") # 1 & 2
-  x <- str_replace_all(x, "[^a-z ]", "")                  # 3
+# Nettoyer une chaine de caractères (-> ici liste de noms de produits)
+nettoyer <- function(x) {
+  x <- stri_trans_general(str_to_lower(x), "Latin-ASCII") 
+  x <- str_replace_all(x, "[^a-z ]", "")
+  x <- trimws(x)
   return(x)
 }
 
+# Générer des expressions régulières à partir d'un mots ou liste de mots
 creer_regex <- function(mots, suffixe = "(e?s)?", collapse = ".*") {
   sapply(mots, function(terme) {
-    terme <- nettoyage(terme)                 # 1
-    tokens <- str_split(terme, " ")[[1]]      # 2
-    regex_tokens <- paste0(tokens, suffixe)   # 3
-    paste0(regex_tokens, collapse = collapse) # 4
+    tokens <- str_split(terme, " ")[[1]] 
+    regex_tokens <- paste0(tokens, suffixe)
+    paste0(regex_tokens, collapse = collapse)
   })
 }
-
-declinaisons_noms_produits <- function(db, product_name, products) {
-  
-  products <- nettoyage(products)
-  products_regex <- creer_regex(products)
-  ordre <- order(nchar(gsub(" ", "", products)), decreasing = TRUE)
-  products_regex <- products_regex[ordre]
-  
-  noms_des_produits <- factor(db[[product_name]])
-  levels(noms_des_produits) <- nettoyage(levels(noms_des_produits))
-  # Appliquer les regex aux niveaux uniques
-  noms_uniques <- levels(noms_des_produits)
-  
-  # Extrait les termes correspondant à chaque expression régulière et 
-  # les concatène en une chaîne.
-  presence_mat_niveaux <- vapply(products_regex, function(prod) {
-    matches <- str_extract_all(noms_uniques, prod)
-    sapply(matches, function(match) {
-      if (length(match) > 0) return(paste(unique(match), collapse = ","))
-      else return(NA_character_) 
-      }
-    )
-  }, FUN.VALUE = character(length(noms_uniques)))
-  
-  attribution <- apply(presence_mat_niveaux, 1, function(pres) {
-    if (sum(!is.na(pres)) == 1) return(pres[!is.na(pres)][1])
-    else if (sum(!is.na(pres)) > 1) {
-      candidats <- pres[!is.na(pres)]
-      premier <- candidats[1]  # Premier produit
-      reste <- candidats[-1]  # Reste des produits
-      if (all(sapply(reste, function(r) grepl(r, premier)))) return(premier)
-      else return(NA_character_)  # Sinon, retourner NA
-    }
-    else return(NA_character_) 
-  })
-  
-  result_df <- na.omit(attribution)
-  return(result_df)
-}
-
-classification_produits_avec_listes <- function(vecteur, list_produits) {
-  # Nettoyer le vecteur d'entrée et la liste des produits
-  vecteur_nettoye <- nettoyage(vecteur)
-  list_nettoyee <- nettoyage(list_produits)
-  liste_regex <- creer_regex(list_nettoyee)
-  # Trie des produits par longueur décroissante
-  ordre <- order(nchar(gsub(" ", "", list_nettoyee)), decreasing = TRUE)
-  list_produits_ord <- list_produits[ordre]
-  list_nettoyee_ord <- list_nettoyee[ordre]
-  liste_regex <- liste_regex[ordre]
-  # Niveaux uniques des noms nettoyés
-  niveaux <- levels(factor(vecteur_nettoye))
-  # Calcul de la matrice de présence sur niveaux uniques
-  presence_mat_niveaux <- sapply(liste_regex, function(prod) {
-    grepl(prod, niveaux, perl = TRUE)
-  })
-  # Facteur des noms nettoyés (indices des niveaux)
-  fact_noms <- factor(vecteur_nettoye, levels = niveaux)
-  # Reconstruction de la matrice de présence par ligne originale
-  presence_mat <- presence_mat_niveaux[as.integer(fact_noms), , drop = FALSE]
-  # Attribution du produit dominant par ligne
-  attribution <- apply(presence_mat, 1, function(pres) {
-    if (sum(pres) == 1) list_produits_ord[pres][1]
-    else if (sum(pres) > 1) {
-      candidats <- list_nettoyee_ord[pres]
-      premier <- candidats[1]
-      reste <- candidats[-1]
-      if (all(sapply(reste, function(r) grepl(r, premier)))) list_produits_ord[pres][1]
-      else NA_character_
-    } 
-    else NA_character_
-  })
-  # Liste complète des produits détectés concaténés
-  liste_detectee <- apply(presence_mat, 1, function(pres) {
-    if (any(pres)) paste(list_produits_ord[pres], collapse = ",") else NA_character_
-  })
-  # Créer un data.frame avec les résultats
-  result_df <- data.frame(vecteur = vecteur_nettoye,produit_classe = attribution)
-  # Séparer les données en ok et nok
-  data_ok <- result_df[!is.na(result_df$produit_classe), ]
-  # Créer la liste sous la forme souhaitée
-  liste_produits_resultats <- list()
-  # Parcours des produits détectés
-  for (produit in unique(data_ok$produit_classe)) {
-    # Extraire toutes les lignes correspondant à ce produit
-    lignes_correspondantes <- data_ok[data_ok$produit_classe == produit, ]
-    # Ajouter à la liste sous le nom du produit
-    liste_produits_resultats[[produit]] <- unique(lignes_correspondantes$vecteur)
-  }
-
-  return(liste_produits_resultats)
+# Extraires des noms de produits toutes les declinaisons des noms de la liste de produit
+trouver_declinaisons_nom_produit <- function(dataset, col_produit, ls_produit, regex) {
+  # Extraction des noms uniques de produits
+  noms_des_produits <- nettoyer(dataset[[col_produit]])
+  noms_des_produits_uniques <- unique(noms_des_produits)
+  # Extraction des déclinaisons par produit
+  liste_declinaisons <- sapply(seq_along(regex), function(i) {
+    extractions <- str_extract(noms_des_produits_uniques, regex[i])
+    extractions[extractions == ""] <- NA
+    extractions <- unique(extractions[!is.na(extractions)])
+    extractions
+  }, simplify = FALSE)
+  # Nommer chaque élément de la liste avec le nom du produit correspondant
+  names(liste_declinaisons) <- ls_produit
+  return(liste_declinaisons)
 }
 ```
 
@@ -833,135 +762,15 @@ separation_fichiers <- function(data, liste_produits, liste_declinai_noms_produi
 ### b) Version 2 : Avec le vecteur des variantes de noms de produits obtenu avec la machine
 
 ```{r}
-declinaisons <- declinaisons_noms_produits(data_coop_circuit_2021, "name", liste_produits)
-set.seed(123)
-final_declinaisons <- classification_produits_avec_listes(
-  unique(unlist(strsplit(declinaisons, ","))), liste_produits)
-
-```
-
-```{r}
-separation_fichiers <- function(data, liste_produits, liste_declinai_noms_produits) {
-
-  #### Étape 0 : Ajout et nettoyage de la colonne `name_clean` dans `data`
-  data <- data %>%
-    mutate(
-      name_clean = name %>%
-        str_to_lower() %>%
-        stri_trans_general("Latin-ASCII") %>%
-        gsub("-", " ", ., ignore.case = TRUE)
-    )
-
-  #### Étape 1 : On extrait les levels des produits
-  levels_produits <- levels(as.factor(data$name_clean))
-
-  #### Étape 2 : Création de la matrice de présence
-  matrice_presence <- sapply(liste_declinai_noms_produits, function(declinaisons) {
-    sapply(levels_produits, function(level) {
-      any(str_detect(level, fixed(declinaisons))) * 1
-    })
-  })
-
-  # Transposition pour avoir les produits en colonnes
-  matrice_presence <- t(matrice_presence)
-
-  # Calcul du nombre de correspondances pour chaque level
-  nb_variantes_noms <- colSums(matrice_presence)
-
-  # Ajouter cette ligne en bas de la matrice
-  matrice_presence <- rbind(matrice_presence, nb_variantes_noms)
-
-  #### Étape 3 : Identifier les noms qui correspondent à un seul produit
-  levels_uniques <- names(nb_variantes_noms[nb_variantes_noms == 1])
-
-  # On garde uniquement les colonnes de la matrice où une seule correspondance existe
-  matrice_uniques <- matrice_presence[-nrow(matrice_presence), levels_uniques, drop = FALSE]
-
-  #### Étape 4 : Créer un vecteur nom_produit proprement
-  vecteur_nom_produit <- sapply(levels_uniques, function(level) {
-    idx <- which(matrice_uniques[, level] == 1)
-    if (length(idx) == 1) {
-      return(liste_produits[idx])
-    } else {
-      return(NA)
-    }
-  }, USE.NAMES = TRUE)
-
-  vecteur_nom_produit <- vecteur_nom_produit[!is.na(vecteur_nom_produit)]
-
-  # Créer le dataframe de correspondance
-  df_correspondance <- data.frame(
-    name_clean = names(vecteur_nom_produit),
-    nom_produit = unname(vecteur_nom_produit),
-    stringsAsFactors = FALSE
+# Creer les expressions reguliere de la liste des noms de produits
+regex <- creer_regex(liste_produits) 
+# Declinaison obtenues de manière automatique
+final_declinaisons <- trouver_declinaisons_nom_produit(
+    dataset = data_coop_circuit_2021,
+    col_produit = "name",
+    ls_produit = liste_produits,
+    regex = regex
   )
-
-  #### Étape 5 : Générer data_ok en ajoutant nom_produit
-  data_ok <- data %>%
-    filter(name_clean %in% df_correspondance$name_clean) %>%
-    left_join(df_correspondance, by = "name_clean")
-
-  #### Étape 6 : Extraire les noms avec 0 ou plusieurs correspondances
-  levels_pas_ok <- names(nb_variantes_noms[nb_variantes_noms != 1])
-
-  matrice_pas_ok <- matrice_presence[-nrow(matrice_presence), levels_pas_ok, drop = FALSE]
-
-  vecteur_nom_pas_ok <- sapply(levels_pas_ok, function(level) {
-    idx <- which(matrice_pas_ok[, level] == 1)
-    if (length(idx) == 0) {
-      return(NA)
-    } else {
-      return(paste(liste_produits[idx], collapse = ";"))
-    }
-  }, USE.NAMES = TRUE)
-
-  df_correspondance_pas_ok <- data.frame(
-    name_clean = names(vecteur_nom_pas_ok),
-    nom_produit = unname(vecteur_nom_pas_ok),
-    stringsAsFactors = FALSE
-  )
-
-  #### Étape 7 : Générer data_pas_ok
-  data_pas_ok <- data %>%
-    filter(name_clean %in% df_correspondance_pas_ok$name_clean) %>%
-    left_join(df_correspondance_pas_ok, by = "name_clean")
-
-  #### Étape 8 : Identifier les lignes avec plusieurs noms dans data_pas_ok
-  data_ambigus <- data_pas_ok %>%
-    filter(str_detect(nom_produit, ";"))
-
-  #### Étape 9 : Nettoyage des noms emboîtés
-  data_ambigus_clean <- data_ambigus %>%
-    rowwise() %>%
-    mutate(
-      noms_list = list(str_split(nom_produit, ";")[[1]] %>% str_trim())
-    ) %>%
-    mutate(
-      noms_clean = list({
-        noms <- noms_list
-        noms[!sapply(noms, function(x) any(noms != x & str_detect(noms, fixed(x))))]
-      })
-    ) %>%
-    mutate(
-      nom_produit_new = ifelse(length(noms_clean) == 1, noms_clean[[1]], paste(noms_clean, collapse = ";"))
-    ) %>%
-    ungroup()
-
-  #### Étape 10 : Extraire les lignes devenues "uniques" après nettoyage
-  data_deplaces <- data_ambigus_clean %>%
-    filter(!str_detect(nom_produit_new, ";")) %>%
-    select(-nom_produit, -noms_list, -noms_clean) %>%
-    rename(nom_produit = nom_produit_new)
-
-  #### Étape 11 : Mettre à jour data_ok
-  data_ok <- bind_rows(data_ok, data_deplaces)
-
-  #### Étape 12 : Mettre à jour data_pas_ok sans les lignes déplacées
-  data_pas_ok <- data_pas_ok %>%
-    filter(!(name_clean %in% data_deplaces$name_clean))
-
-  return(list(data_ok = data_ok, data_pas_ok = data_pas_ok))
-}
 
 ```
 
@@ -987,6 +796,7 @@ data_pas_ok <- resultats$data_pas_ok
 ### b) Version 2
 
 ```{r,message=FALSE,warning=FALSE}
+final_declinaisons$laitue <- c(final_declinaisons$laitue, "laitue pomme", "laitue pommee", " Laitue pommée")
 
 # Test de la fonction : Fichier coop circuit 2021
 resultats_2 <- separation_fichiers(
@@ -995,8 +805,6 @@ resultats_2 <- separation_fichiers(
   liste_declinai_noms_produits = final_declinaisons
 )
 
-# Possibilité de supprimé les noms de la liste pour quelle ressemble à celui de Nesrine
-names(final_declinaisons) <- NULL
 
 # On regarde séparemment le data_ok et data_pas_ok
 data_ok2 <- resultats_2$data_ok
@@ -1799,6 +1607,7 @@ tomate_levels
 # X) Export des jeux de données
 
 ```{r}
+exports_datasets(liste_data_produits_bruts, "2021", "coopcircuit")
 exports_datasets <- function(datasets, annee, dossier) {
   # Crée un sous-dossier avec l'année dans le dossier principal
   sous_dossier <- file.path(dossier, as.character(annee))
@@ -1832,6 +1641,7 @@ exports_datasets <- function(datasets, annee, dossier) {
     })
   }
 }
-
-exports_datasets(liste_data_produits_bruts, "2021", "coopcircuit")
 ```
+
+
+
