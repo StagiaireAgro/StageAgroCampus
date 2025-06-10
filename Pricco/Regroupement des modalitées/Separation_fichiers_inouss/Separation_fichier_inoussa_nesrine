@@ -1,5 +1,5 @@
 ---
-title: "separation_fichiers_v4"
+title: "separation_fichiers_Inoussa_Nesrine"
 format: html
 editor: visual
 ---
@@ -60,13 +60,15 @@ data_ruche_oui_2024 <- vroom("data/la ruche qui dit oui/historique_2024.csv")
 ```{r}
 # Liste des produits alimentaires à rechercher
 liste_produits <- c(
-  "Abricot", "Banane", "Cerise", "Clémentine", "Fraise", "Kiwi", "Nectarine",
-  "Noix", "Pêche", "Poire", "Pomme de terre", "Jus de Pomme", "Pomme", "Prune",
-  "Raisin", "Asperge", "Aubergine", "Carotte", "Céleri-branche", "Chou fleur",
-  "Concombre", "Courgette", "Endive", "Haricot vert", "Laitue", "Melon",
-  "Oignon", "Poireau","Poivron", "Potiron", "Tomate", "Lait", "Oeuf", "Boeuf",
-  "Porc", "Poulet", "Lentille"
+  "Clémentine", "Tomate", "Carotte", "Cerise", "Chou fleur",
+  "Fraise", "Kiwi", "Lait", "Oeuf", "Poireau", "Poire", "Raisin",
+  "Haricot vert", "Noix", "Pomme", "Boeuf", "Porc", "Poulet",
+  "Laitue", "Lentille", "Abricot", "Pomme de terre", "Oignon",
+  "Courgette", "Aubergine", "Asperge", "Banane", "Poivron",
+  "Jus de pomme", "Celeri branche", "Concombre", "Prune",
+  "Peche", "Potiron", "Melon", "Endive", "Nectarine"
 )
+
 
 # Mise en minuscules pour correspondance plus facile
 liste_produits <- str_to_lower(liste_produits)
@@ -717,7 +719,7 @@ classification_produits_avec_listes <- function(vecteur, list_produits) {
 
 ## 1) Développement de la fonction split
 
-### a) Version 1 : Avec le vecteur des variantes de noms de produits obtenu manuellement
+## a) Version 1 : Avec le vecteur des variantes de noms de produits obtenu manuellement
 
 ```{r}
 
@@ -851,6 +853,7 @@ separation_fichiers <- function(data, liste_produits, liste_declinai_noms_produi
 declinaisons <- declinaisons_noms_produits(data_coop_circuit_2021, "name", liste_produits)
 final_declinaisons <- classification_produits_avec_listes(
   unique(unlist(strsplit(declinaisons, ","))), liste_produits)
+
 ```
 
 ```{r}
@@ -1037,6 +1040,8 @@ split_data_ok_par_produit <- function(data_ok) {
 
 ## 2) Application de la fonction split de data_ok par nom de produit
 
+### a) Version 1 
+
 ```{r}
 # Test de la fonction : data_ok de coop circuit 2021
 liste_data_par_produit <- split_data_ok_par_produit(data_ok)
@@ -1052,6 +1057,20 @@ names(liste_data_par_produit)
 ```{r}
 # Vérification de non présence de ligne avec un seul nom de produit dans data_autres 
 noms_produits_autres <- data_pas_ok %>% filter(!is.na(nom_produit))
+```
+
+### a) Version 2
+
+```{r}
+# Test de la fonction : data_ok de coop circuit 2021
+liste_data_par_produit <- split_data_ok_par_produit(data_ok2)
+
+# Accéder au sous-dataframe pour le produit "pomme"
+data_pomme <- liste_data_par_produit[["pomme"]]
+
+# Voir tous les noms de produits
+names(liste_data_par_produit)
+
 ```
 
 # VIII) Création de la fonction pour supprimer les produits transformés
@@ -1485,7 +1504,7 @@ liste_data_produits_bruts[["nectarine"]] <- data_nectarine
 
 # On fusionne les 2  tables des produits transformés avec la table autre
 data_pas_ok <- 
-  rbind(data_pas_ok,data_produits_transformes,data_produits_transformes_jus_pomme,
+  rbind(data_pas_ok2,data_produits_transformes,data_produits_transformes_jus_pomme,
         data_produits_transformes_peche)
 ```
 
@@ -1640,13 +1659,6 @@ data_melon <- liste_data_produits_bruts[["melon"]]
 melon_levels <- levels(as.factor(data_melon$name_clean))
 
 melon_levels
-
-######### nectarine
-data_nectarine <- liste_data_produits_bruts[["nectarine"]]
-
-nectarine_levels <- levels(as.factor(data_nectarine$name_clean))
-
-nectarine_levels
 
 ######### nectarine
 data_nectarine <- liste_data_produits_bruts[["nectarine"]]
