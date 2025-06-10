@@ -1799,7 +1799,6 @@ tomate_levels
 # X) Export des jeux de données
 
 ```{r}
-exports_datasets(liste_data_produits_bruts, "2021", "coopcircuit")
 exports_datasets <- function(datasets, annee, dossier) {
   # Crée un sous-dossier avec l'année dans le dossier principal
   sous_dossier <- file.path(dossier, as.character(annee))
@@ -1833,4 +1832,6 @@ exports_datasets <- function(datasets, annee, dossier) {
     })
   }
 }
+
+exports_datasets(liste_data_produits_bruts, "2021", "coopcircuit")
 ```
