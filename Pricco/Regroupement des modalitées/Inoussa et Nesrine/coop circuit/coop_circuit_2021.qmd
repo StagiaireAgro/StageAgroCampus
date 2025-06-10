@@ -38,7 +38,7 @@ library(tidyverse)
 
 ########################## coop circuit ########################## 
 
-data_coop_circuit_2022 <- vroom("data/coop circuit/par annee/2022.csv")
+data_coop_circuit_2021 <- vroom("data/coop circuit/par annee/2021.csv")
 ```
 
 # III) Définition de la liste de produits
@@ -64,7 +64,6 @@ liste_produits <- gsub("-", " ", liste_produits, ignore.case = TRUE)
 
 # On supprime les accents pour correspondance plus facile
 liste_produits <- stri_trans_general(liste_produits, "Latin-ASCII")
-
 ```
 
 # IV) Dermination de la liste des déclinaisons possibles des noms de produits
@@ -835,6 +834,7 @@ separation_fichiers <- function(data, liste_produits, liste_declinai_noms_produi
 
 ```{r}
 declinaisons <- declinaisons_noms_produits(data_coop_circuit_2021, "name", liste_produits)
+set.seed(123)
 final_declinaisons <- classification_produits_avec_listes(
   unique(unlist(strsplit(declinaisons, ","))), liste_produits)
 
@@ -1798,6 +1798,39 @@ tomate_levels
 
 # X) Export des jeux de données
 
+```{r}
+exports_datasets(liste_data_produits_bruts, "2021", "coopcircuit")
+exports_datasets <- function(datasets, annee, dossier) {
+  # Crée un sous-dossier avec l'année dans le dossier principal
+  sous_dossier <- file.path(dossier, as.character(annee))
 
+  # Crée le sous-dossier, showWarnings = FALSE empêche l'affichage des avertissements si le dossier existe déjà
+  dir.create(sous_dossier, showWarnings = FALSE, recursive = TRUE)
 
+  # Fonction d'export d'un data.frame
+  exporter_df <- function(df, nom_fichier) {
+    # Remplace les sauts de ligne dans les colonnes de type caractère
+    df[] <- lapply(df, function(col) {
+      if (is.factor(col) || is.character(col)) {
+        stringr::str_replace_all(col, "[\r\n]+", " ")
+      } else {
+        col
+      }
+    })
+    # Chemin complet pour le fichier
+    chemin <- file.path(sous_dossier, nom_fichier)
+    # Écrit le fichier CSV
+    write.table(df, file = chemin, sep = ";", row.names = FALSE, fileEncoding = "UTF-8")
+  }
 
+  # Vérifie si l'argument datasets est une liste de data.frames
+  if (is.list(datasets) && all(sapply(datasets, is.data.frame))) {
+    # Applique la fonction d'export à chaque data.frame dans la liste
+    sapply(names(datasets), function(nom) {
+      df <- datasets[[nom]]
+      nom_fichier <- paste0(gsub("[^a-zA-Z0-9_-]", "_", nom),"_",annee, ".csv")
+      exporter_df(df, nom_fichier)
+    })
+  }
+}
+```
