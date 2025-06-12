@@ -1607,40 +1607,25 @@ tomate_levels
 # X) Export des jeux de données
 
 ```{r}
-exports_datasets(liste_data_produits_bruts, "2021", "coopcircuit")
-exports_datasets <- function(datasets, annee, dossier) {
-  # Crée un sous-dossier avec l'année dans le dossier principal
-  sous_dossier <- file.path(dossier, as.character(annee))
+# Export des données ------------------------------------------------------
 
-  # Crée le sous-dossier, showWarnings = FALSE empêche l'affichage des avertissements si le dossier existe déjà
-  dir.create(sous_dossier, showWarnings = FALSE, recursive = TRUE)
-
-  # Fonction d'export d'un data.frame
-  exporter_df <- function(df, nom_fichier) {
-    # Remplace les sauts de ligne dans les colonnes de type caractère
-    df[] <- lapply(df, function(col) {
-      if (is.factor(col) || is.character(col)) {
-        stringr::str_replace_all(col, "[\r\n]+", " ")
-      } else {
-        col
-      }
-    })
-    # Chemin complet pour le fichier
-    chemin <- file.path(sous_dossier, nom_fichier)
-    # Écrit le fichier CSV
-    write.table(df, file = chemin, sep = ";", row.names = FALSE, fileEncoding = "UTF-8")
+export_dataframes <- function(list_of_lists_of_dataframes, annee, base_directory) {
+  # Créer le répertoire de base s'il n'existe pas
+  if (!dir.exists(base_directory)) {
+    dir.create(base_directory, recursive = TRUE)
   }
-
-  # Vérifie si l'argument datasets est une liste de data.frames
-  if (is.list(datasets) && all(sapply(datasets, is.data.frame))) {
-    # Applique la fonction d'export à chaque data.frame dans la liste
-    sapply(names(datasets), function(nom) {
-      df <- datasets[[nom]]
-      nom_fichier <- paste0(gsub("[^a-zA-Z0-9_-]", "_", nom),"_",annee, ".csv")
-      exporter_df(df, nom_fichier)
-    })
+  # Fonction pour exporter un dataframe en format .xlsx
+  export_df <- function(df, name) {
+    filename <- file.path(base_directory, paste0(name,"_",annee,".xlsx"))
+    write_xlsx(as.data.frame(df), path = filename)
   }
+  # Parcourir chaque liste de dataframes et exporter chaque dataframe
+  lapply(seq_along(list_of_lists_of_dataframes), function(i) {
+    inner_list <- list_of_lists_of_dataframes[[i]]
+    export_df(inner_list, names(list_of_lists_of_dataframes)[i])
+  })
 }
+
 ```
 
 
