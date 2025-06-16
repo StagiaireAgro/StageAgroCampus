@@ -62,10 +62,14 @@ lapply(datasets, function(x) names(x))
 ```{r}
 # Vecteurs de sélection par préfixe
 selections <- list(
-  cagette = c(2:3, 5:8, 12, 15:16),
-  socleo  = c(1, 4:8, 11:12, 13),
-  ruche   = c(3:4, 12, 14:15, 21:22, 24, 26),
-  coop    = c(1:4, 6:10)
+  cagette <- c("orderProductPrice", "orderQuantity", "mois", "annee", "productName", "productIsOrganic", "productConditioningQuantity", "productConditioningUnit", "distributionZipCode")
+,
+  socleo <- c("value", "quantite_com", "mois", "annee", "name", "is_organic", "quantite_cond", "unite_conditionnement", "code_postal")
+,
+  ruche <- c("price_ttc_item", "nb_item", "mois", "annee", "product_name", "x", "weight_raw_item", "quantityunit", "hive_zipcode")
+,
+  coop <- c("price", "quantite_unite", "mois", "annee", "name", "is_organic", "quantite_cond", "conditionnement", "code_postal")
+
 )
 
 # Application avec lapply()
