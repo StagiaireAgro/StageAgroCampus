@@ -34,6 +34,7 @@ library(tidyverse)
 ```
 
 # II) Importation des fichiers
+dossier_racine <- "data/2022_2023"
 fichiers <- dir_ls(path = dossier_racine, recurse = TRUE, glob = "*.csv")
 datasets <- lapply(fichiers, function(file) vroom(file))
 
