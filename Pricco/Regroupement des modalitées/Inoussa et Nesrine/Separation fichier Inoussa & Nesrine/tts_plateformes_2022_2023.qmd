@@ -117,3 +117,86 @@ ruche_oui_2022  <- datasets$ruche_oui_2022 |>
 coop_circuit_2022  <- datasets$coop_circuit_2022 |> 
   select(1:4,6:10)
 ```
+
+library(fs)
+
+chemin_absolue <-  dir_ls(path = "data/2022-2023/", recurse = TRUE, glob = "*.csv")
+noms_fichiers <- path_ext_remove(path_file(chemin_absolue))
+datasets <- lapply(chemin_absolue, function(file) fread(file))
+names(datasets) <- noms_fichiers
+
+# Ajout de la colonne NA aux jeux 
+datasets$ruche_oui_2022$productIsOrganic <- NA
+datasets$ruche_oui_2023$productIsOrganic <- NA
+View(datasets)
+
+# Colonne de cagette à garder 
+colonne_cagette_a_garder <- c(
+  "orderProductPrice", "orderQuantity", "mois", "annee", "productName", 
+  "productIsOrganic", "productConditioningQuantity", "productConditioningUnit", 
+  "distributionZipCode")
+indices_cagette <- startsWith(names(datasets), "cagette")
+
+datasets[indices_cagette] <- lapply(datasets[indices_cagette], function(x) {
+  select(x, any_of(colonne_cagette_a_garder))
+})
+
+
+# Colonne de ruche qui dit oui à garder 
+
+colonne_ruche_a_garder <- c(
+  "price_ttc_item","nb_item","mois","annee", "product_name","productIsOrganic",
+  "weight_raw_item", "quantityunit", "hive_zipcode")
+
+indices_ruche <- startsWith(names(datasets), "ruche")
+
+datasets[indices_ruche] <- lapply(datasets[indices_ruche], function(x) {
+  select(x, any_of(colonne_ruche_a_garder))
+})
+
+# Colonne de socleo qui dit oui à garder 
+
+colonne_socleo_a_garder <- c(
+  "value", "quantite_com","mois","annee","name","is_organic","quantite_cond",
+  "unite_conditionnement", "code_postal")
+
+indices_socleo <- startsWith(names(datasets), "socleo")
+
+datasets[indices_socleo] <- lapply(datasets[indices_socleo], function(x) {
+  select(x, any_of(colonne_socleo_a_garder))
+})
+
+# Colonne de coop circuit qui dit oui à garder 
+
+colonne_coop_circuit_a_garder <- c(
+  "price", "quantite_unite","mois", "annee", "name", "is_organic", "quantite_cond",
+  "conditionnement","code_postal") 
+
+indices_coop_circuit <- startsWith(names(datasets), "coop_circuit")
+
+datasets[indices_coop_circuit] <- lapply(datasets[indices_coop_circuit], function(x) {
+  select(x, any_of(colonne_coop_circuit_a_garder))
+})
+
+# Renommer toutes les noms de colonnes des bases aux noms de celui de cagette
+
+datasets[!indices_cagette] <- lapply(datasets[!indices_cagette], function(df) {
+  df <- select(df, everything())
+  colnames(df) <- colonne_cagette_a_garder
+  return(df)
+})
+
+liste_datasets_final <- lapply(names(datasets), function(nom) {
+  df <- datasets[[nom]]
+  df$plateforme <- str_split(nom, "_")[[1]][1]
+  df
+})
+
+names(liste_datasets_final) <- names(datasets)
+
+View(liste_datasets_final)
+
+
+
+
+
