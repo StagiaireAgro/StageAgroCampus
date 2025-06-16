@@ -118,3 +118,9 @@ names(liste_datasets_final) <- names(datasets)
 View(liste_datasets_final)
 
 ```
+
+# IV) Fusion de tous les jeux de données sauf cagette
+
+
+
+
