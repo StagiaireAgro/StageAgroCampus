@@ -16,6 +16,7 @@ library(stringr)
 
 # Pour gérer les accents et normaliser les chaînes
 library(stringi)
+library(fs)
 
 # Le tidyverse est un méta-package qui regroupe plusieurs packages R
 # utiles pour la manipulation, la transformation, et la visualisation de données :
@@ -33,6 +34,10 @@ library(tidyverse)
 ```
 
 # II) Importation des fichiers
+fichiers <- dir_ls(path = dossier_racine, recurse = TRUE, glob = "*.csv")
+datasets <- lapply(fichiers, function(file) vroom(file))
+
+
 
 ```{r,warning=FALSE,message=FALSE}
 
