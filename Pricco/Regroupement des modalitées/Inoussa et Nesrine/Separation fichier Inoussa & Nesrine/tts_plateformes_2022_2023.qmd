@@ -43,7 +43,7 @@ View(datasets)
 ```
 
 
-## III) Harmonisation des noms de colonnes de toutes les plateformes
+# III) Harmonisation des noms de colonnes de toutes les plateformes
 
 
 ```{r}
@@ -117,6 +117,9 @@ ruche_oui_2022  <- datasets$ruche_oui_2022 |>
 coop_circuit_2022  <- datasets$coop_circuit_2022 |> 
   select(1:4,6:10)
 ```
+
+
+```{r}
 
 library(fs)
 
@@ -196,7 +199,4 @@ names(liste_datasets_final) <- names(datasets)
 
 View(liste_datasets_final)
 
-
-
-
-
+```
