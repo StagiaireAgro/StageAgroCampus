@@ -356,7 +356,7 @@ data_pas_ok2 <- resultats_2$data_pas_ok
 
 ```
 
-# VI) Fusion de  tous les fichiers de cagette
+# VI) Fusion de tous les fichiers de cagette
 
 ```{r,warning=FALSE}
 
@@ -440,4 +440,15 @@ liste_finale_datasets_cagette <- do.call(rbind, liste_datasets_cagette_nettoyee)
 View(liste_finale_datasets_cagette)
 ```
 
+# VII) Fusion de tous les fichiers issus de toutes les plateformes
 
+```{r}
+# On supprime la colonne name_clean de data_ok2
+
+data_ok2 <- data_ok2 |> select(-c("name_clean"))
+
+# On fusionne toutes les tables de cagette en une seule
+datsets_tts_plateformes <- rbind(liste_finale_datasets_cagette,data_ok2)
+View(datsets_tts_plateformes)
+
+```
