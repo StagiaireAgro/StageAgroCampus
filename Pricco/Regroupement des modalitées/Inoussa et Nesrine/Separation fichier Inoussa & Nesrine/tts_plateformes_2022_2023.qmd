@@ -41,7 +41,8 @@ datasets <- lapply(fichiers, function(file) vroom(file))
 names(datasets) <- noms_fichiers
 View(datasets)
 
-
+datasets$ruche_oui_2022$productIsOrganic <- NA
+datasets$ruche_oui_2023$productIsOrganic <- NA
 
 
 ```{r,warning=FALSE,message=FALSE}
