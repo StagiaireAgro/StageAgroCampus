@@ -55,84 +55,6 @@ datasets$ruche_oui_2023$productIsOrganic <- NA
 
 
 ```{r}
-lapply(datasets, function(x) names(x))
-```
-
-
-```{r}
-# Vecteurs de sélection par préfixe
-selections <- list(
-  cagette <- c("orderProductPrice", "orderQuantity", "mois", "annee", "productName", "productIsOrganic", "productConditioningQuantity", "productConditioningUnit", "distributionZipCode")
-,
-  socleo <- c("value", "quantite_com", "mois", "annee", "name", "is_organic", "quantite_cond", "unite_conditionnement", "code_postal")
-,
-  ruche <- c("price_ttc_item", "nb_item", "mois", "annee", "product_name", "x", "weight_raw_item", "quantityunit", "hive_zipcode")
-,
-  coop <- c("price", "quantite_unite", "mois", "annee", "name", "is_organic", "quantite_cond", "conditionnement", "code_postal")
-
-)
-
-# Application avec lapply()
-selected_datasets <- lapply(names(datasets), function(name) {
-  df <- datasets[[name]]
-  prefix <- sub("_.*", "", name)  # extrait le préfixe avant le premier "_"
-  if (prefix %in% names(selections)) {
-    return(df[, selections[[prefix]]])
-  } else {
-    return(NULL)  
-  }
-})
-
-# On nomme les datasets pour garder l'association
-names(selected_datasets) <- names(datasets)
-
-```
-
-
-```{r}
-
-# On applique la fonction 
-liste_datasets <- selection_colonnes(datasets)
-```
-
-
-```{r}
-
-# Vérification du bon fonctionnement de la fonction
-lapply(liste_datasets, function(x) names(x))
-```
-
-
-```{r}
-
-cagette_Abricot_2022  <- datasets$cagette_Abricot_2022 |> 
-  select(2:3,5:8,12,15:16)
-
-socleo_2022  <- datasets$socleo_2023 |> 
-  select(1,4:8,11:12,13)
-
-ruche_oui_2022  <- datasets$ruche_oui_2022 |> 
-  select(3:4,12,14:15,21:22,24,26)
-
-coop_circuit_2022  <- datasets$coop_circuit_2022 |> 
-  select(1:4,6:10)
-```
-
-
-```{r}
-
-library(fs)
-
-chemin_absolue <-  dir_ls(path = "data/2022-2023/", recurse = TRUE, glob = "*.csv")
-noms_fichiers <- path_ext_remove(path_file(chemin_absolue))
-datasets <- lapply(chemin_absolue, function(file) fread(file))
-names(datasets) <- noms_fichiers
-
-# Ajout de la colonne NA aux jeux 
-datasets$ruche_oui_2022$productIsOrganic <- NA
-datasets$ruche_oui_2023$productIsOrganic <- NA
-View(datasets)
-
 # Colonne de cagette à garder 
 colonne_cagette_a_garder <- c(
   "orderProductPrice", "orderQuantity", "mois", "annee", "productName", 
@@ -146,7 +68,6 @@ datasets[indices_cagette] <- lapply(datasets[indices_cagette], function(x) {
 
 
 # Colonne de ruche qui dit oui à garder 
-
 colonne_ruche_a_garder <- c(
   "price_ttc_item","nb_item","mois","annee", "product_name","productIsOrganic",
   "weight_raw_item", "quantityunit", "hive_zipcode")
@@ -158,7 +79,6 @@ datasets[indices_ruche] <- lapply(datasets[indices_ruche], function(x) {
 })
 
 # Colonne de socleo qui dit oui à garder 
-
 colonne_socleo_a_garder <- c(
   "value", "quantite_com","mois","annee","name","is_organic","quantite_cond",
   "unite_conditionnement", "code_postal")
@@ -170,7 +90,6 @@ datasets[indices_socleo] <- lapply(datasets[indices_socleo], function(x) {
 })
 
 # Colonne de coop circuit qui dit oui à garder 
-
 colonne_coop_circuit_a_garder <- c(
   "price", "quantite_unite","mois", "annee", "name", "is_organic", "quantite_cond",
   "conditionnement","code_postal") 
@@ -182,7 +101,6 @@ datasets[indices_coop_circuit] <- lapply(datasets[indices_coop_circuit], functio
 })
 
 # Renommer toutes les noms de colonnes des bases aux noms de celui de cagette
-
 datasets[!indices_cagette] <- lapply(datasets[!indices_cagette], function(df) {
   df <- select(df, everything())
   colnames(df) <- colonne_cagette_a_garder
