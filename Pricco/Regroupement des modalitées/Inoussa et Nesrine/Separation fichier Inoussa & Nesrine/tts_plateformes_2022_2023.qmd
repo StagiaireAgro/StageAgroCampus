@@ -121,6 +121,10 @@ View(liste_datasets_final)
 
 # IV) Fusion de tous les jeux de données sauf cagette
 
+```{r}
+liste_datasets_final_sans_cagette <- liste_datasets_final[!indices_cagette]
 
-
+combinaison <- do.call(rbind, liste_datasets_final_sans_cagette)
+View(combinaison)
+```
 
