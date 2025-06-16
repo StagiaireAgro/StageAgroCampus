@@ -31,9 +31,26 @@ library(fs)
 
 library(tidyverse)
 
+library(purrr)
+
 ```
 
-# II) Importation des fichiers
+# II) Documentation des variables d'intérêts pour le calcul du prix au kilogramme
+
+| Variable                    | Définition |
+|-----------------------------|------------|
+| orderProductPrice           |            |
+| orderQuantity               |            |
+| mois                        |  Mois      |
+| annee                       |  Année     |
+| productName                 |            |
+| productIsOrganic            |            |
+| productConditioningQuantity |            |
+| productConditioningUnit     |            |
+| distributionZipCode         |            |
+| plateforme                  |            |
+
+# III) Importation des fichiers
 
 ```{r,message=FALSE}
 dossier_racine <- "data/2022-2023"
@@ -44,8 +61,7 @@ names(datasets) <- noms_fichiers
 View(datasets)
 ```
 
-
-# III) Harmonisation des noms de colonnes de toutes les plateformes
+# IV) Harmonisation des noms de colonnes de toutes les plateformes
 
 ```{r}
 # On ajoute la colonne pour le bio 
@@ -53,7 +69,6 @@ View(datasets)
 datasets$ruche_oui_2022$productIsOrganic <- NA
 datasets$ruche_oui_2023$productIsOrganic <- NA
 ```
-
 
 ```{r}
 # Colonne de cagette à garder 
@@ -120,7 +135,7 @@ View(liste_datasets_final)
 
 ```
 
-# IV) Fusion de tous les jeux de données sauf cagette
+# V) Fusion de tous les jeux de données sauf cagette
 
 ```{r,warning=FALSE}
 liste_datasets_final_sans_cagette <- liste_datasets_final[!indices_cagette]
@@ -129,10 +144,9 @@ combinaison <- do.call(rbind, liste_datasets_final_sans_cagette)
 View(combinaison)
 ```
 
-# V) Séparation des fichiers par produit
+# VI) Séparation des fichiers par produit
 
 ## a) Définition de la liste de produits
-
 
 ```{r}
 # Liste des produits alimentaires à rechercher
@@ -337,7 +351,7 @@ separation_fichiers <- function(data, liste_produits, liste_declinai_noms_produi
 }
 ```
 
-## d) Application de la fonction split 
+## d) Application de la fonction split
 
 ```{r,message=FALSE,warning=FALSE}
 
@@ -351,12 +365,12 @@ system.time({
 
 
 # On regarde séparemment le data_ok et data_pas_ok
-data_ok2 <- resultats_2$data_ok
-data_pas_ok2 <- resultats_2$data_pas_ok
+data_prod_tries <- resultats_2$data_ok
+data_prod_pas_tries <- resultats_2$data_pas_ok
 
 ```
 
-# VI) Fusion de tous les fichiers de cagette
+# VII) Fusion de tous les fichiers de cagette
 
 ```{r,warning=FALSE}
 
@@ -364,7 +378,7 @@ data_pas_ok2 <- resultats_2$data_pas_ok
 liste_datasets_cagette <- liste_datasets_final[indices_cagette]
 ```
 
-```{r}
+```{r,warning=FALSE}
 ################## On fusionne les tables pommes ensemble
 
 # Étape 1 : renommer les éléments pour grouper
@@ -378,7 +392,6 @@ liste_datasets_cagette <- lapply(
 
 
 ```
-
 
 ```{r}
 #################### On ajoute la nouvelle colonne nom_produit à toutes les tables cagette
@@ -440,20 +453,19 @@ liste_finale_datasets_cagette <- do.call(rbind, liste_datasets_cagette_nettoyee)
 View(liste_finale_datasets_cagette)
 ```
 
-# VII) Fusion de tous les fichiers issus de toutes les plateformes
+# VIII) Fusion de tous les fichiers issus de toutes les plateformes
 
 ```{r}
-# On supprime la colonne name_clean de data_ok2
-
-data_ok2 <- data_ok2 |> select(-c("name_clean"))
+# On supprime la colonne name_clean de data_prod_tries
+data_prod_tries <- data_prod_tries |> select(-c("name_clean"))
 
 # On fusionne toutes les tables de cagette en une seule
-datasets_tts_plateformes <- rbind(liste_finale_datasets_cagette,data_ok2)
+datasets_tts_plateformes <- rbind(liste_finale_datasets_cagette,data_prod_tries)
 View(datasets_tts_plateformes)
 
 ```
 
-# VII) Tableau de comptage du nombre de levels par produit
+# IV) Tableau de comptage du nombre de levels par produit
 
 ```{r}
 
@@ -462,5 +474,70 @@ table_comptage_levels_par_prod <- datasets_tts_plateformes %>%
   summarise(`Nombre de levels` = n_distinct(productName)) %>%
   arrange(desc(`Nombre de levels`)) %>%
   rename(`Nom de produit` = nom_produit)
+
+View(table_comptage_levels_par_prod)
+```
+
+# X) Tableaux de comptages du nombre d'occurrences des autres produits pour un produit donné
+
+```{r}
+# On sélectionne les lignes non vides de data_prod_pas_tries
+data_produits_multiples <- data_prod_pas_tries |> filter(!is.na(nom_produit))
+```
+
+```{r}
+
+# Liste des 37 produits nettoyés
+liste_37_prod_nettoyes <- sapply(liste_produits, nettoyer_nom, USE.NAMES = FALSE)
+
+# Étape 1 : Créer un ID par ligne
+data_clean <- data_produits_multiples %>%
+  mutate(id_ligne = row_number())
+
+# Étape 2 : Séparer les noms de produits par ligne
+data_split <- data_clean %>%
+  separate_rows(nom_produit, sep = ";") %>%
+  mutate(nom_produit = str_trim(nom_produit)) %>%
+  filter(nom_produit %in% liste_37_prod_nettoyes)
+
+# Étape 3 : Liste des produits par ligne
+data_grouped <- data_split %>%
+  group_by(id_ligne) %>%
+  summarise(produits = list(nom_produit), .groups = "drop")
+
+# Étape 4 : Calcul des cooccurrences (cross-join par ligne)
+cooccurrences <- data_grouped %>%
+  mutate(paires = map(produits, ~ {
+    expand.grid(p1 = .x, p2 = .x, stringsAsFactors = FALSE)
+  })) %>%
+  unnest(paires) %>%
+  filter(p1 != p2)
+
+# Étape 5 : Compter les cooccurrences
+co_counts <- cooccurrences %>%
+  count(p1, p2, name = "nb_occurrences")
+
+# Étape 6 : Générer les 37 dataframes
+liste_dataframes <- map(set_names(liste_37_prod_nettoyes), function(produit) {
+  autres_produits <- setdiff(liste_37_prod_nettoyes, produit)
+  tibble(`Nom de produit` = autres_produits) %>%
+    left_join(
+      co_counts %>% filter(p1 == produit) %>%
+        select(`Nom de produit` = p2, `Nombre d'occurrences` = nb_occurrences),
+      by = "Nom de produit"
+    ) %>%
+    mutate(`Nombre d'occurrences` = coalesce(`Nombre d'occurrences`, 0L))
+})
+
+```
+
+```{r}
+# Trier chaque dataframe par ordre décroissant d'occurrences
+liste_dataframes_tries <- map(liste_dataframes, ~ {
+  arrange(.x, desc(`Nombre d'occurrences`))
+})
+
+# On regarde les tableaux de comptages 
+View(liste_dataframes_tries)
 
 ```
