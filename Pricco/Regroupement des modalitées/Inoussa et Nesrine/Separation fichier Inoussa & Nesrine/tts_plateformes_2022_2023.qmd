@@ -386,7 +386,7 @@ liste_datasets_cagette <- lapply(
 liste_produits_alimentaires <- c(
   "Abricot", "Asperge", "Aubergine","Banane","Carotte","Cerise","Chou fleur",
   "Clémentine", "Concombre","Courgette","Céleri branche","Endive","Fraise",
-  "Haricot vert","Kiwi","Laitue","Melon","Nectarine","Oignon","Pore","Poireau","Poivron",
+  "Haricot vert","Kiwi","Laitue","Melon","Nectarine","Oignon","Poire","Poireau","Poivron",
   "Pomme de terre","Pomme","Potiron","Prune","Pêche","Raisin","Tomate")
 
 # Nettoyer les noms : minuscules + suppression des accents + remplacement des espaces par _
@@ -448,7 +448,19 @@ View(liste_finale_datasets_cagette)
 data_ok2 <- data_ok2 |> select(-c("name_clean"))
 
 # On fusionne toutes les tables de cagette en une seule
-datsets_tts_plateformes <- rbind(liste_finale_datasets_cagette,data_ok2)
-View(datsets_tts_plateformes)
+datasets_tts_plateformes <- rbind(liste_finale_datasets_cagette,data_ok2)
+View(datasets_tts_plateformes)
+
+```
+
+# VII) Tableau de comptage du nombre de levels par produit
+
+```{r}
+
+table_comptage_levels_par_prod <- datasets_tts_plateformes %>%
+  group_by(nom_produit) %>%
+  summarise(`Nombre de levels` = n_distinct(productName)) %>%
+  arrange(desc(`Nombre de levels`)) %>%
+  rename(`Nom de produit` = nom_produit)
 
 ```
