@@ -122,7 +122,7 @@ View(liste_datasets_final)
 
 # IV) Fusion de tous les jeux de données sauf cagette
 
-```{r,message=FALSE}
+```{r,warning=FALSE}
 liste_datasets_final_sans_cagette <- liste_datasets_final[!indices_cagette]
 
 combinaison <- do.call(rbind, liste_datasets_final_sans_cagette)
@@ -359,9 +359,85 @@ data_pas_ok2 <- resultats_2$data_pas_ok
 # VI) Fusion de  tous les fichiers de cagette
 
 ```{r,warning=FALSE}
-liste_datasets_cagette <- liste_datasets_final[indices_cagette]
 
-liste_finale_datasets_cagette <- do.call(rbind, liste_datasets_cagette)
+# On extrait les tables cagette dans une liste
+liste_datasets_cagette <- liste_datasets_final[indices_cagette]
+```
+
+```{r}
+################## On fusionne les tables pommes ensemble
+
+# Étape 1 : renommer les éléments pour grouper
+noms_groupes <- sub("part_\\d+_", "", names(liste_datasets_cagette))
+
+# Étape 2 : fusionner les data.frames par groupe
+liste_datasets_cagette <- lapply(
+  split(liste_datasets_cagette, noms_groupes),
+  function(groupe) do.call(rbind, groupe)
+)
+
+
+```
+
+
+```{r}
+#################### On ajoute la nouvelle colonne nom_produit à toutes les tables cagette
+# Liste des produits
+liste_produits_alimentaires <- c(
+  "Abricot", "Asperge", "Aubergine","Banane","Carotte","Cerise","Chou fleur",
+  "Clémentine", "Concombre","Courgette","Céleri branche","Endive","Fraise",
+  "Haricot vert","Kiwi","Laitue","Melon","Nectarine","Oignon","Pore","Poireau","Poivron",
+  "Pomme de terre","Pomme","Potiron","Prune","Pêche","Raisin","Tomate")
+
+# Nettoyer les noms : minuscules + suppression des accents + remplacement des espaces par _
+nettoyer_nom <- function(x) {
+  x %>%
+    tolower() %>%
+    stri_trans_general("Latin-ASCII") %>%
+    gsub("[^a-z0-9]+", " ", .) %>%
+    gsub("_+$", "", .) %>%
+    gsub("^_+", "", .)
+}
+
+# Noms nettoyés des produits
+produits_nettoyes <- sapply(liste_produits_alimentaires, nettoyer_nom, USE.NAMES = FALSE)
+
+# Création d'une table de correspondance entre produits nettoyés et noms originaux
+produits_df <- data.frame(
+  produit_clean = produits_nettoyes,
+  produit_label = tolower(liste_produits_alimentaires),
+  stringsAsFactors = FALSE
+)
+
+# Ajouter la colonne nom_produit dans chaque data frame
+liste_datasets_cagette_nettoyee <- lapply(names(liste_datasets_cagette), function(nom_df) {
+  df <- liste_datasets_cagette[[nom_df]]
+  
+  # Extraire le nom du produit dans le nom de la table
+  produit_nom_match <- sub("cagette_(.*)_20[0-9]{2}", "\\1", nom_df)
+  
+  # Nettoyage de ce nom pour le faire correspondre
+  produit_nom_clean <- nettoyer_nom(produit_nom_match)
+  
+  # Recherche du nom d'origine
+  produit_label <- produits_df$produit_label[match(produit_nom_clean, produits_df$produit_clean)]
+  
+  # Ajoute directement le nom nettoyé (sans accents)
+  df$nom_produit <- produits_df$produit_clean[match(produit_nom_clean, produits_df$produit_clean)]
+
+  
+  return(df)
+})
+
+# Réattribution des noms à la liste
+names(liste_datasets_cagette_nettoyee) <- names(liste_datasets_cagette)
+
+```
+
+```{r}
+# On fusionne toutes les tables de cagette en une seule
+liste_finale_datasets_cagette <- do.call(rbind, liste_datasets_cagette_nettoyee)
 View(liste_finale_datasets_cagette)
 ```
+
 
