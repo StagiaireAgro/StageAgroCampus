@@ -29,115 +29,87 @@ library(fs)
 # - stringr : pour manipuler des chaînes de caractères
 # - forcats : pour manipuler des facteurs
 
-library(tidyverse)
-
 ```
 
 # II) Importation des fichiers
-dossier_racine <- "data/2022_2023"
+
+```{r}
+dossier_racine <- "data/2022-2023"
 fichiers <- dir_ls(path = dossier_racine, recurse = TRUE, glob = "*.csv")
 noms_fichiers <- path_ext_remove(path_file(fichiers))
 datasets <- lapply(fichiers, function(file) vroom(file))
 names(datasets) <- noms_fichiers
 View(datasets)
-
-datasets$ruche_oui_2022$productIsOrganic <- NA
-datasets$ruche_oui_2023$productIsOrganic <- NA
-
-
-```{r,warning=FALSE,message=FALSE}
-
-########################## cagette ########################## 
-
-########################## 2022 
-cagette_Abricot_2022 <- vroom("data/cagette/cagette_Abricot_2022.csv")
-cagette_Asperge_2022 <- vroom("data/cagette/cagette_Asperge_2022.csv")
-cagette_Aubergine_2022 <- vroom("data/cagette/cagette_Aubergine_2022.csv")
-cagette_Banane_2022 <- vroom("data/cagette/cagette_Banane_2022.csv")
-cagette_Carotte_2022 <- vroom("data/cagette/cagette_Carotte_2022.csv")
-cagette_Céleri_branche_2022 <- vroom("data/cagette/cagette_Céleri-branche_2022.csv")
-cagette_Cerise_2022 <- vroom("data/cagette/cagette_Cerise_2022.csv")
-cagette_Chou_fleur_2022 <- vroom("data/cagette/cagette_Chou%20fleur_2022.csv")
-cagette_Clémentine_2022 <- vroom("data/cagette/cagette_Clémentine_2022.csv")
-cagette_Concombre_2022 <- vroom("data/cagette/cagette_Concombre_2022.csv")
-cagette_Courgette_2022 <- vroom("data/cagette/cagette_Courgette_2022.csv")
-cagette_Endive_2022 <- vroom("data/cagette/cagette_Endive_2022.csv")
-cagette_Fraise_2022 <- vroom("data/cagette/cagette_Fraise_2022.csv")
-cagette_Haricot_vert_2022 <- vroom("data/cagette/cagette_Haricot%20vert_2022.csv")
-cagette_Kiwi_2022 <- vroom("data/cagette/cagette_Kiwi_2022.csv")
-cagette_Laitue_2022 <- vroom("data/cagette/cagette_Laitue_2022.csv")
-cagette_Melon_2022 <- vroom("data/cagette/cagette_Melon_2022.csv")
-cagette_Nectarine_2022 <- vroom("data/cagette/cagette_Nectarine_2022.csv")
-cagette_Oignon_2022 <- vroom("data/cagette/cagette_Oignon_2022.csv")
-cagette_Peche_2022 <- vroom("data/cagette/cagette_Pêche_2022.csv")
-cagette_Poire_2022 <- vroom("data/cagette/cagette_Poire_2022.csv")
-cagette_Poireau_2022 <- vroom("data/cagette/cagette_Poireau_2022.csv")
-cagette_Poivron_2022 <- vroom("data/cagette/cagette_Poivron_2022.csv")
-cagette_Pomme_part_1_2022 <- vroom("data/cagette/cagette_Pomme de terre_2022.csv")
-cagette_Pomme_part_2_2022 <- vroom("data/cagette/cagette_Pomme_2022.csv")
-cagette_Pomme_de_terre_2022 <- vroom("data/cagette/cagette_Pomme%20de%20terre_2022.csv")
-cagette_Potiron_2022 <- vroom("data/cagette/cagette_Potiron_2022.csv")
-cagette_Prune_2022 <- vroom("data/cagette/cagette_Prune_2022.csv")
-cagette_Raisin_2022 <- vroom("data/cagette/cagette_Raisin_2022.csv")
-cagette_Tomate_2022 <- vroom("data/cagette/cagette_Tomate_2022.csv")
-
-
-########################## 2023 
-cagette_Abricot_2023 <- vroom("data/cagette/cagette_Abricot_2023.csv")
-cagette_Asperge_2023 <- vroom("data/cagette/cagette_Asperge_2023.csv")
-cagette_Aubergine_2023 <- vroom("data/cagette/cagette_Aubergine_2023.csv")
-cagette_Banane_2023 <- vroom("data/cagette/cagette_Banane_2023.csv")
-cagette_Carotte_2023 <- vroom("data/cagette/cagette_Carotte_2023.csv")
-cagette_Céleri_branche_2023 <- vroom("data/cagette/cagette_Céleri-branche_2023.csv")
-cagette_Cerise_2023 <- vroom("data/cagette/cagette_Cerise_2023.csv")
-cagette_Chou_fleur_2023 <- vroom("data/cagette/cagette_Chou%20fleur_2023.csv")
-cagette_Clémentine_2023 <- vroom("data/cagette/cagette_Clémentine_2023.csv")
-cagette_Concombre_2023 <- vroom("data/cagette/cagette_Concombre_2023.csv")
-cagette_Courgette_2023 <- vroom("data/cagette/cagette_Courgette_2023.csv")
-cagette_Endive_2023 <- vroom("data/cagette/cagette_Endive_2023.csv")
-cagette_Fraise_2023 <- vroom("data/cagette/cagette_Fraise_2023.csv")
-cagette_Haricot_vert_2023 <- vroom("data/cagette/cagette_Haricot%20vert_2023.csv")
-cagette_Kiwi_2023 <- vroom("data/cagette/cagette_Kiwi_2023.csv")
-cagette_Laitue_2023 <- vroom("data/cagette/cagette_Laitue_2023.csv")
-cagette_Melon_2023 <- vroom("data/cagette/cagette_Melon_2023.csv")
-cagette_Nectarine_2023 <- vroom("data/cagette/cagette_Nectarine_2023.csv")
-cagette_Oignon_2023 <- vroom("data/cagette/cagette_Oignon_2023.csv")
-cagette_Peche_2023 <- vroom("data/cagette/cagette_Pêche_2023.csv")
-cagette_Poire_2023 <- vroom("data/cagette/cagette_Poire_2023.csv")
-cagette_Poireau_2023 <- vroom("data/cagette/cagette_Poireau_2023.csv")
-cagette_Poivron_2023 <- vroom("data/cagette/cagette_Poivron_2023.csv")
-cagette_Pomme_part_1_2023 <- vroom("data/cagette/cagette_Pomme de terre_2023.csv")
-cagette_Pomme_part_2_2023 <- vroom("data/cagette/cagette_Pomme_2023.csv")
-cagette_Pomme_de_terre_2023 <- vroom("data/cagette/cagette_Pomme%20de%20terre_2023.csv")
-cagette_Potiron_2023 <- vroom("data/cagette/cagette_Potiron_2023.csv")
-cagette_Prune_2023 <- vroom("data/cagette/cagette_Prune_2023.csv")
-cagette_Raisin_2023 <- vroom("data/cagette/cagette_Raisin_2023.csv")
-cagette_Tomate_2023 <- vroom("data/cagette/cagette_Tomate_2023.csv")
-
-########################## coop circuit ########################## 
-
-########################## 2022
-data_coop_circuit_2022 <- vroom("data/coop circuit/par annee/2022.csv")
-
-########################## 2023
-data_coop_circuit_2023 <- vroom("data/coop circuit/par annee/2023.csv")
-
-########################## socleo ########################## 
-
-########################## 2022
-data_socleo_2022 <- vroom("data/socleo/2022/toutsocleo_2022.csv")
-
-########################## 2023
-data_socleo_2023 <- vroom("data/socleo/2023/toutsocleo_2023.csv")
-
-########################## la ruche qui dit oui ########################## 
-
-########################## 2022
-data_ruche_oui_2022 <- vroom("data/la ruche qui dit oui/historique_2022.csv")
-
-########################## 2023
-data_ruche_oui_2023 <- vroom("data/la ruche qui dit oui/historique_2023.csv")
 ```
 
 
 ## III) Harmonisation des noms de colonnes de toutes les plateformes
+
+
+```{r}
+# On ajoute la colonne pour le bio 
+
+datasets$ruche_oui_2022$productIsOrganic <- NA
+datasets$ruche_oui_2023$productIsOrganic <- NA
+```
+
+
+```{r}
+lapply(datasets, function(x) names(x))
+```
+
+
+```{r}
+# Vecteurs de sélection par préfixe
+selections <- list(
+  cagette = c(2:3, 5:8, 12, 15:16),
+  socleo  = c(1, 4:8, 11:12, 13),
+  ruche   = c(3:4, 12, 14:15, 21:22, 24, 26),
+  coop    = c(1:4, 6:10)
+)
+
+# Application avec lapply()
+selected_datasets <- lapply(names(datasets), function(name) {
+  df <- datasets[[name]]
+  prefix <- sub("_.*", "", name)  # extrait le préfixe avant le premier "_"
+  if (prefix %in% names(selections)) {
+    return(df[, selections[[prefix]]])
+  } else {
+    return(NULL)  
+  }
+})
+
+# On nomme les datasets pour garder l'association
+names(selected_datasets) <- names(datasets)
+
+```
+
+
+```{r}
+
+# On applique la fonction 
+liste_datasets <- selection_colonnes(datasets)
+```
+
+
+```{r}
+
+# Vérification du bon fonctionnement de la fonction
+lapply(liste_datasets, function(x) names(x))
+```
+
+
+```{r}
+
+cagette_Abricot_2022  <- datasets$cagette_Abricot_2022 |> 
+  select(2:3,5:8,12,15:16)
+
+socleo_2022  <- datasets$socleo_2023 |> 
+  select(1,4:8,11:12,13)
+
+ruche_oui_2022  <- datasets$ruche_oui_2022 |> 
+  select(3:4,12,14:15,21:22,24,26)
+
+coop_circuit_2022  <- datasets$coop_circuit_2022 |> 
+  select(1:4,6:10)
+```
