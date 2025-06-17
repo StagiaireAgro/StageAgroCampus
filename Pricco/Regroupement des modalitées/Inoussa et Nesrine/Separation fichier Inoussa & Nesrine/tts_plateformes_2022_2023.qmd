@@ -33,6 +33,10 @@ library(tidyverse)
 
 library(purrr)
 
+# Export des fichiers au format Excel 
+
+library(writexl)
+
 ```
 
 # II) Documentation des variables d'intérêts pour le calcul du prix au kilogramme
@@ -541,3 +545,121 @@ liste_dataframes_tries <- map(liste_dataframes, ~ {
 View(liste_dataframes_tries)
 
 ```
+
+
+
+```{r}
+# Ajouter une ligne "Totale" avec la somme des occurrences à chaque dataframe
+liste_dataframes_avec_total <- map(liste_dataframes_tries, ~ {
+  total <- sum(.x$`Nombre d'occurrences`, na.rm = TRUE)
+  bind_rows(.x, tibble(`Nom de produit` = "Totale", `Nombre d'occurrences` = total))
+})
+
+```
+
+# XI) On sépare en 37 tables 
+
+## a) Développement de la fonction pour split 
+
+```{r}
+
+split_data_ok_par_produit <- function(data_ok) {
+  # Vérification de la présence de la colonne nom_produit
+  if (!"nom_produit" %in% colnames(data_ok)) {
+    stop("La colonne 'nom_produit' est absente de data_ok")
+  }
+
+  # Découpage automatique en liste de data frames, un par produit
+  liste_data_par_produit <- split(data_ok, data_ok$nom_produit)
+
+  return(liste_data_par_produit)
+}
+
+```
+
+## b) Application de la fonction 
+
+```{r}
+# Test de la fonction : data_ok de coop circuit 2021
+liste_tables_37_produit <- split_data_ok_par_produit(datasets_tts_plateformes)
+
+# Accéder au sous-dataframe pour le produit "pomme"
+data_tomate <- liste_tables_37_produit[["tomate"]]
+
+# Voir tous les noms de produits
+names(data_tomate)
+
+```
+
+# XII) Génération des prompts 
+
+## a) Développement de la fonction pour générer les prompts
+
+```{r}
+detecter_levels_prod_transfor <- function(nom_prod, levels, nb_chunck, taille_chunck) {
+  
+  total_levels <- length(levels)
+
+  # Création des chunks de taille `taille_chunck` avec gestion du dernier chunk partiel
+  chunks <- split(levels, ceiling(seq_along(levels) / taille_chunck))
+
+  # Nombre total de chunks générés
+  total_chunks <- length(chunks)
+
+  # Limiter au nb_chunck demandé, mais sans dÃ©passer ceux disponibles
+  chunks <- chunks[1:min(nb_chunck, total_chunks)]
+
+  # Prompt de base (dynamique en fonction du produit)
+  base_prompt <- paste0(
+    "Tu es un expert en alimentation et en classification des produits alimentaires.\n\n",
+    "Tu reÃ§ois une liste de produits Ã  base de ", nom_prod, ".\n",
+    "Ta tÃ¢che est dâ€™**identifier uniquement les produits transformÃ©s** dans cette liste.\n\n",
+    "Un **produit est transformÃ©** sâ€™il :\n",
+    "- contient **dâ€™autres ingrÃ©dients que le/la ", nom_prod, "**\n",
+    "- a subi une **transformation culinaire** (cuit, rÃ¢pÃ©, assaisonnÃ©, etc.)\n",
+    "- est conditionnÃ© ou prÃ©sentÃ© de maniÃ¨re Ã  indiquer une prÃ©paration culinaire\n",
+    "- est destinÃ© Ã  un **usage spÃ©cifique** impliquant une transformation\n\n",
+    "Ignore tous les **produits bruts**, câ€™est-Ã -dire :\n",
+    "- les produits qui contiennent **seulement ", nom_prod, "**\n",
+    "- les produits dont le nom ne mentionne **aucun autre ingrÃ©dient ni transformation**\n\n",
+    "Retourne uniquement les **noms exacts** des produits transformÃ©s de la liste dâ€™origine, sans commentaire ni explication.\n\n",
+    "**Le rÃ©sultat doit Ãªtre strictement au format suivant (vecteur R) :**\n",
+    "`c(\"produit transformÃ©\", \"produit transformÃ©\", ...)`\n",
+    "Ne retourne **que** ce vecteur.\n\n",
+    "Voici la liste de produits Ã  analyser :\n"
+  )
+
+  # Génération des prompts complets
+  resultats <- lapply(chunks, function(chunk) {
+    prompt_complet <- paste0(base_prompt, paste(chunk, collapse = "\n"))
+  })
+
+  return(resultats)
+}
+
+```
+
+## b) Application de la fonction
+
+
+```{r}
+
+# Test de la fonction
+levels_tomates <- levels(as.factor(data_tomate$productName))
+prompts_levels_tomates <- detecter_levels_prod_transfor("tomate", levels_tomates, nb_chunck = 89,
+                                         taille_chunck = 50)
+
+# On concatène dans un vecteur  le résultat du dernier chunk
+cat(prompts_levels_tomates[[1]])  
+cat(prompts_levels_tomates[[2]])  
+cat(prompts_levels_tomates[[3]])  
+cat(prompts_levels_tomates[[89]])  
+```
+
+
+## XII) Export du jeu de données 
+
+```{r}
+write_xlsx(data_tomate,"demonstration/data_tomates.xlsx")
+```
+
