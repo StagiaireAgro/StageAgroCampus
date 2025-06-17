@@ -451,3 +451,11 @@ data_carotte_filtré <- supprimer_levels(data_carotte, nu224m_col_data = 12, lis
 data_carotte_filtré$name_clean <- as.factor(data_carotte_filtré$name_clean)        
 ```
 
+# Trouver les produits transformés avec gemma
+
+```{r}
+resultats <- lapply(prompts_levels_tomates[1:2], function(prompt){
+  generate("gemma3",prompt, stream = FALSE, output = "text")
+})
+cat(resultats$`1`)
+```
