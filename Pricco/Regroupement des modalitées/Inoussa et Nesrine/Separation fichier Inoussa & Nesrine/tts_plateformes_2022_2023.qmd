@@ -710,7 +710,7 @@ data_prod_pas_tries_tts_platatefor <- rbind(cagette_prod_pas_tries, data_prod_pa
 ```
 
 
-# XI) On sépare en 37 tables
+# XI) Séparation des données en 37 tables selon le type de produit
 
 ## a) Développement de la fonction pour split en 37 tables
 
