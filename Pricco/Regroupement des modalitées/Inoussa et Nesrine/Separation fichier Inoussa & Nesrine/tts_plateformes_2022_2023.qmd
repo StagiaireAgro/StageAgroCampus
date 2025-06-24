@@ -171,7 +171,7 @@ datasets[!indices_cagette] <- lapply(datasets[!indices_cagette], function(df) {
 })
 
 # Création d'une nouvelle liste contenant les datasets enrichis d'une colonne "plateforme"
-# Cette colonne est extraite du nom de chaque dataset (ex: "ruche_oui_2022" → "ruche")
+# Cette colonne est extraite du nom de chaque dataset (ex: "ruche_oui_2022" --> "ruche")
 liste_datasets_final <- lapply(names(datasets), function(nom) {
   df <- datasets[[nom]]
   df$plateforme <- str_split(nom, "_")[[1]][1]  # Extraction de la plateforme à partir du nom
