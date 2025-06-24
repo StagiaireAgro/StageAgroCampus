@@ -90,7 +90,7 @@ View(datasets)
 
 # IV) Harmonisation des noms de colonnes de toutes les plateformes
 
-Cette étape permet de préparer les deux jeux de données (ruche_oui_2022 et ruche_oui_2023) en ajoutant une nouvelle colonne appelée productIsOrganic, qui pourra ensuite être renseignée avec des valeurs (ex : TRUE, FALSE, ou d'autres infos sur le caractère bio du produit).
+Cette étape permet de préparer les deux jeux de données (ruche_oui_2022 et ruche_oui_2023) en ajoutant une nouvelle colonne appelée productIsOrganic, qui sera ensuite renseignée avec des valeurs manquantes.
 
 ```{r}
 # On ajoute une colonne vide (remplie de NA) nommée 'productIsOrganic'
