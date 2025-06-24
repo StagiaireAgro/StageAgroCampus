@@ -197,6 +197,79 @@ creer_regex <- function(mots, suffixe = "(e?s)?", collapse = ".*") {
     paste0(regex_tokens, collapse = collapse)
   })
 }
+
+# Creer un fichier excel standar permettant de rajoutter d'autres d'éclinaisons
+creer_fichier_excel <- function(liste_de_produits, fichier = "autres_declinaisons.xlsx") {
+  classeur <- createWorkbook() # Creer un classeur
+  addWorksheet(classeur, "Ajoutez autres déclinaisons") # Ajouter une feuille nommée
+  # Dataframe qui sera écrit dans la feuille excel
+  data <- data.frame(
+    "Nom de produit" = liste_de_produits,
+    "Autres déclinaisons" = "",
+    check.names = FALSE
+  )
+  # Ecriture du dataframe dans la feuille excel
+  writeData(
+    classeur, 
+    sheet = "Ajoutez autres déclinaisons", 
+    x = data, 
+    startRow = 1,  # Début d'écriture à la première ligne
+    colNames = TRUE # Considérer la première ligne comme le nom des colonnes
+  )
+  
+  # Nombre de ligne et colonne du dataframe
+  n_rows <- nrow(data) + 1 # Considérer la ligne des colonnes de données de la feuille excel
+  n_cols <- ncol(data)
+  
+  # Ajouter de l'espace dans le nom des colonnes(Rendre plus lisible) 
+  largeurs <- nchar(colnames(data)) + 5  # +5 pour un peu d’espace
+  setColWidths(classeur, sheet = "Ajoutez autres déclinaisons", cols = 1:n_cols, widths = largeurs)
+  
+  # Mettre en gras et augmenter la taille des noms de colonnes de la feuille 
+  header_style <- createStyle(textDecoration = "bold", fontSize = 12)
+  addStyle(
+    wb = classeur,
+    sheet = "Ajoutez autres déclinaisons",
+    style = header_style,
+    rows = 1,
+    cols = 1:n_cols,
+    gridExpand = TRUE,
+    stack = TRUE
+  )
+  # Par défaut les cellules excels sont vérouillées (Déverouiller pour tous les autres lignes)
+  unlocked_style <- createStyle(locked = FALSE)
+  addStyle(
+    wb = classeur,
+    sheet = "Ajoutez autres déclinaisons",
+    style = unlocked_style,
+    rows = 2:n_rows,
+    cols = 1:n_cols,
+    gridExpand = TRUE,
+    stack = TRUE
+  )
+  # Appliquer donc la protection que sur les noms de colonnes de la feuille 
+  protectWorksheet(
+    wb = classeur,
+    sheet = "Ajoutez autres déclinaisons",
+    protect = TRUE,
+    # Autoriser la sélection sur toutes les cellules (locked ou unlocked)
+    lockSelectingLockedCells = FALSE,
+    lockSelectingUnlockedCells = FALSE
+  )
+  
+  saveWorkbook(classeur, fichier, overwrite = TRUE)
+}
+
+# Creaction du fichier excel permettant de rajouter dautres déclinaisons
+creer_fichier_excel(liste_produits)
+
+
+
+
+
+
+
+
 # Extraires des noms de produits toutes les declinaisons des noms de la liste de produit
 trouver_declinaisons_nom_produit <- function(dataset, col_produit, ls_produit, regex) {
   # Extraction des noms uniques de produits
