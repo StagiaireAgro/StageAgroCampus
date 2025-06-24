@@ -181,49 +181,59 @@ liste_produits <- liste_produits[ordre]
 ```{r}
 # Nettoyer une chaine de caractères (-> ici liste de noms de produits)
 nettoyer <- function(x) {
-  x <- stri_trans_general(str_to_lower(x), "Latin-ASCII") 
+  # Convertit les caractères en minuscules et enlève les accents (ex: "É" devient "e")
+  x <- stri_trans_general(str_to_lower(x), "Latin-ASCII")
+  # Supprime tous les caractères non alphabétiques (hors a-z et espace)
   x <- str_replace_all(x, "[^a-z ]", "")
+  # Supprime les espaces au début et à la fin de chaque chaîne
   x <- trimws(x)
+  # Retourne le vecteur nettoyé
   return(x)
 }
 
 # Générer des expressions régulières à partir d'un mots ou liste de mots
 creer_regex <- function(mots, suffixe = "(e?s)?", collapse = ".*") {
+  # Applique la construction de regex à chaque mot ou expression
   sapply(mots, function(terme) {
-    tokens <- str_split(terme, " ")[[1]] 
+    # Découpe l'expression en mots individuels
+    tokens <- str_split(terme, " ")[[1]]
+    # Ajoute le suffixe (par défaut : formes féminines/plurielles) à chaque mot
     regex_tokens <- paste0(tokens, suffixe)
+    # Combine les morceaux avec '.*' entre eux pour matcher des variations textuelles
     paste0(regex_tokens, collapse = collapse)
   })
 }
 
-# Creer un fichier excel standar permettant de rajoutter d'autres d'éclinaisons
+# Crée un fichier Excel standard pour permettre l'ajout d'autres déclinaisons
 creer_fichier_excel <- function(liste_de_produits, fichier = "autres_declinaisons.xlsx") {
-  classeur <- createWorkbook() # Creer un classeur
-  addWorksheet(classeur, "Ajoutez autres déclinaisons") # Ajouter une feuille nommée
-  # Dataframe qui sera écrit dans la feuille excel
+  classeur <- createWorkbook() # Crée un nouveau classeur Excel
+  addWorksheet(classeur, "Ajoutez autres déclinaisons") # Ajoute une feuille nommée
+  
+  # Crée un tableau avec une colonne "Nom de produit" et une colonne vide "Autres déclinaisons"
   data <- data.frame(
     "Nom de produit" = liste_de_produits,
     "Autres déclinaisons" = "",
     check.names = FALSE
   )
-  # Ecriture du dataframe dans la feuille excel
+  
+  # Écrit le tableau dans la feuille Excel à partir de la première ligne avec les noms de colonnes
   writeData(
     classeur, 
     sheet = "Ajoutez autres déclinaisons", 
     x = data, 
-    startRow = 1,  # Début d'écriture à la première ligne
-    colNames = TRUE # Considérer la première ligne comme le nom des colonnes
+    startRow = 1,
+    colNames = TRUE
   )
   
-  # Nombre de ligne et colonne du dataframe
-  n_rows <- nrow(data) + 1 # Considérer la ligne des colonnes de données de la feuille excel
+  # Calcule le nombre total de lignes (données + en-tête) et de colonnes
+  n_rows <- nrow(data) + 1
   n_cols <- ncol(data)
   
-  # Ajouter de l'espace dans le nom des colonnes(Rendre plus lisible) 
-  largeurs <- nchar(colnames(data)) + 5  # +5 pour un peu d’espace
+  # Calcule des largeurs de colonnes pour lisibilité (+5 caractères de marge)
+  largeurs <- nchar(colnames(data)) + 5
   setColWidths(classeur, sheet = "Ajoutez autres déclinaisons", cols = 1:n_cols, widths = largeurs)
   
-  # Mettre en gras et augmenter la taille des noms de colonnes de la feuille 
+  # Crée un style pour l'en-tête (texte en gras et taille de police 12)
   header_style <- createStyle(textDecoration = "bold", fontSize = 12)
   addStyle(
     wb = classeur,
@@ -234,7 +244,8 @@ creer_fichier_excel <- function(liste_de_produits, fichier = "autres_declinaison
     gridExpand = TRUE,
     stack = TRUE
   )
-  # Par défaut les cellules excels sont vérouillées (Déverouiller pour tous les autres lignes)
+  
+  # Crée un style déverrouillé pour permettre la modification des cellules (hors en-tête)
   unlocked_style <- createStyle(locked = FALSE)
   addStyle(
     wb = classeur,
@@ -245,67 +256,51 @@ creer_fichier_excel <- function(liste_de_produits, fichier = "autres_declinaison
     gridExpand = TRUE,
     stack = TRUE
   )
-  # Appliquer donc la protection que sur les noms de colonnes de la feuille 
+  
+  # Protège la feuille tout en autorisant la sélection des cellules verrouillées et déverrouillées
   protectWorksheet(
     wb = classeur,
     sheet = "Ajoutez autres déclinaisons",
     protect = TRUE,
-    # Autoriser la sélection sur toutes les cellules (locked ou unlocked)
     lockSelectingLockedCells = FALSE,
     lockSelectingUnlockedCells = FALSE
   )
   
+  # Enregistre le fichier Excel sous le nom spécifié (en écrasant s’il existe)
   saveWorkbook(classeur, fichier, overwrite = TRUE)
 }
 
-# Extraires des noms de produits toutes les declinaisons des noms de la liste de produit
+
+# Fonction pour extraire toutes les déclinaisons des noms de produits à partir d'un dataset et d’un fichier externe facultatif
 trouver_declinaisons_nom_produit <- 
   function(dataset, col_produit, ls_produit, regex, fichier = NULL) {
-  # Extraction des noms uniques de produits
+  # Nettoie les noms de produits dans la colonne spécifiée du dataset
   noms_des_produits <- nettoyer(dataset[[col_produit]])
+  # Supprime les doublons parmi les noms nettoyés
   noms_des_produits_uniques <- unique(noms_des_produits)
-  # Extraction des déclinaisons par produit
+  # Pour chaque expression régulière, extrait les correspondances dans les noms de produits uniques
   liste_declinaisons <- sapply(seq_along(regex), function(i) {
-    extractions <- str_extract(noms_des_produits_uniques, regex[i])
-    extractions <- extractions[!is.na(extractions) & extractions != ""]
-    unique(extractions)
+    extractions <- str_extract(noms_des_produits_uniques, regex[i]) # Applique la regex
+    extractions <- extractions[!is.na(extractions) & extractions != ""] # Filtre les vides ou NA
+    unique(extractions) # Supprime les doublons dans les extractions
   }, simplify = FALSE)
-
+  
+  # Donne à chaque élément de la liste le nom du produit correspondant
   names(liste_declinaisons) <- ls_produit
   
-  # Ajouter d'autres déclinaisons extérieurs 
+  # Si un fichier externe est fourni, ajouter les déclinaisons supplémentaires
   if(!is.null(fichier)==TRUE){
-    fichier <- na.omit(fichier)
-    fichier[["Nom de produit"]] <- nettoyer(fichier[["Nom de produit"]])
+    fichier <- na.omit(fichier) # Supprime les lignes contenant des NA
+    fichier[["Nom de produit"]] <- nettoyer(fichier[["Nom de produit"]]) # Nettoie les noms de produits du fichier
     sapply(fichier[["Nom de produit"]], function(prod){
-      res <- pull(fichier[fichier[["Nom de produit"]]==prod,"Autres déclinaisons"])
-      declinaisons_suppl <- unlist(str_split(res, ";"))
-      liste_declinaisons[[prod]] <<- unique(c(liste_declinaisons[[prod]], declinaisons_suppl))
+      res <- pull(fichier[fichier[["Nom de produit"]]==prod,"Autres déclinaisons"]) # Récupère les déclinaisons associées au produit
+      declinaisons_suppl <- unlist(str_split(res, ";")) # Sépare les déclinaisons par ";"
+      liste_declinaisons[[prod]] <<- unique(c(liste_declinaisons[[prod]], declinaisons_suppl)) # Ajoute les déclinaisons à la liste existante en supprimant les doublons
     })
   }
+  # Retourne la liste complète des déclinaisons
   return(liste_declinaisons)
 }
-```
-
-```{r}
-# Creer les expressions reguliere de la liste des noms de produits
-regex <- creer_regex(liste_produits) 
-
-# Creaction du fichier excel en question permettant de rajouter dautres déclinaisons
-# creer_fichier_excel(liste_produits)
-
-# Declinaison obtenues de manière automatique
-exemple <- read_excel("autres_declinaisons.xlsx")
-
-# Declinaison obtenues de manière automatique
-final_declinaisons <- trouver_declinaisons_nom_produit(
-    dataset = combinaison,
-    col_produit = "productName",
-    ls_produit = liste_produits,
-    regex = regex,
-    fichier = exemple
-  )
-
 ```
 
 ## c) Développement de la fonction split
