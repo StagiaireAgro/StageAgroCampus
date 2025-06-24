@@ -8,35 +8,38 @@ editor: visual
 
 ```{r,message=FALSE}
 
-# Pour lire les fichiers CSV
+# Chargement du package vroom pour lire efficacement des fichiers CSV ou TSV volumineux
 library(vroom)
 
-# Pour manipuler et détecter les chaînes de caractères
+# Chargement du package stringr pour la manipulation avancée de chaînes de caractères
 library(stringr)
 
-# Pour gérer les accents et normaliser les chaînes
+# Chargement du package stringi pour normaliser les chaînes (ex : suppression d'accents)
 library(stringi)
+
+# Chargement du package fs pour gérer les fichiers et chemins de façon robuste (ex : file_exists, path())
 library(fs)
 
-# Le tidyverse est un méta-package qui regroupe plusieurs packages R
-# utiles pour la manipulation, la transformation, et la visualisation de données :
-# - ggplot2 : pour la visualisation
-# - dplyr : pour la manipulation de données (filtrer, trier, grouper...)
-# - tidyr : pour le reshaping (pivot_longer, pivot_wider, etc.)
-# - readr : pour lire des fichiers plats (CSV, TSV...)
-# - purrr : pour la programmation fonctionnelle (map, etc.)
-# - tibble : pour manipuler des data frames modernes
-# - stringr : pour manipuler des chaînes de caractères
-# - forcats : pour manipuler des facteurs
-
+# Chargement du méta-package tidyverse, qui regroupe plusieurs packages utiles :
+# - ggplot2 : visualisation de données
+# - dplyr : manipulation de tableaux de données (data frames)
+# - tidyr : transformation de la structure des données (long ↔ wide)
+# - readr : lecture rapide de fichiers plats (CSV, etc.)
+# - purrr : programmation fonctionnelle (boucles avec map, etc.)
+# - tibble : version moderne des data frames
+# - stringr : gestion de chaînes de caractères (déjà chargé ci-dessus)
+# - forcats : gestion des variables catégorielles (facteurs)
 library(tidyverse)
-library(openxlsx) # Creer un fichier excel avec plus d'option possible
-library(readxl)
+
+# Chargement explicite du package purrr (déjà inclus dans tidyverse, mais parfois utile de l'importer directement)
 library(purrr)
-# Export des fichiers au format Excel 
+
+# Chargement du package writexl pour exporter des data frames au format Excel (.xlsx)
 library(writexl)
 
+# Chargement explicite du package tibble (également inclus dans tidyverse)
 library(tibble)
+
 
 ```
 
@@ -57,96 +60,145 @@ library(tibble)
 
 # III) Importation des fichiers
 
+Ce code lit automatiquement tous les fichiers .csv présents dans un dossier (et ses sous-dossiers), les charge dans une liste, puis nomme chaque élément de cette liste selon le nom de fichier correspondant. C'est une méthode efficace pour manipuler plusieurs jeux de données en une seule opération.
+
 ```{r,message=FALSE}
+# Définition du dossier racine contenant les fichiers CSV à importer
 dossier_racine <- "data/2022-2023"
+
+# Recherche récursive de tous les fichiers CSV dans le dossier spécifié
+# `recurse = TRUE` permet de chercher dans les sous-dossiers
+# `glob = "*.csv"` filtre uniquement les fichiers ayant l'extension .csv
 fichiers <- dir_ls(path = dossier_racine, recurse = TRUE, glob = "*.csv")
+
+# Extraction du nom de chaque fichier (sans chemin ni extension)
+# - path_file() extrait le nom du fichier à partir du chemin complet
+# - path_ext_remove() retire l'extension (.csv)
 noms_fichiers <- path_ext_remove(path_file(fichiers))
+
+# Lecture de chaque fichier CSV avec vroom()
+# lapply applique la fonction vroom() à chaque élément de la liste 'fichiers'
 datasets <- lapply(fichiers, function(file) vroom(file))
+
+# Attribution des noms de fichiers (sans extension) comme noms des éléments de la liste 'datasets'
 names(datasets) <- noms_fichiers
+
+# Affichage de la liste de datasets dans le visualiseur RStudio
 View(datasets)
+
 ```
 
 # IV) Harmonisation des noms de colonnes de toutes les plateformes
 
-```{r}
-# On ajoute la colonne pour le bio 
+Cette étape permet de préparer les deux jeux de données (ruche_oui_2022 et ruche_oui_2023) en ajoutant une nouvelle colonne appelée productIsOrganic, qui pourra ensuite être renseignée avec des valeurs (ex : TRUE, FALSE, ou d'autres infos sur le caractère bio du produit).
 
+```{r}
+# On ajoute une colonne vide (remplie de NA) nommée 'productIsOrganic'
+# dans le dataset 'ruche_oui_2022' pour indiquer si un produit est bio
 datasets$ruche_oui_2022$productIsOrganic <- NA
+
+# Même opération pour le dataset 'ruche_oui_2023'
 datasets$ruche_oui_2023$productIsOrganic <- NA
+
 ```
 
+Ce script permet d’harmoniser les structures de données issues de différentes plateformes (Cagette, Ruche, Socleo, CoopCircuit) pour faciliter leur fusion et leur analyse en aval. On standardise les colonnes et ajoute une information sur la provenance (plateforme).
+
 ```{r}
-# Colonne de cagette à garder 
+# Définition des colonnes à conserver pour les datasets provenant de Cagette
 colonne_cagette_a_garder <- c(
   "orderProductPrice", "orderQuantity", "mois", "annee", "productName", 
   "productIsOrganic", "productConditioningQuantity", "productConditioningUnit", 
-  "distributionZipCode")
+  "distributionZipCode"
+)
+
+# Identification des datasets dont le nom commence par "cagette"
 indices_cagette <- startsWith(names(datasets), "cagette")
 
+# Sélection des colonnes souhaitées pour chaque dataset de Cagette
 datasets[indices_cagette] <- lapply(datasets[indices_cagette], function(x) {
   select(x, any_of(colonne_cagette_a_garder))
 })
 
-
-# Colonne de ruche qui dit oui à garder 
+# Définition des colonnes à conserver pour les datasets de La Ruche Qui Dit Oui
 colonne_ruche_a_garder <- c(
-  "price_ttc_item","nb_item","mois","annee", "product_name","productIsOrganic",
-  "weight_raw_item", "quantityunit", "hive_zipcode")
+  "price_ttc_item", "nb_item", "mois", "annee", "product_name", "productIsOrganic",
+  "weight_raw_item", "quantityunit", "hive_zipcode"
+)
 
+# Identification des datasets dont le nom commence par "ruche"
 indices_ruche <- startsWith(names(datasets), "ruche")
 
+# Sélection des colonnes souhaitées pour chaque dataset de La Ruche
 datasets[indices_ruche] <- lapply(datasets[indices_ruche], function(x) {
   select(x, any_of(colonne_ruche_a_garder))
 })
 
-# Colonne de socleo qui dit oui à garder 
+# Définition des colonnes à conserver pour les datasets de Socleo
 colonne_socleo_a_garder <- c(
-  "value", "quantite_com","mois","annee","name","is_organic","quantite_cond",
-  "unite_conditionnement", "code_postal")
+  "value", "quantite_com", "mois", "annee", "name", "is_organic",
+  "quantite_cond", "unite_conditionnement", "code_postal"
+)
 
+# Identification des datasets dont le nom commence par "socleo"
 indices_socleo <- startsWith(names(datasets), "socleo")
 
+# Sélection des colonnes souhaitées pour chaque dataset de Socleo
 datasets[indices_socleo] <- lapply(datasets[indices_socleo], function(x) {
   select(x, any_of(colonne_socleo_a_garder))
 })
 
-# Colonne de coop circuit qui dit oui à garder 
+# Définition des colonnes à conserver pour les datasets de CoopCircuit
 colonne_coop_circuit_a_garder <- c(
-  "price", "quantite_unite","mois", "annee", "name", "is_organic", "quantite_cond",
-  "conditionnement","code_postal") 
+  "price", "quantite_unite", "mois", "annee", "name", "is_organic", 
+  "quantite_cond", "conditionnement", "code_postal"
+)
 
+# Identification des datasets dont le nom commence par "coop_circuit"
 indices_coop_circuit <- startsWith(names(datasets), "coop_circuit")
 
+# Sélection des colonnes souhaitées pour chaque dataset de CoopCircuit
 datasets[indices_coop_circuit] <- lapply(datasets[indices_coop_circuit], function(x) {
   select(x, any_of(colonne_coop_circuit_a_garder))
 })
 
-# Renommer toutes les noms de colonnes des bases aux noms de celui de cagette
+# Harmonisation des noms de colonnes pour toutes les plateformes autres que Cagette
+# On renomme leurs colonnes pour correspondre à celles de Cagette
 datasets[!indices_cagette] <- lapply(datasets[!indices_cagette], function(df) {
-  df <- select(df, everything())
-  colnames(df) <- colonne_cagette_a_garder
+  df <- select(df, everything())  # Réorganise les colonnes si nécessaire
+  colnames(df) <- colonne_cagette_a_garder  # Applique les noms standardisés
   return(df)
 })
 
+# Création d'une nouvelle liste contenant les datasets enrichis d'une colonne "plateforme"
+# Cette colonne est extraite du nom de chaque dataset (ex: "ruche_oui_2022" → "ruche")
 liste_datasets_final <- lapply(names(datasets), function(nom) {
   df <- datasets[[nom]]
-  df$plateforme <- str_split(nom, "_")[[1]][1]
+  df$plateforme <- str_split(nom, "_")[[1]][1]  # Extraction de la plateforme à partir du nom
   df
 })
 
+# Attribution des noms d’origine aux éléments de la liste finale
 names(liste_datasets_final) <- names(datasets)
 
 ```
 
 # V) Fusion de tous les jeux de données sauf cagette
 
+Ce code sert à regrouper dans un seul tableau tous les jeux de données hors Cagette, probablement pour des comparaisons ou traitements spécifiques à ces plateformes.
+
 ```{r,warning=FALSE}
+# Création d'une nouvelle liste ne contenant que les datasets 
+# qui ne proviennent PAS de Cagette (on les exclut grâce à !indices_cagette)
 liste_datasets_final_sans_cagette <- liste_datasets_final[!indices_cagette]
 
+# Fusion de tous les datasets restants (Ruche, Socleo, CoopCircuit) en un seul data frame
+# do.call avec rbind permet d'empiler toutes les lignes des datasets ensemble
 combinaison <- do.call(rbind, liste_datasets_final_sans_cagette)
+
 ```
 
-# VI) Séparation des fichiers par produit
+# VI) Associer le bon nom de produit
 
 ## a) Définition de la liste de produits
 
