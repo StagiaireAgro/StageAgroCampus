@@ -626,7 +626,7 @@ liste_finale_datasets_cagette <- do.call(rbind, liste_datasets_cagette_nettoyee)
 ```
 
 
-# VIII) On vérifie la pertinence des données déjà classées par les fournisseurs 
+# VIII) On vérifie la pertinence des données déjà classées pour cagette
 
 Ce code utilise la fonction trouver_declinaisons_nom_produit() pour analyser les noms de produits et détecter les différentes variantes textuelles utilisées dans les données issues de Cagette. Cela permet ensuite de faciliter la normalisation ou le regroupement des produits.
 
