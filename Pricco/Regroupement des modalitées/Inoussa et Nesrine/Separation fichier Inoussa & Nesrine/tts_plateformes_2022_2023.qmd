@@ -802,6 +802,10 @@ split_data_ok_par_produit <- function(data_ok) {
 
 ## b) Application de la fonction
 
+On teste la fonction de découpage sur l’ensemble des données triées.
+Ensuite, on récupère les données liées uniquement au produit "tomate".
+Enfin, on affiche la liste des colonnes du sous-ensemble "tomate".
+
 ```{r}
 # Test de la fonction split_data_ok_par_produit sur le data frame global trié
 liste_tables_37_produit_bruts <- split_data_ok_par_produit(datasets_tts_plateformes_prod_tries)
