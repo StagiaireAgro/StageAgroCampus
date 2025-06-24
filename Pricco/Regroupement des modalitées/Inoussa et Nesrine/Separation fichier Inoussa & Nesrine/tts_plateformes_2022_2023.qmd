@@ -30,9 +30,9 @@ library(fs)
 # - forcats : pour manipuler des facteurs
 
 library(tidyverse)
-
+library(openxlsx) # Creer un fichier excel avec plus d'option possible
+library(readxl)
 library(purrr)
-
 # Export des fichiers au format Excel 
 library(writexl)
 
