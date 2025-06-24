@@ -497,7 +497,7 @@ associer_noms_produits <- function(data, liste_produits, liste_declinai_noms_pro
 
 ```
 
-## d) Application de la fonction split
+## d) Application de la fonction correspondance automatique 
 
 Ce code permet d’exécuter la fonction d’association des produits, puis de séparer les résultats en deux groupes : ceux qui ont pu être associés de façon claire (data_ok) et ceux qui nécessitent un traitement ou une vérification supplémentaire (data_pas_ok).
 
@@ -818,3 +818,4 @@ liste_table_indi_purete_prod_trie <- compter_occurrences_from_levels(levels_prod
 
 
 ```
+
