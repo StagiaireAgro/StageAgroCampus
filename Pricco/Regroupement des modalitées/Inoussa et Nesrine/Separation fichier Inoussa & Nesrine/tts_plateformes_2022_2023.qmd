@@ -393,8 +393,9 @@ liste_datasets_cagette <- lapply(
   split(liste_datasets_cagette, noms_groupes),
   function(groupe) do.call(rbind, groupe)
 )
+liste_datasets_cagette[["cagette_Pomme_2022"]] <- unique(liste_datasets_cagette[["cagette_Pomme_2022"]])
 
-
+liste_datasets_cagette[["cagette_Pomme_2023"]] <- unique(liste_datasets_cagette[["cagette_Pomme_2023"]])
 ```
 
 ```{r}
