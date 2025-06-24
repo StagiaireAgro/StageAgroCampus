@@ -37,6 +37,9 @@ library(purrr)
 
 library(writexl)
 
+# Creer un fichier excel avec plus d'option possible
+library(openxlsx) 
+
 ```
 
 # II) Documentation des variables d'intérêts pour le calcul du prix au kilogramme
