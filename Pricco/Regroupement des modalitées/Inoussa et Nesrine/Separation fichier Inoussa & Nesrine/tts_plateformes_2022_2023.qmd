@@ -709,7 +709,51 @@ data_prod_pas_tries_tts_platatefor <- rbind(cagette_prod_pas_tries, data_prod_pa
 
 ```
 
-# XI) Indicateur de pureté pour les produits triés
+
+# XI) On sépare en 37 tables
+
+## a) Développement de la fonction pour split en 37 tables
+
+Cette fonction prend un tableau propre data_ok avec une colonne nom_produit et renvoie une liste de sous-tableaux, un pour chaque produit distinct.
+Si la colonne nom_produit n’existe pas, la fonction renvoie une erreur.
+
+```{r}
+split_data_ok_par_produit <- function(data_ok) {
+  # Vérifie que la colonne 'nom_produit' existe bien dans le data frame
+  if (!"nom_produit" %in% colnames(data_ok)) {
+    stop("La colonne 'nom_produit' est absente de data_ok")  # Arrête et affiche une erreur si la colonne manque
+  }
+
+  # Sépare le data frame en une liste de data frames, chaque sous-table correspondant à un produit unique
+  liste_data_par_produit <- split(data_ok, data_ok$nom_produit)
+
+  # Retourne cette liste de data frames
+  return(liste_data_par_produit)
+}
+
+
+```
+
+## b) Application de la fonction
+
+On teste la fonction de découpage sur l’ensemble des données triées.
+Ensuite, on récupère les données liées uniquement au produit "tomate".
+Enfin, on affiche la liste des colonnes du sous-ensemble "tomate".
+
+```{r}
+# Test de la fonction split_data_ok_par_produit sur le data frame global trié
+liste_tables_37_produit_bruts <- split_data_ok_par_produit(datasets_tts_plateformes_prod_tries)
+
+# Extraire le sous-dataframe correspondant au produit "tomate"
+data_tomate <- liste_tables_37_produit_bruts[["tomate"]]
+
+# Afficher tous les noms de colonnes dans le sous-dataframe "tomate"
+names(data_tomate)
+
+
+```
+
+# XII) Indicateur de pureté pour les produits triés
 
 Cette fonction compte pour chaque produit standardisé combien de noms bruts (productName) lui correspondent, en évitant les chevauchements. Elle utilise une logique de priorité (plus long d’abord) pour attribuer les noms. Cela permet de calculer un indicateur de « pureté » des correspondances produits dans les données nettoyées.
 
@@ -771,50 +815,6 @@ compter_occurrences_exclusives <- function(df, col_productName = "productName", 
 
 # Test de la fonction avec les listes extraites des données consolidées
 liste_table_indi_purete_prod_trie <- compter_occurrences_from_levels(levels_productName, levels_nom_produit)
-
-
-```
-
-
-# XII) On sépare en 37 tables
-
-## a) Développement de la fonction pour split en 37 tables
-
-Cette fonction prend un tableau propre data_ok avec une colonne nom_produit et renvoie une liste de sous-tableaux, un pour chaque produit distinct.
-Si la colonne nom_produit n’existe pas, la fonction renvoie une erreur.
-
-```{r}
-split_data_ok_par_produit <- function(data_ok) {
-  # Vérifie que la colonne 'nom_produit' existe bien dans le data frame
-  if (!"nom_produit" %in% colnames(data_ok)) {
-    stop("La colonne 'nom_produit' est absente de data_ok")  # Arrête et affiche une erreur si la colonne manque
-  }
-
-  # Sépare le data frame en une liste de data frames, chaque sous-table correspondant à un produit unique
-  liste_data_par_produit <- split(data_ok, data_ok$nom_produit)
-
-  # Retourne cette liste de data frames
-  return(liste_data_par_produit)
-}
-
-
-```
-
-## b) Application de la fonction
-
-On teste la fonction de découpage sur l’ensemble des données triées.
-Ensuite, on récupère les données liées uniquement au produit "tomate".
-Enfin, on affiche la liste des colonnes du sous-ensemble "tomate".
-
-```{r}
-# Test de la fonction split_data_ok_par_produit sur le data frame global trié
-liste_tables_37_produit_bruts <- split_data_ok_par_produit(datasets_tts_plateformes_prod_tries)
-
-# Extraire le sous-dataframe correspondant au produit "tomate"
-data_tomate <- liste_tables_37_produit_bruts[["tomate"]]
-
-# Afficher tous les noms de colonnes dans le sous-dataframe "tomate"
-names(data_tomate)
 
 
 ```
