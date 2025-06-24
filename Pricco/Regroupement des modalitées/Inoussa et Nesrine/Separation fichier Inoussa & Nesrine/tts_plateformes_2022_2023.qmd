@@ -258,23 +258,31 @@ creer_fichier_excel <- function(liste_de_produits, fichier = "autres_declinaison
   saveWorkbook(classeur, fichier, overwrite = TRUE)
 }
 
-# Creaction du fichier excel permettant de rajouter dautres déclinaisons
-creer_fichier_excel(liste_produits)
-
 # Extraires des noms de produits toutes les declinaisons des noms de la liste de produit
-trouver_declinaisons_nom_produit <- function(dataset, col_produit, ls_produit, regex) {
+trouver_declinaisons_nom_produit <- 
+  function(dataset, col_produit, ls_produit, regex, fichier = NULL) {
   # Extraction des noms uniques de produits
   noms_des_produits <- nettoyer(dataset[[col_produit]])
   noms_des_produits_uniques <- unique(noms_des_produits)
   # Extraction des déclinaisons par produit
   liste_declinaisons <- sapply(seq_along(regex), function(i) {
     extractions <- str_extract(noms_des_produits_uniques, regex[i])
-    extractions[extractions == ""] <- NA
     extractions <- extractions[!is.na(extractions) & extractions != ""]
     unique(extractions)
   }, simplify = FALSE)
-  # Nommer chaque élément de la liste avec le nom du produit correspondant
+
   names(liste_declinaisons) <- ls_produit
+  
+  # Ajouter d'autres déclinaisons extérieurs 
+  if(!is.null(fichier)==TRUE){
+    fichier <- na.omit(fichier)
+    fichier[["Nom de produit"]] <- nettoyer(fichier[["Nom de produit"]])
+    sapply(fichier[["Nom de produit"]], function(prod){
+      res <- pull(fichier[fichier[["Nom de produit"]]==prod,"Autres déclinaisons"])
+      declinaisons_suppl <- unlist(str_split(res, ";"))
+      liste_declinaisons[[prod]] <<- unique(c(liste_declinaisons[[prod]], declinaisons_suppl))
+    })
+  }
   return(liste_declinaisons)
 }
 ```
@@ -282,12 +290,20 @@ trouver_declinaisons_nom_produit <- function(dataset, col_produit, ls_produit, r
 ```{r}
 # Creer les expressions reguliere de la liste des noms de produits
 regex <- creer_regex(liste_produits) 
+
+# Creaction du fichier excel en question permettant de rajouter dautres déclinaisons
+# creer_fichier_excel(liste_produits)
+
+# Declinaison obtenues de manière automatique
+exemple <- read_excel("autres_declinaisons.xlsx")
+
 # Declinaison obtenues de manière automatique
 final_declinaisons <- trouver_declinaisons_nom_produit(
     dataset = combinaison,
     col_produit = "productName",
     ls_produit = liste_produits,
-    regex = regex
+    regex = regex,
+    fichier = exemple
   )
 
 ```
