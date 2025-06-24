@@ -34,28 +34,26 @@ library(tidyverse)
 library(purrr)
 
 # Export des fichiers au format Excel 
-
 library(writexl)
 
-# Creer un fichier excel avec plus d'option possible
-library(openxlsx) 
+library(tibble)
 
 ```
 
 # II) Documentation des variables d'intérêts pour le calcul du prix au kilogramme
 
-| Variable                    | Définition |
-|-----------------------------|------------|
-| orderProductPrice           |            |
-| orderQuantity               |            |
-| mois                        |  Mois      |
-| annee                       |  Année     |
-| productName                 |            |
-| productIsOrganic            |            |
-| productConditioningQuantity |            |
-| productConditioningUnit     |            |
-| distributionZipCode         |            |
-| plateforme                  |            |
+| Variable | Définition | Unité |
+|----|----|----|
+| orderProductPrice | Unités de mesure | Euro |
+| orderQuantity | Nombre d'une unité de produit acheté | Sans unité |
+| mois | Mois | Mois |
+| annee | Année | Année |
+| productName | Noms du produit | Sans unité |
+| productIsOrganic | Produit est bio | Sans unité |
+| productConditioningQuantity | Poids d'une unité de produit | Gramme, kilogramme, pièce |
+| productConditioningUnit | Unités de mesure | gramme, kilogramme, pièce |
+| distributionZipCode | Code postal | Sans unité |
+| plateforme | Plateformes partenaires du projet Pricco | Sans unité |
 
 # III) Importation des fichiers
 
@@ -138,8 +136,6 @@ liste_datasets_final <- lapply(names(datasets), function(nom) {
 
 names(liste_datasets_final) <- names(datasets)
 
-View(liste_datasets_final)
-
 ```
 
 # V) Fusion de tous les jeux de données sauf cagette
@@ -148,7 +144,6 @@ View(liste_datasets_final)
 liste_datasets_final_sans_cagette <- liste_datasets_final[!indices_cagette]
 
 combinaison <- do.call(rbind, liste_datasets_final_sans_cagette)
-View(combinaison)
 ```
 
 # VI) Séparation des fichiers par produit
@@ -265,13 +260,6 @@ creer_fichier_excel <- function(liste_de_produits, fichier = "autres_declinaison
 
 # Creaction du fichier excel permettant de rajouter dautres déclinaisons
 creer_fichier_excel(liste_produits)
-
-
-
-
-
-
-
 
 # Extraires des noms de produits toutes les declinaisons des noms de la liste de produit
 trouver_declinaisons_nom_produit <- function(dataset, col_produit, ls_produit, regex) {
@@ -469,9 +457,12 @@ liste_datasets_cagette <- lapply(
   split(liste_datasets_cagette, noms_groupes),
   function(groupe) do.call(rbind, groupe)
 )
+
 liste_datasets_cagette[["cagette_Pomme_2022"]] <- unique(liste_datasets_cagette[["cagette_Pomme_2022"]])
 
 liste_datasets_cagette[["cagette_Pomme_2023"]] <- unique(liste_datasets_cagette[["cagette_Pomme_2023"]])
+
+
 ```
 
 ```{r}
@@ -480,7 +471,8 @@ liste_datasets_cagette[["cagette_Pomme_2023"]] <- unique(liste_datasets_cagette[
 liste_produits_alimentaires <- c(
   "Abricot", "Asperge", "Aubergine","Banane","Carotte","Cerise","Chou fleur",
   "Clémentine", "Concombre","Courgette","Céleri branche","Endive","Fraise",
-  "Haricot vert","Kiwi","Laitue","Melon","Nectarine","Oignon","Poire","Poireau","Poivron",
+  "Haricot vert","Kiwi","Laitue","Melon","Nectarine","Oignon","Poire",
+  "Poireau","Poivron",
   "Pomme de terre","Pomme","Potiron","Prune","Pêche","Raisin","Tomate")
 
 # Nettoyer les noms : minuscules + suppression des accents + remplacement des espaces par _
@@ -531,112 +523,131 @@ names(liste_datasets_cagette_nettoyee) <- names(liste_datasets_cagette)
 ```{r}
 # On fusionne toutes les tables de cagette en une seule
 liste_finale_datasets_cagette <- do.call(rbind, liste_datasets_cagette_nettoyee)
-View(liste_finale_datasets_cagette)
 ```
 
-# VIII) Fusion de tous les fichiers issus de toutes les plateformes
+
+# VIII) On vérifie la pertinence des données déjà classées par les fournisseurs 
+
+```{r}
+
+# On regarde toutes les déclinaisons de noms de produit possibles pour les fichiers cagette
+vect_decli_cagette <- trouver_declinaisons_nom_produit(
+    dataset = liste_finale_datasets_cagette,
+    col_produit = "productName",
+    ls_produit = liste_produits,
+    regex = regex
+  )
+```
+
+
+```{r}
+# On attribue le bon nom de produit de la liste des 37 à chaque ligne 
+
+# On retire la colonne contenant le type de produit 
+liste_finale_datasets_cagette <- liste_finale_datasets_cagette |> select(-c(11))
+
+# Test de la fonction : Fichier coop circuit 2021
+system.time({ 
+  liste_cagette_trie_et_pas_trie <- separation_fichiers(
+  data = liste_finale_datasets_cagette,
+  liste_produits = liste_produits,
+  liste_declinai_noms_produits = vect_decli_cagette
+)})
+
+
+# On regarde séparemment le data_ok et data_pas_ok
+cagette_prod_tries <- liste_cagette_trie_et_pas_trie$data_ok
+cagette_prod_pas_tries <- liste_cagette_trie_et_pas_trie$data_pas_ok
+
+```
+
+
+# IX) Fusion de tous les fichiers de produits triés issus de toutes les plateformes
 
 ```{r}
 # On supprime la colonne name_clean de data_prod_tries
 data_prod_tries <- data_prod_tries |> select(-c("name_clean"))
 
+# On supprime la colonne name_clean de cagette_prod_tries
+cagette_prod_tries <- cagette_prod_tries |> select(-c("name_clean"))
+
 # On fusionne toutes les tables de cagette en une seule
-datasets_tts_plateformes <- rbind(liste_finale_datasets_cagette,data_prod_tries)
-View(datasets_tts_plateformes)
+datasets_tts_plateformes_prod_tries <- rbind(cagette_prod_tries,data_prod_tries)
 
 ```
 
-# IV) Tableau de comptage du nombre de levels par produit
+
+# X) Fusion des fichiers de produits pas triés en un seul 
 
 ```{r}
 
-table_comptage_levels_par_prod <- datasets_tts_plateformes %>%
-  group_by(nom_produit) %>%
-  summarise(`Nombre de levels` = n_distinct(productName)) %>%
-  arrange(desc(`Nombre de levels`)) %>%
-  rename(`Nom de produit` = nom_produit)
+# On fusionne toutes les tables de cagette en une seule
+data_prod_pas_tries_tts_platatefor <- rbind(cagette_prod_pas_tries,data_prod_pas_tries)
 
-View(table_comptage_levels_par_prod)
 ```
 
-# X) Tableaux de comptages du nombre d'occurrences des autres produits pour un produit donné
-
-```{r}
-# On sélectionne les lignes non vides de data_prod_pas_tries
-data_produits_multiples <- data_prod_pas_tries |> filter(!is.na(nom_produit))
-```
+# XI) Indicateur de pureté pour les produits triés
 
 ```{r}
 
-# Liste des 37 produits nettoyés
-liste_37_prod_nettoyes <- sapply(liste_produits, nettoyer_nom, USE.NAMES = FALSE)
+# Extraire les levels (uniques)
+levels_productName <- unique(datasets_tts_plateformes_prod_tries$productName)
+levels_nom_produit <- unique(datasets_tts_plateformes_prod_tries$nom_produit)
 
-# Étape 1 : Créer un ID par ligne
-data_clean <- data_produits_multiples %>%
-  mutate(id_ligne = row_number())
+# Indicateur de pureté pour les produits triés
+compter_occurrences_exclusives <- function(df, col_productName = "productName", col_nom_produit = "nom_produit") {
+  # Étape 1 : trier les noms_produit du plus long au plus court (pour priorité aux plus spécifiques)
+  levels_nom_produit <- unique(df[[col_nom_produit]])
+  levels_nom_produit <- levels_nom_produit[order(nchar(levels_nom_produit), decreasing = TRUE)]
+  
+  # Étape 2 : récupérer tous les productName uniques
+  all_product_names <- unique(df[[col_productName]])
+  
+  # Étape 3 : initialiser les noms déjà utilisés
+  noms_assignés <- rep(FALSE, length(all_product_names))
+  names(noms_assignés) <- all_product_names
+  
+  # Étape 4 : construire les tableaux
+  resultats <- map(levels_nom_produit, function(nom_produit) {
+    # Construire la regex pluriel + imbriqué
+    mots <- str_split(nom_produit, " ")[[1]]
+    mots_regex <- paste0("(", mots, ")(s|x)?")
+    motif <- paste(mots_regex, collapse = "[- ]?")
+    
+    # Filtrer uniquement les noms encore disponibles
+    names_disponibles <- all_product_names[!noms_assignés]
+    
+    # Compter les occurrences
+    nb_occ <- str_count(tolower(names_disponibles), regex(motif, ignore_case = TRUE))
+    
+    # Conserver ceux avec une correspondance
+    matched_names <- names_disponibles[nb_occ > 0]
+    matched_counts <- nb_occ[nb_occ > 0]
+    
+    # Marquer ces noms comme assignés
+    noms_assignés[matched_names] <<- TRUE
+    
+    # Retourner le tibble
+    tibble(
+      !!paste0("levels_", str_replace_all(nom_produit, " ", "_")) := matched_names,
+      !!paste0("nb_occurrence_", str_replace_all(nom_produit, " ", "_")) := matched_counts
+    )
+  }) |> set_names(levels_nom_produit)
+  
+  return(resultats)
+}
 
-# Étape 2 : Séparer les noms de produits par ligne
-data_split <- data_clean %>%
-  separate_rows(nom_produit, sep = ";") %>%
-  mutate(nom_produit = str_trim(nom_produit)) %>%
-  filter(nom_produit %in% liste_37_prod_nettoyes)
 
-# Étape 3 : Liste des produits par ligne
-data_grouped <- data_split %>%
-  group_by(id_ligne) %>%
-  summarise(produits = list(nom_produit), .groups = "drop")
+# On teste la fonction 
+liste_table_indi_purete_prod_trie <- compter_occurrences_from_levels(levels_productName, levels_nom_produit)
 
-# Étape 4 : Calcul des cooccurrences (cross-join par ligne)
-cooccurrences <- data_grouped %>%
-  mutate(paires = map(produits, ~ {
-    expand.grid(p1 = .x, p2 = .x, stringsAsFactors = FALSE)
-  })) %>%
-  unnest(paires) %>%
-  filter(p1 != p2)
-
-# Étape 5 : Compter les cooccurrences
-co_counts <- cooccurrences %>%
-  count(p1, p2, name = "nb_occurrences")
-
-# Étape 6 : Générer les 37 dataframes
-liste_dataframes <- map(set_names(liste_37_prod_nettoyes), function(produit) {
-  autres_produits <- setdiff(liste_37_prod_nettoyes, produit)
-  tibble(`Nom de produit` = autres_produits) %>%
-    left_join(
-      co_counts %>% filter(p1 == produit) %>%
-        select(`Nom de produit` = p2, `Nombre d'occurrences` = nb_occurrences),
-      by = "Nom de produit"
-    ) %>%
-    mutate(`Nombre d'occurrences` = coalesce(`Nombre d'occurrences`, 0L))
-})
 
 ```
 
-```{r}
-# Trier chaque dataframe par ordre décroissant d'occurrences
-liste_dataframes_tries <- map(liste_dataframes, ~ {
-  arrange(.x, desc(`Nombre d'occurrences`))
-})
 
-# On regarde les tableaux de comptages 
-View(liste_dataframes_tries)
+# XII) On sépare en 37 tables
 
-```
-
-
-
-```{r}
-# Ajouter une ligne "Totale" avec la somme des occurrences à chaque dataframe
-liste_dataframes_avec_total <- map(liste_dataframes_tries, ~ {
-  total <- sum(.x$`Nombre d'occurrences`, na.rm = TRUE)
-  bind_rows(.x, tibble(`Nom de produit` = "Totale", `Nombre d'occurrences` = total))
-})
-
-```
-
-# XI) On sépare en 37 tables 
-
-## a) Développement de la fonction pour split 
+## a) Développement de la fonction pour split en 37 tables
 
 ```{r}
 
@@ -654,21 +665,322 @@ split_data_ok_par_produit <- function(data_ok) {
 
 ```
 
-## b) Application de la fonction 
+## b) Application de la fonction
 
 ```{r}
 # Test de la fonction : data_ok de coop circuit 2021
-liste_tables_37_produit <- split_data_ok_par_produit(datasets_tts_plateformes)
+liste_tables_37_produit_bruts <- split_data_ok_par_produit(datasets_tts_plateformes_prod_tries)
 
 # Accéder au sous-dataframe pour le produit "pomme"
-data_tomate <- liste_tables_37_produit[["tomate"]]
+data_tomate <- liste_tables_37_produit_bruts[["tomate"]]
 
 # Voir tous les noms de produits
 names(data_tomate)
 
 ```
 
-# XII) Génération des prompts 
+
+# XIII) Tableau de comptage du nombre de levels par produit après le split pour les produits bruts
+
+```{r}
+
+table_levels_par_prod_apres_split_prod_bruts <- datasets_tts_plateformes %>%
+  group_by(nom_produit) %>%
+  summarise(`nb_levels_prod_bruts` = n_distinct(productName)) %>%
+  arrange(desc(`nb_levels_prod_bruts`)) %>%
+  rename(`nom_prod` = nom_produit)
+
+View(table_levels_par_prod_apres_split_prod_bruts)
+```
+
+# XIV) Tableau de comptage du nombre de levels par produit après le split pour les produits transformés
+
+```{r}
+# On sélectionne les lignes non vides de data_prod_pas_tries
+data_produits_multiples <- data_prod_pas_tries |> filter(!is.na(nom_produit))
+```
+
+```{r}
+library(stringr)
+library(dplyr)
+library(tibble)
+library(purrr)
+library(stringi)
+library(tidyr)
+
+
+# 2. Liste des produits
+liste_produit <- c("celeri branche", "pomme de terre", "haricot vert", "clementine",
+                   "jus de pomme", "chou fleur", "courgette", "aubergine", "concombre",
+                   "nectarine", "lentille", "carotte", "poireau", "abricot", "asperge",
+                   "poivron", "potiron", "tomate", "cerise", "fraise", "raisin", "poulet",
+                   "laitue", "oignon", "banane", "endive", "poire", "pomme", "boeuf",
+                   "prune", "peche", "melon", "kiwi", "lait", "oeuf", "noix", "porc")
+
+# 3. Fonction de normalisation
+
+normalize_text <- function(x) {
+  x %>%
+    str_to_lower() %>%
+    stri_trans_general("Latin-ASCII") %>%
+    gsub("-", " ", ., fixed = TRUE) %>%
+    gsub("(s|x)\\b", "", ., perl = TRUE) %>%  # pluriels
+    gsub("\\bde\\b|\\bet\\b|\\baux\\b|\\bdes\\b|\\ble\\b|\\bla\\b", "", ., perl = TRUE) %>%
+    str_squish()
+}
+
+
+
+# 4. Normalisation produits et tri par longueur décroissante
+liste_produit_sorted <- liste_produit[order(-nchar(liste_produit))]
+produits_norm <- normalize_text(liste_produit_sorted)
+
+# 5. Normaliser les noms de produits dans le dataset
+data_clean <- data_produits_multiples %>%
+  mutate(nom_produit_clean = normalize_text(nom_produit))
+
+# 6. Identifier les produits présents dans chaque ligne
+
+system.time({
+  df_presence <- data_clean %>%
+  mutate(matched_produits = map(nom_produit_clean, function(txt) {
+    matched <- character()
+    txt_copy <- txt
+    for (i in seq_along(produits_norm)) {
+      prod <- produits_norm[i]
+      regex <- paste0("\\b", prod, "s?\\b")
+      if (str_detect(txt_copy, regex)) {
+        matched <- c(matched, liste_produit_sorted[i])
+        txt_copy <- str_replace_all(txt_copy, regex, " ")
+      }
+    }
+    unique(matched)
+  }))
+})
+
+
+# 7. Format long pour comptage
+df_long <- df_presence %>%
+  unnest(matched_produits) %>%
+  rename(nom_prod = matched_produits)
+
+# 8. Compter le nombre de fois qu'un produit apparaît
+table_levels_par_prod_apres_split_prod_tranfo <- df_long %>%
+  count(nom_prod, name = "nb_levels_peod_transfo") %>%
+  complete(nom_prod = liste_produit, fill = list(nb_levels = 0)) %>%
+  arrange(nom_prod)
+
+# Affichage
+View(table_levels_par_prod_apres_split_prod_tranfo)
+
+
+```
+
+```{r}
+# Trier chaque dataframe par ordre décroissant d'occurrences
+liste_dataframes_tries <- map(liste_dataframes, ~ {
+  arrange(.x, desc(`Nombre d'occurrences`))
+})
+
+```
+
+```{r}
+# Ajouter une ligne "Totale" avec la somme des occurrences à chaque dataframe
+liste_dataframes_avec_total <- map(liste_dataframes_tries, ~ {
+  total <- sum(.x$`Nombre d'occurrences`, na.rm = TRUE)
+  bind_rows(.x, tibble(`Nom de produit` = "Totale", `Nombre d'occurrences` = total))
+})
+
+```
+
+# XV) Tableau de comptage du nombre de levels par produit avant le split
+
+```{r}
+############# Pour les 3 plateformes #############  
+
+# Vecteur contenant tous les levels des 3 plateformes
+levels_3_plateformes <- levels(as.factor(combinaison$productName))
+
+#####################################################################
+
+library(stringr)
+library(tibble)
+
+# 1. Liste des produits
+liste_produit <- c("celeri branche", "pomme de terre", "haricot vert", "clementine",
+                   "jus de pomme", "chou fleur", "courgette", "aubergine", "concombre",
+                   "nectarine", "lentille", "carotte", "poireau", "abricot", "asperge",
+                   "poivron", "potiron", "tomate", "cerise", "fraise", "raisin", "poulet",
+                   "laitue", "oignon", "banane", "endive", "poire", "pomme", "boeuf",
+                   "prune", "peche", "melon", "kiwi", "lait", "oeuf", "noix", "porc")
+
+# # 2. Liste des levels
+# levels_3_plateformes <- c(
+#   "veloute de carottes", 
+#   "soupe de potiron", 
+#   "jus de pommes et de poires", 
+#   "gratin de courgettes", 
+#   "omelette aux oeufs et oignons", 
+#   "haricots verts vapeur", 
+#   "puree de pommes de terre",
+#   "boeuf;kiwi", 
+#   "jus de pommes;poires",
+#   "choux fleurs"
+# )
+
+library(stringr)
+library(dplyr)
+library(tibble)
+library(purrr)
+library(stringi)
+
+# 1. Normalisation texte
+normalize_text <- function(x) {
+  x %>%
+    str_to_lower() %>%
+    stri_trans_general("Latin-ASCII") %>%
+    gsub("-", " ", ., fixed = TRUE) %>%
+    gsub("(s|x)\\b", "", ., perl = TRUE) %>%  # pluriels
+    gsub("\\bde\\b|\\bet\\b|\\baux\\b|\\bdes\\b|\\ble\\b|\\bla\\b", "", ., perl = TRUE) %>%
+    str_squish()
+}
+
+# 2. Trier produits par longueur (plus long d’abord)
+liste_produit_sorted <- liste_produit[order(-nchar(liste_produit))]
+produits_norm <- normalize_text(liste_produit_sorted)
+
+# 3. Normaliser les levels
+df_levels <- tibble(level = levels_3_plateformes) %>%
+  mutate(level_clean = normalize_text(level))
+
+# 4. Trouver les produits présents sans doublon interne
+df_presence <- df_levels %>%
+  mutate(matched_produits = map(level_clean, function(txt) {
+    matched <- character()
+    txt_copy <- txt
+    for (i in seq_along(produits_norm)) {
+      prod <- produits_norm[i]
+      regex <- paste0("\\b", prod, "s?\\b")
+      if (str_detect(txt_copy, regex)) {
+        matched <- c(matched, liste_produit_sorted[i])
+        # Supprimer le match du texte pour éviter de détecter des sous-mots plus tard
+        txt_copy <- str_replace_all(txt_copy, regex, " ")
+      }
+    }
+    unique(matched)
+  }))
+
+# 5. Créer une table produit-level (long format)
+df_long <- df_presence %>%
+  unnest(matched_produits) %>%
+  rename(nom_prod = matched_produits)
+
+# 6. Résumer en comptage
+table_levels_par_prod_avt_split <- df_long %>%
+  count(nom_prod, name = "nb_levels_avt_split") %>%
+  complete(nom_prod = liste_produit, fill = list(nb_levels = 0)) %>%
+  arrange(nom_prod)
+
+
+View(table_levels_par_prod_avt_split)
+```
+
+```{r}
+############# Pour lcagette #############  
+
+# liste_finale_datasets_cagette --> Tout cagette 22-23
+
+##############################################
+
+# Vecteur contenant tous les levels des 3 plateformes
+levels_cagette <- levels(as.factor(liste_finale_datasets_cagette$productName))
+
+#####################################################################
+
+library(stringr)
+library(tibble)
+
+# 1. Liste des produits
+liste_produit <- c("celeri branche", "pomme de terre", "haricot vert", "clementine",
+                   "jus de pomme", "chou fleur", "courgette", "aubergine", "concombre",
+                   "nectarine", "lentille", "carotte", "poireau", "abricot", "asperge",
+                   "poivron", "potiron", "tomate", "cerise", "fraise", "raisin", "poulet",
+                   "laitue", "oignon", "banane", "endive", "poire", "pomme", "boeuf",
+                   "prune", "peche", "melon", "kiwi", "lait", "oeuf", "noix", "porc")
+
+# # 2. Liste des levels
+# levels_cagette <- c(
+#   "veloute de carottes", 
+#   "soupe de potiron", 
+#   "jus de pommes et de poires", 
+#   "gratin de courgettes", 
+#   "omelette aux oeufs et oignons", 
+#   "haricots verts vapeur", 
+#   "puree de pommes de terre",
+#   "boeuf;kiwi", 
+#   "jus de pommes;poires",
+#   "choux fleurs"
+# )
+
+library(stringr)
+library(dplyr)
+library(tibble)
+library(purrr)
+library(stringi)
+
+# 1. Normalisation texte
+normalize_text <- function(x) {
+  x %>%
+    str_to_lower() %>%
+    stri_trans_general("Latin-ASCII") %>%
+    gsub("-", " ", ., fixed = TRUE) %>%
+    gsub("(s|x)\\b", "", ., perl = TRUE) %>%  # pluriels
+    gsub("\\bde\\b|\\bet\\b|\\baux\\b|\\bdes\\b|\\ble\\b|\\bla\\b", "", ., perl = TRUE) %>%
+    str_squish()
+}
+
+# 2. Trier produits par longueur (plus long d’abord)
+liste_produit_sorted <- liste_produit[order(-nchar(liste_produit))]
+produits_norm <- normalize_text(liste_produit_sorted)
+
+# 3. Normaliser les levels
+df_levels <- tibble(level = levels_cagette) %>%
+  mutate(level_clean = normalize_text(level))
+
+# 4. Trouver les produits présents sans doublon interne
+df_presence <- df_levels %>%
+  mutate(matched_produits = map(level_clean, function(txt) {
+    matched <- character()
+    txt_copy <- txt
+    for (i in seq_along(produits_norm)) {
+      prod <- produits_norm[i]
+      regex <- paste0("\\b", prod, "s?\\b")
+      if (str_detect(txt_copy, regex)) {
+        matched <- c(matched, liste_produit_sorted[i])
+        # Supprimer le match du texte pour éviter de détecter des sous-mots plus tard
+        txt_copy <- str_replace_all(txt_copy, regex, " ")
+      }
+    }
+    unique(matched)
+  }))
+
+# 5. Créer une table produit-level (long format)
+df_long <- df_presence %>%
+  unnest(matched_produits) %>%
+  rename(nom_prod = matched_produits)
+
+# 6. Résumer en comptage
+table_levels_par_prod_avt_split_cagette <- df_long %>%
+  count(nom_prod, name = "nb_levels_avt_split") %>%
+  complete(nom_prod = liste_produit, fill = list(nb_levels = 0)) %>%
+  arrange(nom_prod)
+
+View(table_levels_par_prod_avt_split_cagette)
+
+```
+
+
+# XVI) Génération des prompts
 
 ## a) Développement de la fonction pour générer les prompts
 
@@ -687,42 +999,47 @@ detecter_levels_prod_transfor <- function(nom_prod, levels, nb_chunck, taille_ch
   chunks <- chunks[1:min(nb_chunck, total_chunks)]
 
   # Prompt de base (dynamique en fonction du produit)
-  base_prompt <- paste0(
-    "Tu es un expert en alimentation et en classification des produits alimentaires.\n\n",
-    "Tu reÃ§ois une liste de produits Ã  base de ", nom_prod, ".\n",
-    "Ta tÃ¢che est dâ€™**identifier uniquement les produits transformÃ©s** dans cette liste.\n\n",
-    "Un **produit est transformÃ©** sâ€™il :\n",
-    "- contient **dâ€™autres ingrÃ©dients que le/la ", nom_prod, "**\n",
-    "- a subi une **transformation culinaire** (cuit, rÃ¢pÃ©, assaisonnÃ©, etc.)\n",
-    "- est conditionnÃ© ou prÃ©sentÃ© de maniÃ¨re Ã  indiquer une prÃ©paration culinaire\n",
-    "- est destinÃ© Ã  un **usage spÃ©cifique** impliquant une transformation\n\n",
-    "Ignore tous les **produits bruts**, câ€™est-Ã -dire :\n",
-    "- les produits qui contiennent **seulement ", nom_prod, "**\n",
-    "- les produits dont le nom ne mentionne **aucun autre ingrÃ©dient ni transformation**\n\n",
-    "Retourne uniquement les **noms exacts** des produits transformÃ©s de la liste dâ€™origine, sans commentaire ni explication.\n\n",
-    "**Le rÃ©sultat doit Ãªtre strictement au format suivant (vecteur R) :**\n",
-    "`c(\"produit transformÃ©\", \"produit transformÃ©\", ...)`\n",
-    "Ne retourne **que** ce vecteur.\n\n",
-    "Voici la liste de produits Ã  analyser :\n"
-  )
+base_prompt <- paste0(
+  "Tu es un expert en alimentation et en classification des produits alimentaires.\n\n",
+  "Tu reçois une liste de produits à base de ", nom_prod, ".\n",
+  "Ta tâche est d’**identifier uniquement les produits transformés** dans cette liste.\n\n",
+  "Un **produit est transformé** s’il :\n",
+  "- contient **d’autres ingrédients que le/la ", nom_prod, "**\n",
+  "- a subi une **transformation culinaire** (cuit, râpé, assaisonné, etc.)\n",
+  "- est conditionné ou présenté de manière à indiquer une préparation culinaire\n",
+  "- est destiné à un **usage spécifique** impliquant une transformation\n\n",
+  "Ignore tous les **produits bruts**, c’est-à-dire :\n",
+  "- les produits qui contiennent **seulement ", nom_prod, "**\n",
+  "- les produits dont le nom ne mentionne **aucun autre ingrédient ni transformation**\n\n",
+  "Retourne uniquement les **noms exacts** des produits transformés de la liste d’origine, sans commentaire ni explication.\n\n",
+  "**Le résultat doit être strictement au format suivant (vecteur R) :**\n",
+  "`c(\"produit transformé\", \"produit transformé\", ...)`\n",
+  "Ne retourne **que** ce vecteur.\n\n",
+  "Voici la liste de produits à analyser :\n"
+)
 
-  # Génération des prompts complets
-  resultats <- lapply(chunks, function(chunk) {
-    prompt_complet <- paste0(base_prompt, paste(chunk, collapse = "\n"))
+
+  # Générer les prompts complets
+  prompts <- lapply(chunks, function(chunk) {
+    paste0(base_prompt, paste(chunk, collapse = "\n"))
   })
 
-  return(resultats)
+  # Générer les résultats en appelant gemma3 pour chaque prompt
+  resultats <- lapply(prompts, function(p) {
+    generate("gemma3", p, stream = FALSE, output = "text")
+  })
+
+  return(list(prompts = prompts, resultats = resultats))
 }
 
 ```
 
 ## b) Application de la fonction
 
-
 ```{r}
 
 # Test de la fonction
-levels_tomates <- levels(as.factor(data_tomate$productName))
+levels_tomates <- levels(as.factor(data_tomates$productName))
 prompts_levels_tomates <- detecter_levels_prod_transfor("tomate", levels_tomates, nb_chunck = 89,
                                          taille_chunck = 50)
 
@@ -733,10 +1050,26 @@ cat(prompts_levels_tomates[[3]])
 cat(prompts_levels_tomates[[89]])  
 ```
 
+```{r}
 
-## XII) Export du jeu de données 
+# On stocke tous les prompts
+invisible(
+  lapply(seq_along(prompts_levels_tomates), function(i) {
+    cat("\n")
+    cat(prompts_levels_tomates[[i]])
+    cat("\n")
+  })
+)
+
+
+df <- dput(prompts_levels_tomates, "liste_prompts_complets.txt")
+print(df)
+
+save(prompts_levels_tomates, file = "liste_prompts_complets.RData")
+```
+
+# XVII) Export du jeu de données
 
 ```{r}
 write_xlsx(data_tomate,"demonstration/data_tomates.xlsx")
 ```
-
