@@ -185,7 +185,7 @@ names(liste_datasets_final) <- names(datasets)
 
 # V) Fusion de tous les jeux de données sauf cagette
 
-Ce code sert à regrouper dans un seul tableau tous les jeux de données hors Cagette, probablement pour des comparaisons ou traitements spécifiques à ces plateformes.
+Ce code sert à regrouper dans un seul tableau tous les jeux de données hors Cagette. En effet, les données de cagette étant déjà séparées en 37 tables de produit.
 
 ```{r,warning=FALSE}
 # Création d'une nouvelle liste ne contenant que les datasets 
