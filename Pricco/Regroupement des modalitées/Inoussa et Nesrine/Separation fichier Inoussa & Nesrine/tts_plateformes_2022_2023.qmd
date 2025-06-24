@@ -206,8 +206,8 @@ trouver_declinaisons_nom_produit <- function(dataset, col_produit, ls_produit, r
   liste_declinaisons <- sapply(seq_along(regex), function(i) {
     extractions <- str_extract(noms_des_produits_uniques, regex[i])
     extractions[extractions == ""] <- NA
-    extractions <- unique(extractions[!is.na(extractions)])
-    extractions
+    extractions <- extractions[!is.na(extractions) & extractions != ""]
+    unique(extractions)
   }, simplify = FALSE)
   # Nommer chaque élément de la liste avec le nom du produit correspondant
   names(liste_declinaisons) <- ls_produit
