@@ -54,3 +54,81 @@ comparaison_prompts_res <- function(prompt_produits, res_gemmas){
 res_inoussas <- comparaison_prompts_res(prompts_40_levels_tomates_2, res_40)
 View(res_inoussas)
 ```
+
+On teste le prompt de taille 40
+
+```{r}
+
+extract_vector <- function(texte) {
+  # Extraire la chaîne qui commence par c("...") et finit par ")
+  pattern <- "c\\((\"[^\"]*\"\\s*,?\\s*)+\\)"
+  
+  vecteur_brut <- regmatches(texte, regexpr(pattern, texte))
+
+  if (length(vecteur_brut) == 0) return(NULL)  # Rien trouvé
+
+  # Essayer d'évaluer le texte en R, mais ignorer les erreurs
+  res <- tryCatch(eval(parse(text = vecteur_brut)), error = function(e) NULL)
+  return(res)
+}
+
+comparaison_prompts_res <- function(prompt_produits, res_gemmas){
+  # Extraire les levels des produits dans les prompts
+  extraction_produits <- lapply(prompt_produits, function(prompt){
+    extr_levels <- str_extract(
+      prompt, "(?s)(?<=Voici la liste de produits à analyser :)\\s*.*")
+    unlist(strsplit(extr_levels, "\n"))
+  })
+  # Extraire les produits renvoyées par gemmas
+  resultats_gemma <- lapply(res_gemmas, function(rdes){
+    extract_vector(rdes)
+  })
+  # Comparaison & retourn concordance et discordance
+  res <- lapply(seq_along(extraction_produits), function(i){
+    levels_prod <- extraction_produits[[i]] ; gemma_res <- resultats_gemma[[i]]
+    communs <- intersect(levels_prod, gemma_res)
+    hallucination <- setdiff(gemma_res, communs)
+    
+    list(
+      levels_produits = levels_prod, 
+      resultats_gemma = gemma_res,
+      levels_communs = communs, 
+      hallucination = hallucination
+      )
+  })
+  return(res)
+}
+
+res_inoussas <- comparaison_prompts_res(prompts_40_levels_tomates_2, res_40)
+View(res_inoussas)
+
+
+# Fonction pour identifier les listes dont la fonction extract na pas extraire le vecteur c
+res <- lapply(seq_along(res_inoussas), function(i){
+  if(is.null(res_inoussas[[i]][["resultats_gemma"]])){
+   i
+  }
+})
+
+rt <- na.omit(unlist(res)) # Les numeros de listes concernées
+
+# Les cas qui ne sont traitées
+avant <- c(7,20,38,42,47,48,52,56,63,64,72,83,87,103)
+View(res_inoussas[avant])
+
+# Nouveau pattern à utilisé pour resoudre certains cas daffichage
+pattern <- "c\\(((\"(\\\\\"|[^\"])*\"\\s*,?\\s*)+)\\)"
+
+# Les cas qui sont traitées
+
+
+length(avant)
+
+
+verifier <- avant[avant %in% rt]
+verify <- res_inoussas[verifier]
+length(verifier)
+View(verify)
+
+
+
