@@ -355,6 +355,18 @@ trouver_declinaisons_nom_produit <-
 }
 ```
 
+```{r}
+# Creer les expressions reguliere de la liste des noms de produits
+regex <- creer_regex(liste_produits) 
+# Declinaison obtenues de manière automatique
+final_declinaisons <- trouver_declinaisons_nom_produit(
+    dataset = combinaison,
+    col_produit = "productName",
+    ls_produit = liste_produits,
+    regex = regex
+  )
+
+```
 
 ## c) Correspondance automatique et nettoyage intelligent des noms de produits avec gestion des cas ambigus
 
@@ -559,70 +571,10 @@ liste_datasets_cagette[["cagette_Pomme_2023"]] <- unique(liste_datasets_cagette[
 
 ```
 
-Ce code permet d’ajouter à chaque table Cagette une colonne nom_produit cohérente et nettoyée, en se basant sur le nom du fichier d’origine. Cela facilite les traitements et les fusions ultérieures, tout en gardant une référence standardisée pour les produits.
-
-```{r}
-#################### On ajoute la nouvelle colonne nom_produit à toutes les tables Cagette ####################
-
-# Liste des produits alimentaires standards que l'on souhaite reconnaître
-liste_produits_alimentaires <- c(
-  "Abricot", "Asperge", "Aubergine", "Banane", "Carotte", "Cerise", "Chou fleur",
-  "Clémentine", "Concombre", "Courgette", "Céleri branche", "Endive", "Fraise",
-  "Haricot vert", "Kiwi", "Laitue", "Melon", "Nectarine", "Oignon", "Poire",
-  "Poireau", "Poivron", "Pomme de terre", "Pomme", "Potiron", "Prune", "Pêche", "Raisin", "Tomate"
-)
-
-# Fonction de nettoyage d’un nom :
-# - conversion en minuscules
-# - suppression des accents
-# - remplacement des caractères non alphanumériques par des espaces
-nettoyer_nom <- function(x) {
-  x %>%
-    tolower() %>%
-    stri_trans_general("Latin-ASCII") %>%
-    gsub("[^a-z0-9]+", " ", .) %>%
-    gsub("_+$", "", .) %>%
-    gsub("^_+", "", .)
-}
-
-# Application du nettoyage sur tous les noms de produits
-produits_nettoyes <- sapply(liste_produits_alimentaires, nettoyer_nom, USE.NAMES = FALSE)
-
-# Création d’une table de correspondance entre nom nettoyé et nom original (en minuscules)
-produits_df <- data.frame(
-  produit_clean = produits_nettoyes,
-  produit_label = tolower(liste_produits_alimentaires),
-  stringsAsFactors = FALSE
-)
-
-# Ajout de la colonne `nom_produit` dans chaque tableau de la liste Cagette
-liste_datasets_cagette_nettoyee <- lapply(names(liste_datasets_cagette), function(nom_df) {
-  df <- liste_datasets_cagette[[nom_df]]
-  
-  # Extraction du nom du produit à partir du nom du dataset (ex : "cagette_Pomme_2022" → "Pomme")
-  produit_nom_match <- sub("cagette_(.*)_20[0-9]{2}", "\\1", nom_df)
-  
-  # Nettoyage du nom pour pouvoir le faire correspondre à la version nettoyée de la liste
-  produit_nom_clean <- nettoyer_nom(produit_nom_match)
-  
-  # Recherche du nom d'origine (label) correspondant dans la table de correspondance
-  produit_label <- produits_df$produit_label[match(produit_nom_clean, produits_df$produit_clean)]
-  
-  # Ajout de la colonne `nom_produit` avec le nom nettoyé (non accentué, simplifié)
-  df$nom_produit <- produits_df$produit_clean[match(produit_nom_clean, produits_df$produit_clean)]
-
-  return(df)
-})
-
-# Réattribution des noms d'origine aux éléments de la liste nettoyée
-names(liste_datasets_cagette_nettoyee) <- names(liste_datasets_cagette)
-
-
-```
 
 ```{r}
 # On fusionne toutes les tables de cagette en une seule
-liste_finale_datasets_cagette <- do.call(rbind, liste_datasets_cagette_nettoyee)
+liste_finale_datasets_cagette <- do.call(rbind, liste_datasets_cagette)
 ```
 
 
@@ -647,9 +599,6 @@ vect_decli_cagette <- trouver_declinaisons_nom_produit(
 
 ```{r}
 # Attribution du bon nom de produit (standardisé parmi la liste de 37) à chaque ligne des données Cagette
-
-# Suppression de la colonne 11 (probablement une colonne temporaire ou redondante, ex : ancien nom du produit)
-liste_finale_datasets_cagette <- liste_finale_datasets_cagette |> select(-c(11))
 
 # Application de la fonction d'association des noms de produits à la liste des produits standards
 # system.time() permet de mesurer la durée d'exécution de la fonction
@@ -814,8 +763,8 @@ compter_occurrences_exclusives <- function(df, col_productName = "productName", 
 
 
 # Test de la fonction avec les listes extraites des données consolidées
-liste_table_indi_purete_prod_trie <- compter_occurrences_from_levels(levels_productName, levels_nom_produit)
-
+liste_table_indi_purete_prod_trie <- compter_occurrences_exclusives(datasets_tts_plateformes_prod_tries)
 
 ```
+
 
