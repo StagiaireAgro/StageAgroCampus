@@ -1,160 +1,21 @@
 ---
-title: "Fonction_prompt_trait_prod_transfo"
+title: "Traitement_prod_tranfo_tomates"
 format: html
 editor: visual
 ---
 
-# I) Exemple de prompt
+# I) Importation des librairies
 
-```{r}
-a <- "Tu es un expert en alimentation et en classification des produits alimentaires.
+```{r,message=FALSE}
+library("ollamar")
 
-Tu reçois une liste de produits à base de carottes.  
-Ta tâche est d’**identifier uniquement les produits transformés** dans cette liste.
-
-Un **produit est transformé** s’il :
-  - contient **d’autres ingrédients que la carotte** (par exemple : carotte + chou, carotte + vinaigrette, carotte + gingembre)
-- a subi une **transformation culinaire**, c’est-à-dire qu’il a été cuit, râpé, assaisonné, fermenté, mixé ou assemblé avec d’autres aliments (par exemple : purée, soupe, tartinade, chips, confiture, plat cuisiné, conserve, etc.)
-- est conditionné ou présenté de manière à indiquer une préparation culinaire (mots comme : barquette, bocal, bouteille, pot, sous vide, plat, etc.)
-- est destiné à un **usage spécifique** impliquant une transformation (mots comme : apéritif, snacking, bébé, mix, coleslaw, etc.)
-
-Ignore tous les **produits bruts**, c’est-à-dire :
-  - les produits qui contiennent **seulement de la carotte**, même s’ils sont bio, lavés, non lavés, en botte, en vrac, en filet, ou en différentes couleurs
-- les produits dont le nom ne mentionne **aucun autre ingrédient ni transformation**
-  
-  Retourne uniquement les **noms exacts** des produits transformés de la liste d’origine, sans commentaire ni explication.
-
-**Le résultat doit être strictement au format suivant (vecteur R) :**  
-  `c(\"produit transformé\", \"produit transformé\", \"produit transformé\", ...)`  
-Ne retourne **que** ce vecteur.
-
-Voici la liste de produits à analyser :  
- 
-Carottes
-Carotte
-Carotte botte
-Carottes nouvelles botte
-carotte
-Carotte non lave
-CAROTTE
-Carottes botte
-carotte botte
-Carottes vrac
-Carotte vrac
-CAROTTES
-Carotte - Vrac KG - Landes
-Carotte De Sable
-Carottes jaunes
-Carottes De Couleurs
-Carottes du Jardin des Saveurs
-Carottes 1 kg
-Carotte fane
-Carottes EARL du Moulin Grand
-Carottes de couleur
-Carottes Nouvelles
-Carottes fanes
-Carotte lave
-CRUDIT COLESLAW carottes rpes et chou blanc rp barquette 250 grammes
-Carotte lacto-ferment au zeste de citron_ gingembre et carvi
-CRUDIT CAROTTES RAPES barquette 250 grammes
-carottes type nantaise lavées 1 kg
-Carottes entières sous vide
-CAROTTE   GROsses vrac 3kg
-Carottes Bio 500 grammes
-CAROTTE EN CUBE 20x20 U
-CAROTTE EN CUBE 10x10 U
-CAROTTE EN RONDELLE U
-Carottes albigeoises
-Carotte rpe bio 400g
-Carotte rpe bio 200g
-Carottes Bio 1 kilo
-CAROTTE RPE 500 g U
-CAROTTE RPE 250 g U
-carottes bio  1kg
-Carottes oranges
-Carottes Mix 1kg
-Carotte  orange
-Carotte bio 1kg
-CAROTTE bio
-Tournedos de poisson_ pure de carotte_ kalamansi_ quinoa
-Salade coleslaw bio [carotte_ chou blanc] 200g
-Mix de crudits bio [carotte_ radis noir] 200g
-Mix de crudits bio [carotte_ radis noir] 400g
-Petits Pois carottes 660g - Jardin Bio
-Carottes types Nantaise lavées 0.500kg
-Carotte rondelle pelée bio 500g (4mm)
-Soupe carotte thym &#8211; Potaverger
-CAROTTES   TERRE ou LAVEES  France
-Carotte - mlange de couleur
-Soupe de carotte curry 75cl
-Carottes cultives  Sarrians
-Carottes (BIOLAND Mhren)
-"
+library("tidyverse")
 ```
 
-```{r}
-# On génère la liste des produits tranformés avec gemma3
-res <-generate("gemma3",a, stream = FALSE, output = "text")
-
-# On concatène dans un vecteur le résultat
-cat(res)
-
-# On stocke dans un vecteur le résultat
-liste_resultat <- c("CRUDIT COLESLAW carottes rpes et chou blanc rp barquette 250 grammes", "Carotte lacto-ferment au zeste de citron_ gingembre et carvi", "CRUDIT CAROTTES RAPES barquette 250 grammes", "Salade coleslaw bio [carotte_ chou blanc] 200g", "Mix de crudits bio [carotte_ radis noir] 200g", "Mix de crudits bio [carotte_ radis noir] 400g", "Carotte  orange", "Carottes Mix 1kg", "Soupe de carotte curry 75cl", "Carotte rondelle pelée bio 500g (4mm)")
-
-```
-
-# II) Fonction pour générer la liste des produits transfomés à partir d'un prompt
-
-## a) sans sample
+# II) Trouver les produits transformés avec gemma
 
 ```{r}
-detecter_levels_prod_transfor <- function(nom_prod, levels, nb_chunck, taille_chunck) {
-  
-  total_levels <- length(levels)
-
-  # CrÃ©ation des chunks de taille `taille_chunck` avec gestion du dernier chunk partiel
-  chunks <- split(levels, ceiling(seq_along(levels) / taille_chunck))
-
-  # Nombre total de chunks gÃ©nÃ©rÃ©s
-  total_chunks <- length(chunks)
-
-  # Limiter au nb_chunck demandÃ©, mais sans dÃ©passer ceux disponibles
-  chunks <- chunks[1:min(nb_chunck, total_chunks)]
-
-  # Prompt de base (dynamique en fonction du produit)
-  base_prompt <- paste0(
-    "Tu es un expert en alimentation et en classification des produits alimentaires.\n\n",
-    "Tu reÃ§ois une liste de produits Ã  base de ", nom_prod, ".\n",
-    "Ta tÃ¢che est dâ€™**identifier uniquement les produits transformÃ©s** dans cette liste.\n\n",
-    "Un **produit est transformÃ©** sâ€™il :\n",
-    "- contient **dâ€™autres ingrÃ©dients que le/la ", nom_prod, "**\n",
-    "- a subi une **transformation culinaire** (cuit, rÃ¢pÃ©, assaisonnÃ©, etc.)\n",
-    "- est conditionnÃ© ou prÃ©sentÃ© de maniÃ¨re Ã  indiquer une prÃ©paration culinaire\n",
-    "- est destinÃ© Ã  un **usage spÃ©cifique** impliquant une transformation\n\n",
-    "Ignore tous les **produits bruts**, câ€™est-Ã -dire :\n",
-    "- les produits qui contiennent **seulement ", nom_prod, "**\n",
-    "- les produits dont le nom ne mentionne **aucun autre ingrÃ©dient ni transformation**\n\n",
-    "Retourne uniquement les **noms exacts** des produits transformÃ©s de la liste dâ€™origine, sans commentaire ni explication.\n\n",
-    "**Le rÃ©sultat doit Ãªtre strictement au format suivant (vecteur R) :**\n",
-    "`c(\"produit transformÃ©\", \"produit transformÃ©\", ...)`\n",
-    "Ne retourne **que** ce vecteur.\n\n",
-    "Voici la liste de produits Ã  analyser :\n"
-  )
-
-  # Génération des prompts complets
-  resultats <- lapply(chunks, function(chunk) {
-    prompt_complet <- paste0(base_prompt, paste(chunk, collapse = "\n"))
-  })
-
-  return(resultats)
-}
-
-```
-
-## b) Avec sample
-
-```{r}
+# On génère les prompts et on applique Gemma dessus
 detecter_levels_prod_transfor <- function(nom_prod, levels, nb_chunck, taille_chunck) {
   
   total_levels <- length(levels)
@@ -165,297 +26,111 @@ detecter_levels_prod_transfor <- function(nom_prod, levels, nb_chunck, taille_ch
   # Nombre total de chunks générés
   total_chunks <- length(chunks)
 
-  # Limiter au nb_chunck demandé, mais sans dépasser ceux disponibles
+  # Limiter au nb_chunck demandé, mais sans dÃ©passer ceux disponibles
   chunks <- chunks[1:min(nb_chunck, total_chunks)]
 
   # Prompt de base (dynamique en fonction du produit)
-  base_prompt <- paste0(
-    "Tu es un expert en alimentation et en classification des produits alimentaires.\n\n",
-    "Tu reçois une liste de produits à base de ", nom_prod, ".\n",
-    "Ta tâche est d’**identifier uniquement les produits transformés** dans cette liste.\n\n",
-    "Un **produit est transformé** s’il :\n",
-    "- contient **d’autres ingrédients que le/la ", nom_prod, "**\n",
-    "- a subi une **transformation culinaire** (cuit, râpé, assaisonné, etc.)\n",
-    "- est conditionné ou présenté de manière à indiquer une préparation culinaire\n",
-    "- est destiné à un **usage spécifique** impliquant une transformation\n\n",
-    "Ignore tous les **produits bruts**, c’est-à-dire :\n",
-    "- les produits qui contiennent **seulement ", nom_prod, "**\n",
-    "- les produits dont le nom ne mentionne **aucun autre ingrédient ni transformation**\n\n",
-    "Retourne uniquement les **noms exacts** des produits transformés de la liste d’origine, sans commentaire ni explication.\n\n",
-    "**Le résultat doit être strictement au format suivant (vecteur R) :**\n",
-    "`c(\"produit transformé\", \"produit transformé\", ...)`\n",
-    "Ne retourne **que** ce vecteur.\n\n",
-    "Voici la liste de produits à analyser :\n"
-  )
-
-  # Étape 1 : Génération des prompts complets
-  prompts_complets <- lapply(chunks, function(chunk) {
-    paste0(base_prompt, paste(chunk, collapse = "\n"))
-  })
-
-  # Étape 2 : Tirer 3 lignes produit par prompt (après génération)
-  random_levels_par_prompt <- lapply(prompts_complets, function(prompt) {
-    # Extraire uniquement les lignes produit (après "à analyser :")
-    lignes <- unlist(strsplit(prompt, "\n"))
-    # On repère où commence la liste des produits qprès la phrase
-    # "Voici la liste de produits à analyser :"
-    idx_liste <- grep("liste de produits à analyser", lignes)
-    
-    # On prends toutes les lignes après la ligne contenant la phrase-clé, jusqu’à la fin du 
-    # prompt
-    produits <- lignes[(idx_liste + 1):length(lignes)]
-    
-    # On tire au hasard sans remise 3 noms de produits
-    sample(produits, min(3, length(produits)), replace = FALSE)
-  })
-
-  return(list(prompts = prompts_complets))
-}
-
-
-```
-
-## c) Avec sample + data filtré (sans produits transformés)
-
-```{r}
-detecter_levels_prod_transfor <- function(nom_prod, levels, nb_chunck, taille_chunck, data, num_col_data) {
-  
-  total_levels <- length(levels)
-
-  # Création des chunks de taille `taille_chunck` avec gestion du dernier chunk partiel
-  chunks <- split(levels, ceiling(seq_along(levels) / taille_chunck))
-
-  # Nombre total de chunks générés
-  total_chunks <- length(chunks)
-
-  # Limiter au nb_chunck demandé, mais sans dépasser ceux disponibles
-  chunks <- chunks[1:min(nb_chunck, total_chunks)]
-
-  # Prompt de base (dynamique en fonction du produit)
-  base_prompt <- paste0(
-    "Tu es un expert en alimentation et en classification des produits alimentaires.\n\n",
-    "Tu reçois une liste de produits à base de ", nom_prod, ".\n",
-    "Ta tâche est d’**identifier uniquement les produits transformés** dans cette liste.\n\n",
-    "Un **produit est transformé** s’il :\n",
-    "- contient **d’autres ingrédients que le/la ", nom_prod, "**\n",
-    "- a subi une **transformation culinaire** (cuit, râpé, assaisonné, etc.)\n",
-    "- est conditionné ou présenté de manière à indiquer une préparation culinaire\n",
-    "- est destiné à un **usage spécifique** impliquant une transformation\n\n",
-    "Ignore tous les **produits bruts**, c’est-à-dire :\n",
-    "- les produits qui contiennent **seulement ", nom_prod, "**\n",
-    "- les produits dont le nom ne mentionne **aucun autre ingrédient ni transformation**\n\n",
-    "Retourne uniquement les **noms exacts** des produits transformés de la liste d’origine, sans commentaire ni explication.\n\n",
-    "**Le résultat doit être strictement au format suivant (vecteur R) :**\n",
-    "`c(\"produit transformé\", \"produit transformé\", ...)`\n",
-    "Ne retourne **que** ce vecteur.\n\n",
-    "Voici la liste de produits à analyser :\n"
-  )
-
-  # Étape 1 : Génération des prompts complets
-  prompts_complets <- lapply(chunks, function(chunk) {
-    paste0(base_prompt, paste(chunk, collapse = "\n"))
-  })
-
-  # Étape 2 : Tirer 3 lignes produit par prompt (après génération)
-  random_levels_par_prompt <- lapply(prompts_complets, function(prompt) {
-    lignes <- unlist(strsplit(prompt, "\n"))
-    idx_liste <- grep("liste de produits à analyser", lignes)
-    produits <- lignes[(idx_liste + 1):length(lignes)]
-    sample(produits, min(3, length(produits)), replace = FALSE)
-  })
-
-  # Étape 3 : Flatten des tirages pour avoir tous les produits tirés
-  all_levels_to_remove <- unique(unlist(random_levels_par_prompt))
-
-  # Étape 4 : Suppression des lignes correspondantes dans la colonne concernée
-  filtered_data <- data[!data[[num_col_data]] %in% all_levels_to_remove, , drop = FALSE]
-
-  return(list(
-    tirages = random_levels_par_prompt,
-    data_filtrée = filtered_data
-  ))
-}
-
-
-```
-
-# III) Application de la fonction
-
-## a) Exemple : M.Lê
-
-```{r}
-# Appel fonction avec les levels de carottes
-levels_carotte <- c(
-  "Carottes",
-  "Carotte",
-  "Carotte botte",
-  "Carottes nouvelles botte",
-  "carotte",
-  "Carotte non lave",
-  "CAROTTE",
-  "Carottes botte",
-  "carotte botte",
-  "Carottes vrac",
-  "Carotte vrac",
-  "CAROTTES",
-  "Carotte - Vrac KG - Landes",
-  "Carotte De Sable",
-  "Carottes jaunes",
-  "Carottes De Couleurs",
-  "Carottes du Jardin des Saveurs",
-  "Carottes 1 kg",
-  "Carotte fane",
-  "Carottes EARL du Moulin Grand",
-  "Carottes de couleur",
-  "Carottes Nouvelles",
-  "Carottes fanes",
-  "Carotte lave",
-  "CRUDIT COLESLAW carottes rpes et chou blanc rp barquette 250 grammes",
-  "Carotte lacto-ferment au zeste de citron_ gingembre et carvi",
-  "CRUDIT CAROTTES RAPES barquette 250 grammes",
-  "carottes type nantaise lavées 1 kg",
-  "Carottes entières sous vide",
-  "CAROTTE   GROsses vrac 3kg",
-  "Carottes Bio 500 grammes",
-  "CAROTTE EN CUBE 20x20 U",
-  "CAROTTE EN CUBE 10x10 U",
-  "CAROTTE EN RONDELLE U",
-  "Carottes albigeoises",
-  "Carotte rpe bio 400g",
-  "Carotte rpe bio 200g",
-  "Carottes Bio 1 kilo",
-  "CAROTTE RPE 500 g U",
-  "CAROTTE RPE 250 g U",
-  "carottes bio  1kg",
-  "Carottes oranges",
-  "Carottes Mix 1kg",
-  "Carotte  orange",
-  "Carotte bio 1kg",
-  "CAROTTE bio",
-  "Tournedos de poisson_ pure de carotte_ kalamansi_ quinoa",
-  "Salade coleslaw bio [carotte_ chou blanc] 200g",
-  "Mix de crudits bio [carotte_ radis noir] 200g",
-  "Mix de crudits bio [carotte_ radis noir] 400g",
-  "Petits Pois carottes 660g - Jardin Bio",
-  "Carottes types Nantaise lavées 0.500kg",
-  "Carotte rondelle pelée bio 500g (4mm)",
-  "Soupe carotte thym &#8211; Potaverger",
-  "CAROTTES   TERRE ou LAVEES  France",
-  "Carotte - mlange de couleur",
-  "Soupe de carotte curry 75cl",
-  "Carottes cultives  Sarrians",
-  "Carottes (BIOLAND Mhren)"
+base_prompt <- paste0(
+  "Tu es un expert en alimentation et en classification des produits alimentaires.",
+  "Tu reçois une liste de produits à base de ", nom_prod, ". ", 
+  "Ta tâche est d’**identifier uniquement les produits transformés** dans cette liste.",
+  "---",
+  "### \uD83D\uDD36 Définition d’un **produit transformé** :",
+  "Un produit est considéré comme **transformé** s’il remplit **au moins un** des critères suivants :",
+  "- Il contient **d’autres ingrédients en plus de la ", nom_prod, "** (par exemple : chou, vinaigrette, gingembre, panais, quinoa, etc.)",
+  "- Il a subi une **transformation culinaire** (ex. cuit, râpé, assaisonné, mixé, fermenté, stérilisé…)",
+  "- Il est présenté ou conditionné comme un **plat préparé** (ex. soupe, purée, tartinade, chips, coleslaw, conserve, plat cuisiné, bocal, barquette, bouteille…)",
+  "- Il est destiné à un **usage spécifique** (ex. apéritif, snacking, bébé, mix de crudités, etc.)",
+  "---",
+  "### ⛔ À l’inverse, un **produit brut** est **non transformé** :",
+  "Tu dois **ignorer tous les produits bruts**, même s’ils sont variés ou bio.",  
+  "Un produit est brut s’il :",
+  "- est uniquement composé de **", nom_prod, "**, sans aucun autre ingrédient",
+  "- est présenté sous forme **naturelle** : entière, en botte, en vrac, en sac, lavée ou non, bio ou non, orange, jaune, violette, de différentes variétés",
+  "- n’a **subi aucune transformation culinaire**",
+  "- ne contient **aucune mention de préparation, de mélange ou de conditionnement culinaire**",
+  "\uD83D\uDC49 Exemples de produits **bruts à ignorer** :  ",
+  paste0(nom_prod, ", ", nom_prod, " vrac, ", nom_prod, " lavées, ", nom_prod, " bio, ", nom_prod, " en botte, ", nom_prod, " jaune, ", nom_prod, " non lavées, etc."),
+  "---",
+  "### \uD83D\uDCE4 Ce que tu dois faire :",
+  "- **Retourne uniquement** les **noms exacts** des produits transformés de la liste, **copiés tels quels**",
+  "- N’ajoute **aucune explication, aucun commentaire**",
+  "- Rends la sortie **exclusivement** au format R suivant :",
+  "c(\"produit transformé\", \"produit transformé\", \"produit transformé\")",
+  "Voici la liste de produits à analyser :"
 )
 
-resultats <- detecter_levels_prod_transfor("carotte", levels_carotte, nb_chunck = 12,
-                                         taille_chunck = 5)
 
-resultats
 
-# On concatène dans un vecteur  le résultat du dernier chunk
-cat(resultats[[12]])  
-
-```
-
-## b) Exemple : Coop circuit 2021
-
-```{r}
-
-# Importation du jeu de données carottes de coop circuit 2021
-library(readxl)
-data_carottes <- read_excel("data_carottes.xlsx")
-
-# Test de la fonction
-levels_carotte <- levels(as.factor(data_carotte$name_clean))
-resultat_carottes <- detecter_levels_prod_transfor("carotte", levels_carotte, nb_chunck = 4,
-                                         taille_chunck = 25)
-
-# On concatène dans un vecteur  le résultat du dernier chunk
-cat(resultat_carottes[[1]])  
-cat(resultat_carottes[[2]])  
-cat(resultat_carottes[[3]])  
-cat(resultat_carottes[[4]])  
-```
-
-# IV) Fonction pour extraire la liste des levels renvoyées par Gemma 3
-
-```{r}
-# Fonction qui extrait les produits listés après "Voici la liste de produits à analyser :"
-extraire_levels_prompt <- function(resultat_list) {
-  
-  # On applique une fonction à chaque élément de la liste resultat_list
-  lapply(resultat_list, function(texte) {
+  # Générer les prompts complets en y incorporant les levels
+  prompts <- lapply(chunks, function(chunk) {
+    paste0(base_prompt,paste(chunk, collapse = "\n"))
     
-    # On découpe le texte en lignes, en séparant sur les sauts de ligne "\n"
-    lignes <- unlist(strsplit(texte, "\n"))
-    
-    # On cherche l’index de la ligne contenant la phrase cible
-    index <- grep("Voici la liste de produits à analyser :", lignes)
-    
-    # Si on a trouvé cette phrase (donc si index n'est pas vide)
-    if (length(index) > 0) {
-      
-      # On retourne toutes les lignes situées après cette phrase jusqu’à la fin du texte
-      return(lignes[(index + 1):length(lignes)])
-    
-    } else {
-      
-      # Si la phrase n’est pas trouvée, on retourne NA de type caractère
-      return(NA_character_)
-    }
   })
+
+  # Générer les produits transformés en appelant Gemma3 pour chaque prompt
+  # resultats <- lapply(prompts, function(p) {
+  #   generate("gemma3", p, stream = FALSE, output = "text")
+  # })
+
+  # Résultats des prompts et de Gemma 3
+  #return(list(prompts = prompts, resultats = resultats))
+  
+  # Résultats des prompts
+  return(prompts = prompts)
 }
+```
+
+```{r}
+# Test de la fonction pour 20 prompts 
+liste_prompts_tomates <- 
+  detecter_levels_prod_transfor(
+    "tomate", levels_tomates_permutes, nb_chunck = 223,taille_chunck = 20)
+
+# Exemple d'affichage correct 
+cat(liste_prompts_tomates$`1`)
+
+# On sauvegarde les 20 prompts dans un fichier RData
+save(liste_prompts_tomates, file = "liste_20_prompts_complets.RData")
+```
+
+# III) Indicateur d'hallucination du modèle de langage
+
+## a) 1er vecteur de résultat du LLM
+
+```{r}
+
+# On stocke dans une variable le 1er vecteur de résultat du modèle de langage
+# 972 levels au total
+produits_uniques_1 <- produits_uniques
+
+# S'assurer qu'on travaille avec des levels uniques
+levels_tomates_uniques <- unique(levels_tomates)
+produits_uniques_1_uniques <- unique(produits_uniques_1)
+
+# Calculs
+nb_levels_tomates <- length(levels_tomates_uniques)
+nb_levels_produits <- length(produits_uniques_1_uniques)
+nb_communs <- length(intersect(levels_tomates_uniques, produits_uniques_1_uniques))
+
+# Créer le tableau de comptage
+table_1_comptage_comparaison <- tibble::tibble(
+  nb_levels_tomates = nb_levels_tomates,
+  nb_levels_LLM = nb_levels_produits,
+  nb_en_commun = nb_communs
+)
 
 ```
 
 ```{r}
+# On visualise les levels en commun
+Table_1_levels_commun_LLM_et_tomates <- 
+  data.frame(Levels_en_commun = 
+               intersect(levels_tomates_uniques, produits_uniques_1_uniques))
 
-# test de la fonction
-liste_levels_par_chunk <- extraire_levels_prompt(resultat_carottes)
+# On trie les levels du mot le plus court au plus long
 
-# Voir les résultats du chunk 8
-print(liste_levels_par_chunk[[8]])
+Table_1_levels_commun_LLM_et_tomates <- Table_1_levels_commun_LLM_et_tomates %>%
+  arrange(nchar(Levels_en_commun))
 
-```
-
-# V) Fonction pour supprimer les levels de produit tarnsformés dans le jeu de données
-
-```{r}
-# Fonction qui retire du data.frame les lignes contenant les levels des produits transformés
-supprimer_levels <- function(data, num_col_data, liste_levels_a_retire) {
-  
-  # On extrait la colonne cible et on la transforme en facteur
-  col_produits <- as.factor(data[[num_col_data]])
-  
-  # On identifie les levels à retirer
-  levels_a_supprimer <- unlist(liste_levels_a_retire)
-  
-  # On filtre les lignes du data. On garde celles dont le level n'est pas dans les niveaux à 
-  # retirer
-  lignes_a_garder <- !col_produits %in% levels_a_supprimer
-  
-  # On retourne le data.frame filtré (sans les lignes contenant les levels exclus)
-  data_filtre <- data[lignes_a_garder, ]
-
-  return(data_filtre)
-}
-
-
-```
-
-```{r}
-# Test de la fonction
-data_carotte_filtré <- supprimer_levels(data_carotte, nu224m_col_data = 12, liste_levels_par_chunk)
-
-
-data_carotte_filtré$name_clean <- as.factor(data_carotte_filtré$name_clean)        
-```
-
-# Trouver les produits transformés avec gemma
-
-```{r}
-resultats <- lapply(prompts_levels_tomates[1:2], function(prompt){
-  generate("gemma3",prompt, stream = FALSE, output = "text")
-})
-cat(resultats$`1`)
 ```
