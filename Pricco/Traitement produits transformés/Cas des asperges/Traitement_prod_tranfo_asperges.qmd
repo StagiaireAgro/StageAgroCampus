@@ -53,7 +53,7 @@ extraire_liste_produits <- function(texte_source) {
   if (grepl("\\*\\s+", texte_source) || grepl("-\\s+", texte_source)) {
     lignes_separees <- unlist(strsplit(texte_source, "\n"))  # Découpe le texte ligne par ligne
     lignes_avec_puce <- grep("^\\s*(\\*|-)", lignes_separees, value = TRUE)  # Ne garde que les lignes avec puces
-# V) Tableau d'indicateur de pureté 
+
     if (length(lignes_avec_puce) > 0) {
       return(trimws(gsub("^(\\*|-)+\\s*", "", lignes_avec_puce)))  # Supprime les puces et espaces initiaux
     }
@@ -142,6 +142,7 @@ View(resultats_comparaison)
 
 # V) Tableau d'indicateur de pureté 
 
+
 ```{r}
 # On initialise le tableau d'indicateur d'impureté 
 table_indica_purete_asperge <- data.frame(chunck_traite = c(1:9),
@@ -151,7 +152,23 @@ table_indica_purete_asperge <- data.frame(chunck_traite = c(1:9),
                                           nb_fausses_halluci_llm = NA,
                                           nb_vraies_halluci_llm = NA)
 
+
+
+# On remplit la colonne du nb_levels_initial
+table_indica_purete_asperge$nb_levels_initial <- sapply(resultats_comparaison, function(x) length(x$produits_attendus))
+
+# On remplit la colonne du nb_levels_llm
+table_indica_purete_asperge$nb_levels_llm <- sapply(resultats_comparaison, function(x) length(x$produits_extraits))
+
+# On remplit la colonne du nb_levels_commun
+table_indica_purete_asperge$nb_levels_commun <- sapply(resultats_comparaison, function(x) length(x$produits_communs))
+
+# On remplit la colonne du nb_fausses_halluci_llm
+table_indica_purete_asperge$nb_fausses_halluci_llm <- sapply(resultats_comparaison, function(x) length(x$pseudo_hallucinations))
+
+# On remplit la colonne du nb_vraies_halluci_llm
+table_indica_purete_asperge$nb_vraies_halluci_llm <- sapply(resultats_comparaison, function(x) length(x$hallucinations_reelles))
+
+View(table_indica_purete_asperge)
 ```
-
-
 
