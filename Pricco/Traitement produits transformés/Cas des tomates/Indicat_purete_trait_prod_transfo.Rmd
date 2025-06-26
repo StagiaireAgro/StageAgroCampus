@@ -78,7 +78,7 @@ vect_verifi_res_LLM <- lapply(res_40, extraire_liste_produits)
 # Vérifie pour quels éléments de res_40 l'extraction a échoué (retourne NULL)
 # sapply(..., is.null)' renvoie un vecteur logique indiquant quels éléments sont NULL
 # which(...)' retourne les indices correspondants. C'est utile pour identifier les cas problématiques
-which(sapply(res_40, is.null))
+which(sapply(res_60, is.null))
 
 ```
 
@@ -113,14 +113,20 @@ comparer_listes_produits <- function(prompts_attendus, reponses_llm) {
     produits_communs <- intersect(liste_attendue, liste_extraite)
 
     # Identifie les "hallucinations" : produits extraits par le LLM mais absents de la liste initiale
-    hallucinations <- setdiff(liste_extraite, produits_communs)
+    hallucinations_brutes <- setdiff(liste_extraite, produits_communs)
+    
+      # Filtrage des hallucinations : on retire celles qui sont des sous-parties d’un produit attendu
+    hallucinations_filtrees <- hallucinations_brutes[!sapply(hallucinations_brutes, function(h) {
+      any(grepl(h, liste_attendue, fixed = TRUE))
+    })]
 
     # Structure des résultats par comparaison
     list(
       produits_attendus = liste_attendue,
       produits_extraits = liste_extraite,
       produits_communs = produits_communs,
-      hallucinations = hallucinations
+      pseudo_hallucinations = hallucinations_brutes,
+      hallucinations_reelles = hallucinations_filtrees
     )
   })
 
@@ -133,4 +139,3 @@ resultats_comparaison <- comparer_listes_produits(prompts_20_levels_tomates_2, r
 View(resultats_comparaison)
 
 ```
-
