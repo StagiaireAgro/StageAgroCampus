@@ -72,13 +72,13 @@ extraire_liste_produits <- function(texte_source) {
 
 # Applique la fonction extraire_liste_produits() à chaque élément de 'res_40'
 # Cela permet d'extraire, pour chaque réponse du LLM, la liste de produits transformés détectée
-vect_verifi_res_LLM <- lapply(res_40, extraire_liste_produits)
+vect_verifi_LLM_res_asp_60_1 <- lapply(res_asp_60_1, extraire_liste_produits)
 
 
 # Vérifie pour quels éléments de res_40 l'extraction a échoué (retourne NULL)
 # sapply(..., is.null)' renvoie un vecteur logique indiquant quels éléments sont NULL
 # which(...)' retourne les indices correspondants. C'est utile pour identifier les cas problématiques
-which(sapply(res_60, is.null))
+which(sapply(res_asp_60_1, is.null))
 
 ```
 
@@ -135,8 +135,7 @@ comparer_listes_produits <- function(prompts_attendus, reponses_llm) {
 }
 
 # Exemple d'exécution de la fonction pour les prompts de taille 20 des tomates
-resultats_comparaison <- comparer_listes_produits(prompts_20_levels_tomates_2, res_20)
+resultats_comparaison <- comparer_listes_produits(prompts_60_levels_asperge_1, res_asp_60_1)
 View(resultats_comparaison)
 
 ```
-
