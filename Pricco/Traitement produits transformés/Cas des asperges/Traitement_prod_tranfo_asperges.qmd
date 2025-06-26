@@ -142,4 +142,16 @@ View(resultats_comparaison)
 
 # V) Tableau d'indicateur de pureté 
 
+```{r}
+# On initialise le tableau d'indicateur d'impureté 
+table_indica_purete_asperge <- data.frame(chunck_traite = c(1:9),
+                                          nb_levels_initial = NA,
+                                          nb_levels_llm = NA,
+                                          nb_levels_commun = NA,
+                                          nb_fausses_halluci_llm = NA,
+                                          nb_vraies_halluci_llm = NA)
+
+```
+
+
 
