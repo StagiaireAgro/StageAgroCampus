@@ -110,38 +110,32 @@ comparer_listes_produits <- function(prompts_attendus, reponses_llm) {
     liste_extraite <- produits_extraits_llm[[i]]
 
     # Identifie les produits présents dans les deux listes (correspondance exacte)
-    produits_communs_initiaux <- intersect(liste_attendue, liste_extraite)
+    produits_communs <- intersect(liste_attendue, liste_extraite)
 
     # Identifie les "hallucinations" brutes : produits extraits par le LLM mais absents de la liste initiale
     pseudo_hallucinations <- setdiff(liste_extraite, liste_attendue)
 
-    # Ajoute aux produits_communs les pseudo_hallucinations qui ne sont pas des sous-parties des produits déjà communs
-    pseudo_valides <- pseudo_hallucinations[
-      !sapply(pseudo_hallucinations, function(ph) {
-        any(grepl(ph, produits_communs_initiaux, fixed = TRUE))
-      })
-    ]
-
-    # Fusion des produits communs initiaux avec les pseudo_hallucinations valides
-    produits_communs <- c(produits_communs_initiaux, pseudo_valides)
-
     # Identifie les hallucinations réelles : tout ce qui reste dans produits_extraits et pseudo_hallucinations,
-    # une fois les produits communs pris en compte
-    hallucinations_reelles <- setdiff(unique(c(liste_extraite, pseudo_hallucinations)), produits_communs)
+    # une fois les produits attendus retirés
+# Hallucinations réelles = (produits_extraits U pseudo_hallucinations) - produits_communs
+    hallucinations_reelles <- setdiff(liste_extraite, pseudo_hallucinations)
+    
+    # hallucinations_reelles correspondent aux éléments de liste_extraite qui ne sont pas 
 
     # Structure des résultats par comparaison
     list(
-      produits_attendus = liste_attendue,
-      produits_extraits = liste_extraite,
-      produits_communs = produits_communs,
-      pseudo_hallucinations = pseudo_hallucinations,
-      hallucinations_reelles = hallucinations_reelles
+      levels_initiaux = liste_attendue,
+      levels_llm = liste_extraite,
+      levels_communs = produits_communs,
+      fausses_hallucina = pseudo_hallucinations,
+      vraies_hallucina = hallucinations_reelles
     )
   })
 
   # Étape 4 : Retourne la liste complète des résultats de comparaison
   return(comparaison)
 }
+
 
 
 # Exemple d'exécution de la fonction pour les prompts de taille 20 des tomates
