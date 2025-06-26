@@ -53,7 +53,7 @@ extraire_liste_produits <- function(texte_source) {
   if (grepl("\\*\\s+", texte_source) || grepl("-\\s+", texte_source)) {
     lignes_separees <- unlist(strsplit(texte_source, "\n"))  # Découpe le texte ligne par ligne
     lignes_avec_puce <- grep("^\\s*(\\*|-)", lignes_separees, value = TRUE)  # Ne garde que les lignes avec puces
-
+# V) Tableau d'indicateur de pureté 
     if (length(lignes_avec_puce) > 0) {
       return(trimws(gsub("^(\\*|-)+\\s*", "", lignes_avec_puce)))  # Supprime les puces et espaces initiaux
     }
@@ -139,3 +139,7 @@ resultats_comparaison <- comparer_listes_produits(prompts_60_levels_asperge_1, r
 View(resultats_comparaison)
 
 ```
+
+# V) Tableau d'indicateur de pureté 
+
+
