@@ -6,129 +6,130 @@ format: html
 # I) Importation des librairies
 
 ```{r,message=FALSE}
-library("ollamar")
 library("tidyverse")
 ```
 
-# II) Trouver les produits transformés avec gemma
+# II) Extraction des produits transformés trouvés par le modèle de langage
 
 ```{r}
-extract_vector <- function(texte) {
-  # Extraire la chaîne qui commence par c("...") et finit par ")
-  pattern <- "c\\((\"[^\"]*\"\\s*,?\\s*)+\\)"
-  vecteur_brut <- regmatches(texte, regexpr(pattern, texte))
+# Fonction permettant d'extraire une liste de produits transformés depuis un texte généré par un LLM
 
-  if (length(vecteur_brut) == 0) return(NULL)  # Rien trouvé
+extraire_liste_produits <- function(texte_source) {
+  # Étape 1 : Remplace les appels à 'C(' par 'c(' (R est sensible à la casse, 'C(' pourrait causer une erreur)
+  texte_source <- gsub("C\\(", "c(", texte_source, ignore.case = TRUE)
 
-  # Essayer d'évaluer le texte en R, mais ignorer les erreurs
-  res <- tryCatch(eval(parse(text = vecteur_brut)), error = function(e) NULL)
-  return(res)
+  # Étape 2 : Supprime les sauts de ligne pour éviter de casser la chaîne de caractères lors de l'évaluation
+  texte_source <- gsub("\n", " ", texte_source)
+
+  # Étape 3 : Définit le motif (regex) pour détecter un appel à la fonction R c(...) contenant une liste de chaînes
+  motif_vecteur <- "c\\s*\\((.*?)\\)"
+
+  # Étape 4 : Cherche la première correspondance avec le motif défini ci-dessus
+  correspondance_vecteur <- regmatches(texte_source, regexpr(motif_vecteur, texte_source, perl = TRUE))
+
+  # Étape 5 : Si une correspondance a été trouvée et qu’elle n’est pas vide, tenter de l’évaluer comme du code R
+  if (length(correspondance_vecteur) > 0 && correspondance_vecteur != "") {
+    tentative_evaluation <- tryCatch(
+      eval(parse(text = correspondance_vecteur)),  # Essaie d'exécuter le texte comme du code R
+      error = function(e) NULL  # En cas d'erreur, retourne NULL
+    )
+
+    # Étape 6 : Si l’évaluation a réussi et retourne un vecteur de chaînes de caractères, le retourner
+    if (!is.null(tentative_evaluation) && is.character(tentative_evaluation)) {
+      return(tentative_evaluation)
+    }
+  }
+
+  # Étape 7 : Si aucun vecteur c(...) exploitable n’a été trouvé, chercher manuellement des chaînes entre guillemets
+  positions_chaines <- gregexpr('"([^"]{2,100})"', texte_source, perl = TRUE)
+  chaines_trouvees <- regmatches(texte_source, positions_chaines)[[1]]
+
+  # Étape 8 : Si au moins deux chaînes sont extraites, les retourner comme vecteur après nettoyage
+  if (length(chaines_trouvees) >= 2) {
+    return(trimws(gsub('"', "", chaines_trouvees)))  # Supprime les guillemets et espaces superflus
+  }
+
+  # Étape 9 : Vérifie si le texte ressemble à une liste (éléments précédés de * ou -)
+  if (grepl("\\*\\s+", texte_source) || grepl("-\\s+", texte_source)) {
+    lignes_separees <- unlist(strsplit(texte_source, "\n"))  # Découpe le texte ligne par ligne
+    lignes_avec_puce <- grep("^\\s*(\\*|-)", lignes_separees, value = TRUE)  # Ne garde que les lignes avec puces
+
+    if (length(lignes_avec_puce) > 0) {
+      return(trimws(gsub("^(\\*|-)+\\s*", "", lignes_avec_puce)))  # Supprime les puces et espaces initiaux
+    }
+  }
+
+  # Étape 10 : Si aucune méthode n’a permis d’extraire une liste, retourner NULL
+  return(NULL)
 }
 
-comparaison_prompts_res <- function(prompt_produits, res_gemmas){
-  # Extraire les levels des produits dans les prompts
-  extraction_produits <- lapply(prompt_produits, function(prompt){
-    extr_levels <- str_extract(
-      prompt, "(?s)(?<=Voici la liste de produits à analyser :)\\s*.*")
-    unlist(strsplit(extr_levels, "\n"))
-  })
-  # Extraire les produits renvoyées par gemmas
-  resultats_gemma <- lapply(res_gemmas, function(rdes){
-    extract_vector(rdes)
-  })
-  # Comparaison & retourn concordance et discordance
-  res <- lapply(seq_along(extraction_produits), function(i){
-    levels_prod <- extraction_produits[[i]] ; gemma_res <- resultats_gemma[[i]]
-    communs <- intersect(levels_prod, gemma_res)
-    hallucination <- setdiff(gemma_res, communs)
-    list(
-      levels_produits = levels_prod, 
-      resultats_gemma = gemma_res,
-      levels_communs = communs, 
-      hallucination = hallucination
-      )
-  })
-  return(res)
-}
-
-res_inoussas <- comparaison_prompts_res(prompts_40_levels_tomates_2, res_40)
-View(res_inoussas)
 ```
 
-On teste le prompt de taille 40
+
+# III) Vérification de l'extraction des résultats du LLM dans une liste
 
 ```{r}
 
-extract_vector <- function(texte) {
-  # Extraire la chaîne qui commence par c("...") et finit par ")
-  pattern <- "c\\((\"[^\"]*\"\\s*,?\\s*)+\\)"
+# Applique la fonction extraire_liste_produits() à chaque élément de 'res_40'
+# Cela permet d'extraire, pour chaque réponse du LLM, la liste de produits transformés détectée
+vect_verifi_res_LLM <- lapply(res_40, extraire_liste_produits)
+
+
+# Vérifie pour quels éléments de res_40 l'extraction a échoué (retourne NULL)
+# sapply(..., is.null)' renvoie un vecteur logique indiquant quels éléments sont NULL
+# which(...)' retourne les indices correspondants. C'est utile pour identifier les cas problématiques
+which(sapply(res_40, is.null))
+
+```
+
+# IV) Comparaison des produits listés dans les prompts avec ceux extraits par LLM
+
+```{r}
+# Fonction permettant de comparer les produits listés dans les prompts avec ceux extraits par LLM
+comparer_listes_produits <- function(prompts_attendus, reponses_llm) {
   
-  vecteur_brut <- regmatches(texte, regexpr(pattern, texte))
-
-  if (length(vecteur_brut) == 0) return(NULL)  # Rien trouvé
-
-  # Essayer d'évaluer le texte en R, mais ignorer les erreurs
-  res <- tryCatch(eval(parse(text = vecteur_brut)), error = function(e) NULL)
-  return(res)
-}
-
-comparaison_prompts_res <- function(prompt_produits, res_gemmas){
-  # Extraire les levels des produits dans les prompts
-  extraction_produits <- lapply(prompt_produits, function(prompt){
-    extr_levels <- str_extract(
-      prompt, "(?s)(?<=Voici la liste de produits à analyser :)\\s*.*")
-    unlist(strsplit(extr_levels, "\n"))
+  # Étape 1 : Extraction des produits attendus depuis les prompts (niveau "level")
+  produits_attendus <- lapply(prompts_attendus, function(texte_prompt) {
+    # Extrait tout ce qui suit "Voici la liste de produits à analyser :"
+    texte_extrait <- str_extract(
+      texte_prompt,
+      "(?s)(?<=Voici la liste de produits à analyser :)\\s*.*"
+    )
+    # Découpe le texte extrait ligne par ligne
+    unlist(strsplit(texte_extrait, "\n"))
   })
-  # Extraire les produits renvoyées par gemmas
-  resultats_gemma <- lapply(res_gemmas, function(rdes){
-    extract_vector(rdes)
+
+  # Étape 2 : Extraction des produits reconnus par le LLM (via extract_vector)
+  produits_extraits_llm <- lapply(reponses_llm, function(texte_reponse) {
+    extraire_liste_produits(texte_reponse)  # On utilise la fonction d'extraction de texte issu du LLM
   })
-  # Comparaison & retourn concordance et discordance
-  res <- lapply(seq_along(extraction_produits), function(i){
-    levels_prod <- extraction_produits[[i]] ; gemma_res <- resultats_gemma[[i]]
-    communs <- intersect(levels_prod, gemma_res)
-    hallucination <- setdiff(gemma_res, communs)
-    
+
+  # Étape 3 : Comparaison entre les produits attendus et extraits
+  comparaison <- lapply(seq_along(produits_attendus), function(i) {
+    liste_attendue <- produits_attendus[[i]]
+    liste_extraite <- produits_extraits_llm[[i]]
+
+    # Identifie les produits présents dans les deux listes (correspondance)
+    produits_communs <- intersect(liste_attendue, liste_extraite)
+
+    # Identifie les "hallucinations" : produits extraits par le LLM mais absents de la liste initiale
+    hallucinations <- setdiff(liste_extraite, produits_communs)
+
+    # Structure des résultats par comparaison
     list(
-      levels_produits = levels_prod, 
-      resultats_gemma = gemma_res,
-      levels_communs = communs, 
-      hallucination = hallucination
-      )
+      produits_attendus = liste_attendue,
+      produits_extraits = liste_extraite,
+      produits_communs = produits_communs,
+      hallucinations = hallucinations
+    )
   })
-  return(res)
+
+  # Étape 4 : Retourne la liste complète des résultats de comparaison
+  return(comparaison)
 }
 
-res_inoussas <- comparaison_prompts_res(prompts_40_levels_tomates_2, res_40)
-View(res_inoussas)
+# Exemple d'exécution de la fonction pour les prompts de taille 20 des tomates
+resultats_comparaison <- comparer_listes_produits(prompts_20_levels_tomates_2, res_20)
+View(resultats_comparaison)
 
-
-# Fonction pour identifier les listes dont la fonction extract na pas extraire le vecteur c
-res <- lapply(seq_along(res_inoussas), function(i){
-  if(is.null(res_inoussas[[i]][["resultats_gemma"]])){
-   i
-  }
-})
-
-rt <- na.omit(unlist(res)) # Les numeros de listes concernées
-
-# Les cas qui ne sont traitées
-avant <- c(7,20,38,42,47,48,52,56,63,64,72,83,87,103)
-View(res_inoussas[avant])
-
-# Nouveau pattern à utilisé pour resoudre certains cas daffichage
-pattern <- "c\\(((\"(\\\\\"|[^\"])*\"\\s*,?\\s*)+)\\)"
-
-# Les cas qui sont traitées
-
-
-length(avant)
-
-
-verifier <- avant[avant %in% rt]
-verify <- res_inoussas[verifier]
-length(verifier)
-View(verify)
-
-
-
+```
