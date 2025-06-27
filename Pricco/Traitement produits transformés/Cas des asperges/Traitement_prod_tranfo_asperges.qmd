@@ -197,7 +197,8 @@ table_indica_purete_asperge <- data.frame(chunck_traite = c(1:9),
                                           nb_vraies_halluci_llm = NA,
                                           nb_prod_attendus = NA, 
                                           nb_prod_transfo_trouves_llm = NA,
-                                          nb_prod_transfo_pas_trouves_llm = NA)
+                                          nb_prod_transfo_pas_trouves_llm = NA,
+                                          nb_fausses_halluci_llm_st_prod_transfo = NA)
 
 
 
@@ -228,11 +229,14 @@ table_indica_purete_asperge$nb_prod_transfo_trouves_llm <- sapply(resultats_comp
 # On remplit la colonne du nb_prod_transfo_pas_trouves_llm
 table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm <- sapply(resultats_comparaison, function(x) length(x$prod_transfo_pas_trouver))
 
+# On remplit la colonne du nb_fausses_halluci_llm_st_prod_transfo
+table_indica_purete_asperge$nb_fausses_halluci_llm_st_prod_transfo <- sapply(resultats_comparaison, function(x) length(x$fausses_hallucina_prod_transfo))
+
 
 # On crée le jeu de données contenant le total de chacune des colonnes de 
 # table_indica_purete_asperge
 data_total_indicat_purete <-
-  data.frame("Totale",sum(table_indica_purete_asperge$nb_levels_initial),sum(table_indica_purete_asperge$nb_levels_llm),sum(table_indica_purete_asperge$nb_levels_commun),sum(table_indica_purete_asperge$nb_fausses_halluci_llm),sum(table_indica_purete_asperge$nb_vraies_halluci_llm),sum(table_indica_purete_asperge$nb_prod_attendus),sum(table_indica_purete_asperge$nb_prod_transfo_trouves_llm),sum(table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm))
+  data.frame("Totale",sum(table_indica_purete_asperge$nb_levels_initial),sum(table_indica_purete_asperge$nb_levels_llm),sum(table_indica_purete_asperge$nb_levels_commun),sum(table_indica_purete_asperge$nb_fausses_halluci_llm),sum(table_indica_purete_asperge$nb_vraies_halluci_llm),sum(table_indica_purete_asperge$nb_prod_attendus),sum(table_indica_purete_asperge$nb_prod_transfo_trouves_llm),sum(table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm), sum(table_indica_purete_asperge$nb_fausses_halluci_llm_st_prod_transfo))
 
 # On affecte les mêmes noms de colonnes que pour table_indica_purete_asperge
 names(data_total_indicat_purete) <- names(table_indica_purete_asperge)
@@ -240,7 +244,7 @@ names(data_total_indicat_purete) <- names(table_indica_purete_asperge)
 # On crée le jeu de données contenant le total de chacune des colonnes de 
 # table_indica_purete_asperge
 data_moy_indicat_purete <-
-  data.frame("Moyenne",NA,round(mean(table_indica_purete_asperge$nb_levels_llm)),round(mean(table_indica_purete_asperge$nb_levels_commun)),round(mean(table_indica_purete_asperge$nb_fausses_halluci_llm)),round(mean(table_indica_purete_asperge$nb_vraies_halluci_llm)),round(mean(table_indica_purete_asperge$nb_prod_attendus)),round(mean(table_indica_purete_asperge$nb_prod_transfo_trouves_llm)),round(mean(table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm)))
+  data.frame("Moyenne",NA,round(mean(table_indica_purete_asperge$nb_levels_llm)),round(mean(table_indica_purete_asperge$nb_levels_commun)),round(mean(table_indica_purete_asperge$nb_fausses_halluci_llm)),round(mean(table_indica_purete_asperge$nb_vraies_halluci_llm)),round(mean(table_indica_purete_asperge$nb_prod_attendus)),round(mean(table_indica_purete_asperge$nb_prod_transfo_trouves_llm)),round(mean(table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm)),round(mean(table_indica_purete_asperge$nb_fausses_halluci_llm_st_prod_transfo)))
 
 # On affecte les mêmes noms de colonnes que pour table_indica_purete_asperge
 names(data_moy_indicat_purete) <- names(table_indica_purete_asperge)
