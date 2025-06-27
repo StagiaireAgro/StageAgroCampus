@@ -160,7 +160,8 @@ hallucinations_reelles <- pseudo_hallucinations[!sapply(pseudo_hallucinations, f
   return(comparaison)
 }
 
-verite_terrain <- readxl::read_excel("data/2022-2023/levels_asperge.xlsx")
+# On importe la vérité terrain 
+verite_terrain <- readxl::read_excel("levels_asperge.xlsx")
 
 # Exemple d'exécution de la fonction pour les prompts de taille 20 des tomates
 resultats_comparaison <- comparer_listes_produits(prompts_60_levels_asperge_1, res_asp_60_1, verite_terrain)
