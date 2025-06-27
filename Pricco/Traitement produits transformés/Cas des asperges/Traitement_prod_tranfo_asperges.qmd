@@ -118,9 +118,20 @@ comparer_listes_produits <- function(prompts_attendus, reponses_llm) {
     # Identifie les hallucinations réelles : tout ce qui reste dans produits_extraits et pseudo_hallucinations,
     # une fois les produits attendus retirés
 # Hallucinations réelles = (produits_extraits U pseudo_hallucinations) - produits_communs
-    hallucinations_reelles <- setdiff(liste_extraite, pseudo_hallucinations)
+
+    
+hallucinations_reelles <- pseudo_hallucinations[!sapply(pseudo_hallucinations, function(h) {
+  mots <- strsplit(tolower(h), "\\s+")[[1]]
+  if (length(mots) == 0) return(FALSE)  # cas vide
+  pattern <- paste0(".*", paste(mots, collapse = ".*"), ".*")  # construit regex : .*mot1.*mot2.*mot3.*
+  any(grepl(pattern, tolower(liste_attendue)))
+})]
+    
+    pseudo_hallucinations <- setdiff(pseudo_hallucinations, hallucinations_reelles)
     
     # hallucinations_reelles correspondent aux éléments de liste_extraite qui ne sont pas 
+    
+
 
     # Structure des résultats par comparaison
     list(
@@ -135,7 +146,6 @@ comparer_listes_produits <- function(prompts_attendus, reponses_llm) {
   # Étape 4 : Retourne la liste complète des résultats de comparaison
   return(comparaison)
 }
-
 
 
 # Exemple d'exécution de la fonction pour les prompts de taille 20 des tomates
@@ -159,19 +169,19 @@ table_indica_purete_asperge <- data.frame(chunck_traite = c(1:9),
 
 
 # On remplit la colonne du nb_levels_initial
-table_indica_purete_asperge$nb_levels_initial <- sapply(resultats_comparaison, function(x) length(x$produits_attendus))
+table_indica_purete_asperge$nb_levels_initial <- sapply(resultats_comparaison, function(x) length(x$levels_initiaux))
 
 # On remplit la colonne du nb_levels_llm
-table_indica_purete_asperge$nb_levels_llm <- sapply(resultats_comparaison, function(x) length(x$produits_extraits))
+table_indica_purete_asperge$nb_levels_llm <- sapply(resultats_comparaison, function(x) length(x$levels_llm))
 
 # On remplit la colonne du nb_levels_commun
-table_indica_purete_asperge$nb_levels_commun <- sapply(resultats_comparaison, function(x) length(x$produits_communs))
+table_indica_purete_asperge$nb_levels_commun <- sapply(resultats_comparaison, function(x) length(x$levels_communs))
 
 # On remplit la colonne du nb_fausses_halluci_llm
-table_indica_purete_asperge$nb_fausses_halluci_llm <- sapply(resultats_comparaison, function(x) length(x$pseudo_hallucinations))
+table_indica_purete_asperge$nb_fausses_halluci_llm <- sapply(resultats_comparaison, function(x) length(x$fausses_hallucina))
 
 # On remplit la colonne du nb_vraies_halluci_llm
-table_indica_purete_asperge$nb_vraies_halluci_llm <- sapply(resultats_comparaison, function(x) length(x$hallucinations_reelles))
+table_indica_purete_asperge$nb_vraies_halluci_llm <- sapply(resultats_comparaison, function(x) length(x$vraies_hallucina))
 
 View(table_indica_purete_asperge)
 ```
