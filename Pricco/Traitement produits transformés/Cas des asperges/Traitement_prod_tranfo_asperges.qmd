@@ -7,8 +7,6 @@ format: html
 
 ```{r,message=FALSE}
 library("tidyverse")
-
-library("readxl")
 ```
 
 # II) Extraction des produits transformés trouvés par le modèle de langage
@@ -139,11 +137,11 @@ hallucinations_reelles <- pseudo_hallucinations[!sapply(pseudo_hallucinations, f
     
     verite_terrain_produit_transfo <- verite_terrain$levels_asperge[verite_terrain$Prod_transfo_ou_non == "1"]
     
-    prod_transfo_levels_initiaux <- intersect(tolower(verite_terrain_produit_transfo), tolower(liste_attendue))
+    prod_transfo_levels_initiaux <- intersect(verite_terrain_produit_transfo, liste_attendue)
     
-    produit_transfo_llm <- intersect(tolower(prod_transfo_levels_initiaux), tolower(produits_communs))
+    produit_transfo_llm <- intersect(prod_transfo_levels_initiaux, produits_communs)
 
-    prod_transfo_pas_trouver <- setdiff(tolower(prod_transfo_levels_initiaux), tolower(produit_transfo_llm))
+    prod_transfo_pas_trouver <- setdiff(prod_transfo_levels_initiaux, produit_transfo_llm)
 
     # Structure des résultats par comparaison
     list(
@@ -162,13 +160,14 @@ hallucinations_reelles <- pseudo_hallucinations[!sapply(pseudo_hallucinations, f
   return(comparaison)
 }
 
-verite_terrain <- readxl::read_excel("levels_asperge.xlsx")
+verite_terrain <- readxl::read_excel("data/2022-2023/levels_asperge.xlsx")
 
 # Exemple d'exécution de la fonction pour les prompts de taille 20 des tomates
 resultats_comparaison <- comparer_listes_produits(prompts_60_levels_asperge_1, res_asp_60_1, verite_terrain)
 View(resultats_comparaison)
 
 ```
+
 
 # V) Tableau d'indicateur de pureté 
 
