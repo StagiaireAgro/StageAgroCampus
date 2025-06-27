@@ -7,6 +7,8 @@ format: html
 
 ```{r,message=FALSE}
 library("tidyverse")
+
+library("readxl")
 ```
 
 # II) Extraction des produits transformés trouvés par le modèle de langage
@@ -178,7 +180,10 @@ table_indica_purete_asperge <- data.frame(chunck_traite = c(1:9),
                                           nb_levels_llm = NA,
                                           nb_levels_commun = NA,
                                           nb_fausses_halluci_llm = NA,
-                                          nb_vraies_halluci_llm = NA)
+                                          nb_vraies_halluci_llm = NA,
+                                          nb_prod_attendus = NA, 
+                                          nb_prod_transfo_trouves_llm = NA,
+                                          nb_prod_transfo_pas_trouves_llm = NA)
 
 
 
@@ -196,6 +201,18 @@ table_indica_purete_asperge$nb_fausses_halluci_llm <- sapply(resultats_comparais
 
 # On remplit la colonne du nb_vraies_halluci_llm
 table_indica_purete_asperge$nb_vraies_halluci_llm <- sapply(resultats_comparaison, function(x) length(x$vraies_hallucina))
+
+# On remplit la colonne du nb_prod_attendus
+table_indica_purete_asperge$nb_prod_attendus <- sapply(resultats_comparaison, function(x) length(x$vraies_hallucina))
+
+# On remplit la colonne du nb_prod_attendus
+table_indica_purete_asperge$nb_prod_attendus <- sapply(resultats_comparaison, function(x) length(x$prod_transfo_attendus))
+
+# On remplit la colonne du nb_prod_transfo_trouves_llm
+table_indica_purete_asperge$nb_prod_transfo_trouves_llm <- sapply(resultats_comparaison, function(x) length(x$produit_transfo_llm))
+
+# On remplit la colonne du nb_prod_transfo_pas_trouves_llm
+table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm <- sapply(resultats_comparaison, function(x) length(x$prod_transfo_pas_trouver))
 
 View(table_indica_purete_asperge)
 ```
