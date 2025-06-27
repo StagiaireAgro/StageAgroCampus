@@ -7,6 +7,9 @@ format: html
 
 ```{r,message=FALSE}
 library("tidyverse")
+
+# Chargement du package writexl pour exporter des data frames au format Excel (.xlsx)
+library(writexl)
 ```
 
 # II) Extraction des produits transformés trouvés par le modèle de langage
@@ -290,4 +293,16 @@ matrice_confusion_prompt_60$Negatifs[[2]] <- matrice_confusion_prompt_60$Negatif
 matrice_confusion_prompt_60$Positifs[[2]] <-table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm[[10]]
 
 ```
+
+# VII) Export de la liste des produits transformés non trouvés par le LLM et de la liste des produits considérés comme transformés mais qui sont en réalité des produits bruts 
+
+
+```{r}
+# Export de la liste des produits transformés non trouvés par le LLM
+write_xlsx(produits_transfo_pas_trouves,"data_produits_transfo_pas_trouves.xlsx")
+
+# Export de la liste des produits considérés comme transformés mais qui sont en réalité des produits bruts 
+write_xlsx(produits_transfo_trouves_ms_bruts,"data_produits_transfo_trouves_ms_bruts.xlsx")
+```
+
 
