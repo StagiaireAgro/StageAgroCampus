@@ -86,7 +86,7 @@ which(sapply(res_asp_60_1, is.null))
 
 ```{r}
 # Fonction permettant de comparer les produits listés dans les prompts avec ceux extraits par LLM
-comparer_listes_produits <- function(prompts_attendus, reponses_llm) {
+comparer_listes_produits <- function(prompts_attendus, reponses_llm, verite_terrain) {
   
   # Étape 1 : Extraction des produits attendus depuis les prompts (niveau "level")
   produits_attendus <- lapply(prompts_attendus, function(texte_prompt) {
@@ -119,6 +119,9 @@ comparer_listes_produits <- function(prompts_attendus, reponses_llm) {
     # une fois les produits attendus retirés
 # Hallucinations réelles = (produits_extraits U pseudo_hallucinations) - produits_communs
 
+    #hallucinations_reelles <- #pseudo_hallucinations[!sapply(pseudo_hallucinations, function(x) {
+      #any(grepl(tolower(x), tolower(liste_attendue), fixed = TRUE))
+    #})] 
     
 hallucinations_reelles <- pseudo_hallucinations[!sapply(pseudo_hallucinations, function(h) {
   mots <- strsplit(tolower(h), "\\s+")[[1]]
@@ -131,7 +134,14 @@ hallucinations_reelles <- pseudo_hallucinations[!sapply(pseudo_hallucinations, f
     
     # hallucinations_reelles correspondent aux éléments de liste_extraite qui ne sont pas 
     
+    
+    verite_terrain_produit_transfo <- verite_terrain$levels_asperge[verite_terrain$Prod_transfo_ou_non == "1"]
+    
+    prod_transfo_levels_initiaux <- intersect(tolower(verite_terrain_produit_transfo), tolower(liste_attendue))
+    
+    produit_transfo_llm <- intersect(tolower(prod_transfo_levels_initiaux), tolower(produits_communs))
 
+    prod_transfo_pas_trouver <- setdiff(tolower(prod_transfo_levels_initiaux), tolower(produit_transfo_llm))
 
     # Structure des résultats par comparaison
     list(
@@ -139,7 +149,10 @@ hallucinations_reelles <- pseudo_hallucinations[!sapply(pseudo_hallucinations, f
       levels_llm = liste_extraite,
       levels_communs = produits_communs,
       fausses_hallucina = pseudo_hallucinations,
-      vraies_hallucina = hallucinations_reelles
+      vraies_hallucina = hallucinations_reelles,
+      prod_transfo_attendus = prod_transfo_levels_initiaux,
+      produit_transfo_llm = produit_transfo_llm,
+      prod_transfo_pas_trouver = prod_transfo_pas_trouver
     )
   })
 
@@ -147,9 +160,10 @@ hallucinations_reelles <- pseudo_hallucinations[!sapply(pseudo_hallucinations, f
   return(comparaison)
 }
 
+verite_terrain <- readxl::read_excel("levels_asperge.xlsx")
 
 # Exemple d'exécution de la fonction pour les prompts de taille 20 des tomates
-resultats_comparaison <- comparer_listes_produits(prompts_60_levels_asperge_1, res_asp_60_1)
+resultats_comparaison <- comparer_listes_produits(prompts_60_levels_asperge_1, res_asp_60_1, verite_terrain)
 View(resultats_comparaison)
 
 ```
