@@ -1,5 +1,5 @@
 ---
-title: "Traitement_prod_tranfo_asperges_prompt_60"
+title: "Traitement_prod_tranfo_asperges"
 format: html
 ---
 
@@ -7,9 +7,6 @@ format: html
 
 ```{r,message=FALSE}
 library("tidyverse")
-
-# Chargement du package writexl pour exporter des data frames au format Excel (.xlsx)
-library(writexl)
 ```
 
 # II) Extraction des produits transformés trouvés par le modèle de langage
@@ -120,12 +117,10 @@ comparer_listes_produits <- function(prompts_attendus, reponses_llm, verite_terr
 
     # Identifie les hallucinations réelles : tout ce qui reste dans produits_extraits et pseudo_hallucinations,
     # une fois les produits attendus retirés
-# Hallucinations réelles = (produits_extraits U pseudo_hallucinations) - produits_communs
 
     #hallucinations_reelles <- #pseudo_hallucinations[!sapply(pseudo_hallucinations, function(x) {
       #any(grepl(tolower(x), tolower(liste_attendue), fixed = TRUE))
     #})] 
-    
 hallucinations_reelles <- pseudo_hallucinations[!sapply(pseudo_hallucinations, function(h) {
   mots <- strsplit(tolower(h), "\\s+")[[1]]
   if (length(mots) == 0) return(FALSE)  # cas vide
@@ -133,9 +128,24 @@ hallucinations_reelles <- pseudo_hallucinations[!sapply(pseudo_hallucinations, f
   any(grepl(pattern, tolower(liste_attendue)))
 })]
 
-    pseudo_hallucinations <- setdiff(pseudo_hallucinations, hallucinations_reelles)
-    
-    # hallucinations_reelles correspondent aux éléments de liste_extraite qui ne sont pas 
+  pseudo_hallucinations <- setdiff(pseudo_hallucinations, hallucinations_reelles)
+        
+hallucinations_corrige <- unlist(lapply(pseudo_hallucinations, function(h) {
+  mots <- strsplit(tolower(h), "\\s+")[[1]]
+  if (length(mots) == 0) return(NULL) 
+  pattern <- paste0(".*", paste(mots, collapse = ".*"), ".*")
+  
+  vrais_noms <- liste_attendue[sapply(liste_attendue, function(p) {
+    grepl(pattern, tolower(p))
+  })]
+  
+  if (length(vrais_noms) == 0) return(NULL)
+  return(vrais_noms)
+}))
+
+    hallucinations_corrige <- unique(hallucinations_corrige)
+
+    produits_communs <- unique(c(produits_communs, hallucinations_corrige))
     
     
     verite_terrain_produit_transfo <- verite_terrain$levels_asperge[verite_terrain$Prod_transfo_ou_non == "1"]
@@ -146,31 +156,19 @@ hallucinations_reelles <- pseudo_hallucinations[!sapply(pseudo_hallucinations, f
 
     prod_transfo_pas_trouver <- setdiff(prod_transfo_levels_initiaux, produit_transfo_llm)
     
-    # On regarde parmi les hallucinations qui sont des sous parties des produits initiaux lesquelles sont des sous parties des produits transformés attendus
+    # On regarde parmi les hallucinations qui sont des sous parties des produits initiaux lesquelles sont des sous parties des produits transformés attendus, et on récupère leur nom complet dans la liste des produits transformé attendus 
     
-if (length(pseudo_hallucinations) == 0 || length(prod_transfo_levels_initiaux) == 0) {
-  fausses_hallucina_prod_transfo <- character(0)  # vecteur vide si données manquantes
-} else {
-
-  fausses_hallucina_prod_transfo <- pseudo_hallucinations[sapply(pseudo_hallucinations, function(h) {
-    mots <- strsplit(tolower(h), "\\s+")[[1]]
-    if (length(mots) == 0) return(FALSE)
-    pattern <- paste0(".*", paste(mots, collapse = ".*"), ".*")
-    any(grepl(pattern, tolower(prod_transfo_levels_initiaux)))
-  })]
-}
-
+    
     # Structure des résultats par comparaison
     list(
       levels_initiaux = liste_attendue,
       levels_llm = liste_extraite,
-      levels_communs = produits_communs,
       fausses_hallucina = pseudo_hallucinations,
       vraies_hallucina = hallucinations_reelles,
+      levels_communs = produits_communs,
       prod_transfo_attendus = prod_transfo_levels_initiaux,
       produit_transfo_llm = produit_transfo_llm,
-      prod_transfo_pas_trouver = prod_transfo_pas_trouver,
-      fausses_hallucina_prod_transfo = fausses_hallucina_prod_transfo
+      prod_transfo_pas_trouver = prod_transfo_pas_trouver
     )
   })
 
@@ -184,6 +182,9 @@ verite_terrain <- readxl::read_excel("levels_asperge.xlsx")
 resultats_comparaison <- comparer_listes_produits(prompts_60_levels_asperge_1, res_asp_60_1, verite_terrain)
 View(resultats_comparaison)
 
+produits_transfo_pas_trouves <- unlist(lapply(resultats_comparaison, function(x) x$prod_transfo_pas_trouver))
+
+produits_transfo_trouves_ms_bruts <- unlist(lapply(resultats_comparaison, function(x) setdiff(x$levels_communs, x$prod_transfo_attendus)))
 ```
 
 
@@ -196,14 +197,13 @@ table_indica_purete_asperge <- data.frame(chunck_traite = c(1:9),
                                           nb_levels_initial = NA,
                                           nb_levels_llm = NA,
                                           nb_levels_commun = NA,
-                                          nb_fausses_halluci_llm = NA,
                                           nb_vraies_halluci_llm = NA,
                                           nb_prod_attendus = NA, 
                                           nb_prod_transfo_trouves_llm = NA,
-                                          nb_prod_transfo_pas_trouves_llm = NA,
-                                          nb_fausses_halluci_llm_st_prod_transfo = NA)
+                                          nb_prod_transfo_pas_trouves_llm = NA)
 
 
+######----------- col a supprimer: fausses_hallucina_prod_transfo
 
 # On remplit la colonne du nb_levels_initial
 table_indica_purete_asperge$nb_levels_initial <- sapply(resultats_comparaison, function(x) length(x$levels_initiaux))
@@ -214,8 +214,6 @@ table_indica_purete_asperge$nb_levels_llm <- sapply(resultats_comparaison, funct
 # On remplit la colonne du nb_levels_commun
 table_indica_purete_asperge$nb_levels_commun <- sapply(resultats_comparaison, function(x) length(x$levels_communs))
 
-# On remplit la colonne du nb_fausses_halluci_llm
-table_indica_purete_asperge$nb_fausses_halluci_llm <- sapply(resultats_comparaison, function(x) length(x$fausses_hallucina))
 
 # On remplit la colonne du nb_vraies_halluci_llm
 table_indica_purete_asperge$nb_vraies_halluci_llm <- sapply(resultats_comparaison, function(x) length(x$vraies_hallucina))
@@ -232,14 +230,17 @@ table_indica_purete_asperge$nb_prod_transfo_trouves_llm <- sapply(resultats_comp
 # On remplit la colonne du nb_prod_transfo_pas_trouves_llm
 table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm <- sapply(resultats_comparaison, function(x) length(x$prod_transfo_pas_trouver))
 
-# On remplit la colonne du nb_fausses_halluci_llm_st_prod_transfo
-table_indica_purete_asperge$nb_fausses_halluci_llm_st_prod_transfo <- sapply(resultats_comparaison, function(x) length(x$fausses_hallucina_prod_transfo))
-
 
 # On crée le jeu de données contenant le total de chacune des colonnes de 
 # table_indica_purete_asperge
 data_total_indicat_purete <-
-  data.frame("Totale",sum(table_indica_purete_asperge$nb_levels_initial),sum(table_indica_purete_asperge$nb_levels_llm),sum(table_indica_purete_asperge$nb_levels_commun),sum(table_indica_purete_asperge$nb_fausses_halluci_llm),sum(table_indica_purete_asperge$nb_vraies_halluci_llm),sum(table_indica_purete_asperge$nb_prod_attendus),sum(table_indica_purete_asperge$nb_prod_transfo_trouves_llm),sum(table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm), sum(table_indica_purete_asperge$nb_fausses_halluci_llm_st_prod_transfo))
+  data.frame("Totale",sum(table_indica_purete_asperge$nb_levels_initial),
+             sum(table_indica_purete_asperge$nb_levels_llm),
+             sum(table_indica_purete_asperge$nb_levels_commun),
+             sum(table_indica_purete_asperge$nb_vraies_halluci_llm),
+             sum(table_indica_purete_asperge$nb_prod_attendus),
+             sum(table_indica_purete_asperge$nb_prod_transfo_trouves_llm),
+             sum(table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm))
 
 # On affecte les mêmes noms de colonnes que pour table_indica_purete_asperge
 names(data_total_indicat_purete) <- names(table_indica_purete_asperge)
@@ -247,7 +248,12 @@ names(data_total_indicat_purete) <- names(table_indica_purete_asperge)
 # On crée le jeu de données contenant le total de chacune des colonnes de 
 # table_indica_purete_asperge
 data_moy_indicat_purete <-
-  data.frame("Moyenne",NA,round(mean(table_indica_purete_asperge$nb_levels_llm)),round(mean(table_indica_purete_asperge$nb_levels_commun)),round(mean(table_indica_purete_asperge$nb_fausses_halluci_llm)),round(mean(table_indica_purete_asperge$nb_vraies_halluci_llm)),round(mean(table_indica_purete_asperge$nb_prod_attendus)),round(mean(table_indica_purete_asperge$nb_prod_transfo_trouves_llm)),round(mean(table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm)),round(mean(table_indica_purete_asperge$nb_fausses_halluci_llm_st_prod_transfo)))
+  data.frame("Moyenne",NA,round(mean(table_indica_purete_asperge$nb_levels_llm)),
+             round(mean(table_indica_purete_asperge$nb_levels_commun)),
+             round(mean(table_indica_purete_asperge$nb_vraies_halluci_llm)),
+             round(mean(table_indica_purete_asperge$nb_prod_attendus)),
+             round(mean(table_indica_purete_asperge$nb_prod_transfo_trouves_llm)),
+             round(mean(table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm)))
 
 # On affecte les mêmes noms de colonnes que pour table_indica_purete_asperge
 names(data_moy_indicat_purete) <- names(table_indica_purete_asperge)
@@ -257,6 +263,7 @@ table_indica_purete_asperge <- rbind(table_indica_purete_asperge, data_total_ind
 
 # On combine la ligne du total à table_indica_purete_asperge
 table_indica_purete_asperge <- rbind(table_indica_purete_asperge, data_moy_indicat_purete)
+
 ```
 
 # VI) Matrice de confiusion 
