@@ -126,10 +126,10 @@ comparer_listes_produits <- function(prompts_attendus, reponses_llm, verite_terr
 hallucinations_reelles <- pseudo_hallucinations[!sapply(pseudo_hallucinations, function(h) {
   mots <- strsplit(tolower(h), "\\s+")[[1]]
   if (length(mots) == 0) return(FALSE)  # cas vide
-  pattern <- paste0(".*", paste(mots, collapse = ".*"), ".*")  # construit regex : .*mot1.*mot2.*mot3.*
+  pattern <- paste0(".*", paste(mots, collapse = ".*"), ".*")  # construction du regex : .*mot1.*mot2.*mot3.*
   any(grepl(pattern, tolower(liste_attendue)))
 })]
-    
+
     pseudo_hallucinations <- setdiff(pseudo_hallucinations, hallucinations_reelles)
     
     # hallucinations_reelles correspondent aux éléments de liste_extraite qui ne sont pas 
@@ -142,6 +142,20 @@ hallucinations_reelles <- pseudo_hallucinations[!sapply(pseudo_hallucinations, f
     produit_transfo_llm <- intersect(prod_transfo_levels_initiaux, produits_communs)
 
     prod_transfo_pas_trouver <- setdiff(prod_transfo_levels_initiaux, produit_transfo_llm)
+    
+    # On regarde parmi les hallucinations qui sont des sous parties des produits initiaux lesquelles sont des sous parties des produits transformés attendus
+    
+if (length(pseudo_hallucinations) == 0 || length(prod_transfo_levels_initiaux) == 0) {
+  fausses_hallucina_prod_transfo <- character(0)  # vecteur vide si données manquantes
+} else {
+
+  fausses_hallucina_prod_transfo <- pseudo_hallucinations[sapply(pseudo_hallucinations, function(h) {
+    mots <- strsplit(tolower(h), "\\s+")[[1]]
+    if (length(mots) == 0) return(FALSE)
+    pattern <- paste0(".*", paste(mots, collapse = ".*"), ".*")
+    any(grepl(pattern, tolower(prod_transfo_levels_initiaux)))
+  })]
+}
 
     # Structure des résultats par comparaison
     list(
@@ -152,7 +166,8 @@ hallucinations_reelles <- pseudo_hallucinations[!sapply(pseudo_hallucinations, f
       vraies_hallucina = hallucinations_reelles,
       prod_transfo_attendus = prod_transfo_levels_initiaux,
       produit_transfo_llm = produit_transfo_llm,
-      prod_transfo_pas_trouver = prod_transfo_pas_trouver
+      prod_transfo_pas_trouver = prod_transfo_pas_trouver,
+      fausses_hallucina_prod_transfo = fausses_hallucina_prod_transfo
     )
   })
 
@@ -160,7 +175,6 @@ hallucinations_reelles <- pseudo_hallucinations[!sapply(pseudo_hallucinations, f
   return(comparaison)
 }
 
-# On importe la vérité terrain 
 verite_terrain <- readxl::read_excel("levels_asperge.xlsx")
 
 # Exemple d'exécution de la fonction pour les prompts de taille 20 des tomates
