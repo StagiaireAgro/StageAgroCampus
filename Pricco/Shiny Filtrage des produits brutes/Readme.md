@@ -1,4 +1,4 @@
-# Global.R
+# global.R
 Ce script contient les fonctions utilisées dans l'application
 
 # ui.R
