@@ -1,5 +1,0 @@
-paths:
-  data_dir: data/
-  output_dir: output/
-  log_file: logs/app.log
-
