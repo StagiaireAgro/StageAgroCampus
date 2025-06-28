@@ -7,5 +7,5 @@ Ce script contient uniquement le developpement front-end
 # server.R
 Ce script contient toutes les manipulations back-end qui intérragit avec le front-end
 
-# Config/settings/
+# Config/settings.yml
 Definitions des chemins data/ et output/ (ou seront stockés les jeux de données télechargés)
