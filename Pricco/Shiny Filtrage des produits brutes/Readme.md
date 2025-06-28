@@ -9,3 +9,6 @@ Ce script contient toutes les manipulations back-end qui intérragit avec le fro
 
 # Config/settings.yml
 Definitions des chemins data/ et output/ (ou seront stockés les jeux de données télechargés)
+
+
+MERCI DE TELECHARGER TOUT LE DOSSIER !
