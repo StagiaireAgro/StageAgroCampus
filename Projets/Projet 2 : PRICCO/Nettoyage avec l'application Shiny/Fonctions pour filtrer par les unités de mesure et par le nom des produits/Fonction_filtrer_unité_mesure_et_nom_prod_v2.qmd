@@ -1,1 +1,246 @@
+---
+title: "Fonction_filtrer_unité_mesure_et_nom_prod_v2"
+format:
+  html:
+    toc: true
+---
+# nettoyage des bases de donnees
+## Importation de fonctions
+```{r}
+convert_kg <- function(data, num_unit, num_qt, tx_kg){
+      
+      t1 <- Sys.time()
+      
+      data[[num_unit]] <- as.factor(data[[num_unit]])
+      levels(data[[num_unit]]) <- 1:length(levels(data[[num_unit]])) # on transorme les facteur en niveau 1:n
+      
+      convert_unit <- tx_kg[seq(1,length(tx_kg), by = 2)] #On selectionne la bonne convertion pour chaque observation grace au facteur
+      vecteur_convert <- convert_unit[data[[num_unit]]]   #On fait le vecteur de convertion pour chaque observation
+      
+      data$poidsenkg <- data[[num_qt]]/vecteur_convert #
+      
+      data_NaN <- data[is.nan(data$poidsenkg),] 
+      
+      data_conv <- data[!(is.nan(data$poidsenkg)),]
+      
+      t2 <- Sys.time()
+      
+      t <- t2-t1
+      
+      return(list(data_conv,data_NaN,t)) 
+
+}
+
+convert_non_calc <- function(data, num_name, num_qt, tx_kg_qt){
+      
+      t1 <- Sys.time()
+      
+      data[[num_name]] <- as.factor(data[[num_name]])
+      levels(data[[num_name]]) <- 1:length(levels(data[[num_name]])) # on transorme les facteur en niveau 1:n
+      
+      convert_unit <- tx_kg_qt[seq(1,length(tx_kg_qt), by = 3)] #On selectionne la bonne convertion en kg pour chaque observation grace aux facteurs
+      convert_qt <- tx_kg_qt[seq(2,length(tx_kg_qt), by = 3)] #On selectionne la bonne convertion  de quantité pour chaque observation grace aux facteurs
+      
+      vecteur_convert_unit <- convert_unit[data[[num_name]]] #On fait le vecteur de convertion d'unité 
+      
+      vecteur_convert_qt <- convert_qt[data[[num_name]]] #On fait le vecteur de convertion de quantité
+      
+      data$poidsenkg <- vecteur_convert_qt/vecteur_convert_unit*data$productConditioningQuantity #On utilise nos vecteur pour avoir le poids net en kg
+      
+      data_NaN2 <- data[is.nan(data$poidsenkg),] 
+      
+      data_conv2 <- data[!(is.nan(data$poidsenkg)),]
+      
+      t2 <- Sys.time()
+      t <- t2-t1
+      
+      return(list(data_conv2,data_NaN2,t))
+
+    }
+```
+
+## Creation de vecteur pour les convertion en kg
+
+```{r}
+recup_convert_c_lvls <- function(data, num_unit){
+  lvls <- levels(as.factor(data[[num_unit]]))
+  convert_lvls <- rep(1:length(lvls), each = 2)
+  i <- 1
+  for(val in lvls){
+    question <- paste("Combien de '",val,"' pour 1kg (NaN si impossible) : ")
+    nb_unit <- as.numeric(readline(prompt = question ))
+    convert_lvls[i] <- nb_unit
+    i <- i+2
+    
+  }
+  
+  return(convert_lvls)
+}
+
+```
+```{r}
+recup_convert_nc_lvls <- function(data, num_name){
+  
+  lvls <- levels(as.factor(data[[num_name]]))
+  convert_lvls <- rep(1:length(lvls), each = 3)
+  i <- 1
+  for(val in lvls){
+    
+    question1 <- paste("Combien de l'unité de '",val,"' pour 1kg (NaN si impossible) : ")
+    question2 <- paste("Il y a combien de cette unite : '",val,"' : (NaN si impossible) : ")
+    
+    nb_unit <- as.numeric(readline(prompt = question1 ))
+    qt_unit <- as.numeric(readline(prompt = question2 ))
+    
+    convert_lvls[i] <- nb_unit
+    convert_lvls[i+1] <- qt_unit
+    i <- i + 3
+  }
+  
+  return(convert_lvls)
+}
+
+```
+### Test
+```{r}
+# data <- read.csv("data/Cagette/cagette_Abricot_2021_2022_2023.csv")
+
+#    num_unit <- 8
+
+#    num_qt <- 7
+
+#    tx_kg <- c(c(NaN,1),c(1000,2),c(1,3),c(NaN,4))
+
+#    data_conv_kg <- convert_kg(data,num_unit,num_qt,tx_kg)
+
+#    data_conv <- data_conv_kg[[1]]
+
+#    data_NaN <- data_conv_kg[[2]]
+
+#recup_convert_nc_lvls(data_NaN,5)
+```
+# Combinaison fonction pour calculer le kg
+```{r}
+calcul_kg <- function(data, nom_csv){
+  
+  question_nom <- paste("Quel est le numéro de colonne pour le nom du produit du fichier : ", nom_csv," ? : ")
+  num_name <- as.numeric(readline(prompt = question_nom))
+  
+  question_qt <- paste("Quel est le numéro de colonne pour la quantité du produit du fichier : ", nom_csv," ? : ")
+  num_qt <- as.numeric(readline(prompt = question_qt))
+  
+  question_unit <- paste("Quel est le numéro de colonne pour l'unité du produit du fichier : ", nom_csv," ? : ")
+  num_unit <- as.numeric(readline(prompt = question_unit))
+  
+  # premier net
+  
+  t1 <- Sys.time()
+  
+  tx_kg <- recup_convert_c_lvls(data, num_unit)
+  
+  l1 <- convert_kg(data, num_unit, num_qt, tx_kg)
+  
+  tx_qt_kg <- recup_convert_nc_lvls(l1[[2]], num_name)
+  
+  l2 <- convert_non_calc(l1[[2]], num_name, num_qt, tx_qt_kg)
+  
+  data_conv <- rbind(l1[[1]],l2[[1]])
+  
+  t2 <- Sys.time()
+  
+  t <- t2-t1
+  
+  return(list(data_conv,l2[[2]],l1[[3]]+l2[[3]],t))
+  
+}
+
+
+```
+### Test
+```{r}
+
+# a <- calcul_kg(data,"1")
+
+
+# traite <- a[[1]]
+# non_traite <- a[[2]]
+# time_machine <- a[[3]]
+# time_utilisateur <- a[[4]]
+
+# time_machine
+# time_utilisateur
+
+# non_traite
+```
+# Remplissage auto csv
+## Creation du fichier csv a remplir
+- Nombre de lignes du fichier est egal au nombre de fichiers csv a traiter
+- On cree plusieurs variable (le nombre de lignes traite et non traite, le temps d'execution de la machine, le temps que l'utilisateur met pour traite le fichier et le nom de l'individu qui traite le fichier)
+- Par default les donnees manquantes prennent la valeur NaN
+```{r}
+
+nom_fich <- list.files(path = "data")
+tests <- data.frame(nom_fich = nom_fich,
+                    nb_valeurs_c = rep(NaN,length(nom_fich)),
+                    nb_valeur_nc = rep(NaN,length(nom_fich)),
+                    t_machine = rep(NaN,length(nom_fich)),
+                    t_utilisateur = rep(NaN,length(nom_fich)),
+                    nom = rep(NaN,length(nom_fich))
+                    )
+write.csv(tests, "tests_cagette.csv",row.names = F)
+head(tests)
+```
+## Creationde de la fonction de remplissage automatique
+### Arguments
+- list_nom_csv = liste des fichier csv a traiter. en rapport avec le fichier csv qui vient d'etre cree
+- nom_fich_csv = Nom du fichier csv que l'on vient de cree. Contient la liste des nom de fichier csv a traiter
+- Nom_indiv = Nom de l'individu qui traite les fichiers csv
+```{r}
+
+remplissage_csv <- function(list_nom_csv,nom_fich_csv,Nom_indiv){
+  
+  data_nom_fich_csv <- read.csv(paste("data/",nom_fich_csv, sep = ""))
+  
+  for( nom_csv in list_nom_csv){
+    
+    data <- read.csv(paste("data/",nom_csv,sep = ""))
+    
+    result <- calcul_kg(data, nom_csv)
+    
+    data_nom_fich_csv[data_nom_fich_csv[[1]] == nom_csv,2] <- nrow(result[[1]])
+    
+    data_nom_fich_csv[data_nom_fich_csv[[1]] == nom_csv,3] <- nrow(result[[2]])
+    
+    data_nom_fich_csv[data_nom_fich_csv[[1]] == nom_csv,4] <- result[[3]]
+    
+    data_nom_fich_csv[data_nom_fich_csv[[1]] == nom_csv,5] <- result[[4]]
+    
+    data_nom_fich_csv[data_nom_fich_csv[[1]] == nom_csv,6] <- Nom_indiv
+    
+    oui_non <- as.integer(readline(prompt = "voulez vous continuer ? (1 = oui/ 0 = non)"))
+    
+    if(!as.logical(oui_non)){
+      
+      
+      return(data_nom_fich_csv)
+      
+      stop()
+      
+    } 
+    
+  }
+  
+  return(data_nom_fich_csv)
+  
+}
+
+```
+### Test
+```{r}
+list_nom_fich <- list.files(path = "data/")
+
+#a <- remplissage_csv(list_nom_fich,"tests_cagette.csv","Antoine")
+ 
+```
+
 
