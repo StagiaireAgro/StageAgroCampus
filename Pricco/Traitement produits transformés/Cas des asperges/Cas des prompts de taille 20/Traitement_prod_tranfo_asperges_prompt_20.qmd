@@ -188,6 +188,10 @@ verite_terrain <- readxl::read_excel("levels_asperge.xlsx")
 resultats_comparaison <- comparer_listes_produits(prompts_20_levels_asperge_1, res_asp_20_1, verite_terrain)
 View(resultats_comparaison)
 
+produits_transfo_pas_trouves <- unlist(lapply(resultats_comparaison, function(x) x$prod_transfo_pas_trouver))
+
+produits_transfo_trouves_ms_bruts <- unlist(lapply(resultats_comparaison, function(x) setdiff(x$levels_communs, x$prod_transfo_attendus)))
+
 ```
 
 
