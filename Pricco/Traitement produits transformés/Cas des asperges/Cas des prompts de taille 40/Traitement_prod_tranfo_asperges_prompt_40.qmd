@@ -204,7 +204,7 @@ produits_transfo_trouves_ms_bruts <- unlist(lapply(resultats_comparaison, functi
 
 ```{r}
 # On initialise le tableau d'indicateur d'impureté 
-table_indica_purete_asperge <- data.frame(chunck_traite = c(1:9),
+table_indica_purete_asperge <- data.frame(chunck_traite = length(resultats_comparaison),
                                           nb_levels_initial = NA,
                                           nb_levels_llm = NA,
                                           nb_levels_commun = NA,
