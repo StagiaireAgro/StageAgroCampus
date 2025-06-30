@@ -1,1 +1,2930 @@
+---
+title: "Version_3_documentation"
+format:
+  html:
+    toc: true
+---
+
+## Packages
+
+```{r, message=FALSE, warning=FALSE}
+library(readxl)
+library(dplyr)
+library(tidyverse)
+library(kableExtra)
+library(gtsummary)
+library(questionr)
+library(magrittr) # %T>% 
+```
+
+## Importation des données
+
+```{r,}
+
+data <- read_excel("24407_Export.xlsx")
+
+```
+
+## Questions :
+
+### 1.Pour chaque lieu. Expression des fréquences des courses
+
+#### Avec R natif
+
+(1) On renomme les variables. Dans cette option, il est possible de renommer immédiatement après avoir importé le jeu de données, à l’aide de la fonction `names()`.
+    (1) La commande `names()` permet de sélectionner le nom des variables du jeu de données.
+    (2) `[17:28]`permet de ne garder que les colonnes numéro 17 jusqu'au numéro 28.
+    (3) L'opérateur `<-` est celui de l'affectation `c()` est l'opérateur de concaténation. Dedans, on précise le nouveau nom des colonnes.
+(2) On renomme les modalités. Poursuivons avec le bon renommage des lignes des colonnes de la question 6. Etant donné qu'il faudra répéter exactement la même opération de renommage sur 13 colonnes, nous nous servirons d'une boucle for pour optimiser et éviter les copier-coller qui prennent beaucoup de temps.
+(3) On sélectionne les colonnes d'intérêt. Ensuite, pour cette question, nous n'avons besoin que des colonnes portant sur la question 6 de l'enquête. Pour ce faire, nous exploitons la fonction `subset()`. Elle a pour objectif de renvoyer des sous-ensembles de vecteurs, de matrices ou de trames de données qui répondent à certaines conditions.
+    (1) Le premier argument obligatoire de `subset()` est le jeu de données. Ici, il s'agit de data1.
+    (2) Le deuxième atgument obligatoire de `subset()` est la condition appliquée. Ici, il s'agit d'une sélection des colonnes 17 à 28 (qui sont celles de la question 6). D'où l'écriture, `select = c(17:28)` qui permet de le faire.
+(4) On calcule les fréquences. Maintenant, passons au calcul des fréquences avec la fonction `lapply()` Pour un jeu de données fourni, `lapply()` appliquera une ou des fonctions sur ce dernier. Nous entendons fonctions au sens large, c’est-à-dire que cela peut autant être des fonctions comme le type des variables, la somme, etc. Les résultats renvoyés par la fonction `lapply()` seront au format liste.
+    (1) On renseigne les données qui nous intéressent dans l’argument X. Ici, c'est data1_question_6
+    (2) On remplit la ou les fonctions qu’on souhaite appliquer sur les données d’intérêt dans l'argument `FUN.` Ici, on utilisera `round()` pour arrondi les résultats à 2 décimales puis `prop.table()` pour calculer les fréquences et on multiplie par 100 pour obtenir des pourcentages.
+(5) On transforme en tableau de résultats exploitable et interprétable. Le format liste n’est pas des plus appropriés pour lire des résultats dans un rapport. C’est pourquoi, nous décidons de métamorphoser les résultats listes en tableau de résultat grâce à la fonction `as.data.frame()` de R de base. Au sien de la fonction `as.data.frame()`, nous introduisons la fonction `do.call()` qui construit et exécute un appel de fonction à partir d’un nom ou d’une fonction et une liste d’arguments à lui transmettre.
+    (1) Le premier argument de `do.call()` est le nom de la fonction. Ici, il s'agit de `rbind()` qui permet de combiner toutes nos listes par lignes. Attention, il faut s'assurer d'avoir exactement le même nombre de colonnes pour que `rbind()` marche. Sinon, une erreur sera renvoyée. Cette condition est bien vérifiée ici.
+    (2) Le deuxième argument est la liste. Dans notre cas, il s'agit de table_propr_courses_option_1.
+(6) On Met en forme le tableau. Nous allons crééer et ajouter une colonne pour le libellé du lieu d'achat à l'aide de la fonction de concaténation `c()` et le `$`. Par défaut, R place automatyiquement la nouvelle colonne créée en dernière position. Il est plus naturel et logique d'avoir le libellé du lieu d'achat en première position. Ainsi, grâce à la sélection, la concaténation et le nombre de colonnes (`ncol()`), nous exécutons cela. De plus, nous ajoutons le symbole `%`dans chaque cellule de notre tableau avec une boucle `for` et de la fonction `paste0()` qui permet de concaténer.
+
+```{r,warning=FALSE}
+
+# (1)
+
+data1 = data
+
+names(data1)[17:28] <- c("Hypermarché", "Hard discount","Epiceries indépendante",
+                            "Magains de surgelé","Magasins spécialisés Bio", "Marché","Directement aux agriculteur",
+                            "Paniers en ligne", "Artisans et commerçants spécialisés", "Epicerie participative",
+                            "Magasin alimentaire spécialisé dans le vrac", "Magasin d'aide alimentaire")
+
+# (2)
+modifications <- c("1" = "Plusieurs fois par semaine",
+                   "2" = "1 fois par semaine",
+                   "3" = "2 à 3 fois par mois",
+                   "4" = "1 fois par mois",
+                   "5" = "Moins d’une fois par mois",
+                   "6" = "Seulement pour des événements particuliers",
+                   "7" = "Jamais")
+
+
+colonnes_a_modifier <- c("Hypermarché", "Hard discount","Epiceries indépendante",
+                          	"Magains de surgelé","Magasins spécialisés Bio", "Marché","Directement aux agriculteur",
+                          	"Paniers en ligne", "Artisans et commerçants spécialisés", "Epicerie participative",
+                          	"Magasin alimentaire spécialisé dans le vrac", "Magasin d'aide alimentaire")
+
+
+for (col in colonnes_a_modifier) {
+  data1[[col]] <- modifications[as.character(data1[[col]])]
+}
+
+# (3)
+
+data1_question_6 <- subset(data1, select = c(17:28))
+
+# (4)
+
+table_propr_courses_option_1 <- lapply(data1_question_6, function(x) round(prop.table(table(x)),2)*100)
+
+# (5)
+table_propr_courses_option_1 <- as.data.frame(do.call(rbind, table_propr_courses_option_1))
+
+# (6)
+
+Type=c("Hypermarché", "Hard discount", "Epiceries indépendantes", "Magains de surgelés", "Magasins spécialisés Bio", "Marché", "Directement aux agriculteurs", "Paniers en ligne", 
+                                         "Artisans et commerçants spécialisés", "Epicerie participative", "Magasin alimentaire spécialisé dans le vrac", "Magasin d'aide alimentaire")
+
+
+table_propr_courses_option_1$Type <- Type
+
+
+table_propr_courses_option_1 <- table_propr_courses_option_1[, c(ncol(table_propr_courses_option_1), 1:(ncol(table_propr_courses_option_1)-1))]
+
+table_propr_courses_option_1
+
+```
+
+#### Avec usage de library
+
+1.  On sélectionne les données qui nous intéressent avec la fonction `select()` dans le dataframe de base (On sélectionne les données de la colonne Q6_1 à Q6_12). Pour travailler faire une action sur notre dataframe on l'outil `%>%` de la library dplyr
+
+2.  On fait une mise au format long de notre nouveau dataframe à l’aide de la fonction `pivot_longer()` de la library tidyverse.
+
+3.  On passe toute les données en type facteur à l'aide de la fonction `factor()` où l'on définit les levels et les labels associés.
+
+4.  A l’aide de la fonction `table()` on fait un tableau de fréquence en fonction des catégories croisés (le lieux d’achat croisé avec sa régularité de fréquentation).
+
+5.  A partir de ce tableau on calcul les proportion d'individu en fonction des catégories croisés que l'on multipli par 100 pour avoir des pourcentages à l'aide de la fonction `prop.table()`, l'argu. On arrondi à deux chiffres après la virgule avec la fonction `round()`.
+
+-   
+
+    (6) Avec la fonction `kable()` du package KableExtra on met en forme ce tableau. On lui ajoute un style avec la fonction `kable_styling()` et on ajoute une note de fin de page avec la fonction `footnote()` qu l'on applique à kable à l'aide la `%>%`.
+
+```{r}
+#1
+  
+df_Q6 <- data %>%      
+  select(Q6_1:Q6_12) 
+
+#2
+
+df_Q6_L <- df_Q6 %>%  pivot_longer(cols = Q6_1:Q6_12,
+                          names_to = "Q6",
+                          values_to = "value")
+
+#3
+
+df_Q6_L$Q6 <- factor(df_Q6_L$Q6, levels = paste("Q6_", seq(1:12), sep = ""), labels = c("Hypermarché, Supermarché","Hard discount","Epiceries indépendantes, de quartier, épiceries fines","Magasins de surgelés","Magasins spécialisés Bio","Marché","Directement aux agriculteurs","Paniers en ligne réalisés par un intermédiaire","Artisans et commerçants spécialisés","Epicerie participative, associative, supermarché coopératif","Magasin alimentaire spécialisé dans le vrac ou les produits locaux","Magasin d’aide alimentaire"))
+
+df_Q6_L$value <- factor(df_Q6_L$value, levels = 1:7, labels = c("Plusieurs fois par semaine","1 fois par semaine","2 à 3 fois par mois","1 fois par mois","Moins d’une fois par mois","Seulement pour des événements particuliers","Jamais"))
+
+#4
+
+df_Q6_freq <- table(df_Q6_L$Q6, df_Q6_L$value)
+
+#5
+
+df_Q6_prop <- round(prop.table(df_Q6_freq, margin = 1)*100, 2)
+
+#6
+
+kable(df_Q6_prop, captation = "Taux de réquentation en fonction des lieux d'achat" ) %>% # mise en forme du tableau
+  kable_styling(latex_options = "striped") %>%
+  footnote(general = "Format des données en pourcentage",
+           general_title = "Note: ",)
+```
+
+### 2.Nombre de lieux fréquentés très régulièrement (réponses 1/2) en moyenne
+
+#### Usage de R natif
+
+1.  On sélectionne les données qui nous intéressent. On utilise la fonctione `paste()` pour créer tout les noms de colonnes qui nous intéressent.
+
+2.  On regarde pour chaque individu pour chaque lieu si il est très fréquenté ( = 1 ou = 2). cela nous retourne le dataframe de booléens (0 = FALSE ou 1 = TRUE) . Il nous reste à sommer par ligne à l'aide de la fonction `rowSums()`
+
+3.  Pour afficher notre résultat on utilise la fontion `print()` à laquel on donne comme argument notre collage de à de la fonction `paste()` pour intégrer la moyenne arrondi à un chiffre après la virgule de notre moyenne du nombre de lieux très fréquenté
+
+```{r}
+
+#(1)
+
+dt_nb_moy <- data[,paste("Q6_",1:12,sep = "")]
+
+#(2)
+
+nb_tres_freq <- rowSums(dt_nb_moy == 1 | dt_nb_moy == 2)
+
+#(3)
+
+print(paste("Les répondants fréquentent en moyenne ",round(mean(nb_tres_freq),1),
+            " lieux très régulièrement (au moins une fois par semaine)"))
+```
+
+#### Avec usage de library
+
+1.  Sélectionner les variables ou colonnes qui répondent à la question dans le jeu de données avec `select()`
+2.  Vérifier que toutes les colonnes vérifient la condition via `accross()`
+3.  Pour chaque individu, il faut compter le nombre de lieux qu'il a visité `rowSums()`
+4.  Faire une moyenne du nombre de lieux `mean()`
+
+```{r}
+moyenne_freq <- data %>%
+  select(Q6_1:Q6_12) %>%
+  mutate(across(everything(), ~ .x == 1 | .x == 2)) %>%
+  rowSums() %>%
+  mean()
+moyenne_freq
+```
+
+### 3.Répartition des répondants selon le nombre de lieux fréquentés très régulièrement
+
+#### Avec R natif
+
+1.  On récupère les données `nb_tres_freq` qui sont le nombre de lieus d'achat très fréquenté par individu.
+
+2.  On transforme nos données en tableeau avec la fonction `table()`, puis on calcule la proportion de chaque variable (1 à 12) avec `prop.table()` que l'on va multiplier par cent pour avoir un pourcentage. On peut arrondir à deux chiffres après la virgule avec `round`.
+
+3.  On récupère le nom des dimensions avec la fonction `dimnames()` et on récupère le nom du tableau avec `names` que l'on va réaffecter par son nouveau nom.
+
+4.  On fait la mise en forme de notre tableau avec `kable()`.
+
+5.  Créer le graphique à partir du tableau avec `barplot()`.
+
+6.  Ajouter le titre et les noms des axes, et ajuster la limite de l’axe y selon la valeur maximale.
+
+7.  Changer la couleur des barres et mettre en évidence la valeur maximale.
+
+8.  Ajouter la valeur maximale au-dessus de la barre avec la fonction `text()`.
+
+```{r}
+
+#(1)
+
+head(nb_tres_freq)
+
+#(2)
+
+tb_nb_tres_freq_pourcent <- round(prop.table(table(nb_tres_freq))*100,2) 
+
+#(3)
+
+names(dimnames(tb_nb_tres_freq_pourcent)) <- "Nombre"
+
+#(4)
+
+print(tb_nb_tres_freq_pourcent)
+
+#(5)
+
+barplot(tb_nb_tres_freq_pourcent)
+
+max_val <- max(tb_nb_tres_freq_pourcent)
+
+barplot(tb_nb_tres_freq_pourcent, 
+        main = "Répartition selon le nombre de lieux fréquentés très régulièrement",
+        ylab = "pourcentage",
+        xlab = "nombre de lieux très fréquenté",
+        ylim = c(0,max_val+5))
+
+coul <- rep("cyan3", length(tb_nb_tres_freq_pourcent))
+max_id <- which.max(tb_nb_tres_freq_pourcent)
+coul[max_id] <- "cyan1"
+
+
+barplot(tb_nb_tres_freq_pourcent, 
+        main = "Répartition selon le nombre de lieux fréquentés très régulièrement",
+        ylab = "pourcentage",
+        xlab = "nombre de lieux très fréquenté",
+        ylim = c(0,max_val+5),
+        col = coul)
+
+barplot(tb_nb_tres_freq_pourcent, 
+        main = "Répartition selon le nombre de lieux fréquentés très régulièrement",
+        ylab = "pourcentage",
+        xlab = "nombre de lieux très fréquenté",
+        ylim = c(0,max_val+5),
+        col = coul)
+text(x = max_id, y = max_val, labels = max_val, pos = 3, cex = 1.3)
+  
+```
+
+
+#### Avec usage de library
+
+Voici la version avec usage de librairies R. Pour ce faire, nous utiliserons la librairie dplyr() (déjà vue et présentée lors de la question 1) pour générer les tableaux de contingences et de pourcentages des lieux fréquentés régulièrement par les consommateurs. Puis, nous nous appuierons sur la fonction kable() de la librairie kableExtra() déjà rencontrée plus haut dans le rapport. Enfin, nous terminerons par une représentation graphique des lieux fréquentés régulièrement par les clients.
+
+```{r}
+# Tableau de contingence
+df_nb_tres_freq <- data.frame(nb_tres_freq) %>%
+  count(nb_tres_freq, name = "Effectif")
+
+# Tableau de pourcentages 
+dt_nb_tres_freq_pourcent <- data.frame(nb_tres_freq) %>%
+  count(nb_tres_freq) %>%
+  mutate(Pourcentage = round(n / sum(n) * 100, 2))
+
+# Mise en forme du tableau des pourcentages
+kable(dt_nb_tres_freq_pourcent) 
+
+```
+
+Voici, les différentes étapes à suivre pour construire un diagramme en barres avec la librairie ggplot2().
+
+**Etape 1 : Renseigner le jeu de données**
+
+La première des choses à faire est de renseigner sur quel jeu de données on travaille et le remplir dans l'argument ggplot(). Pour le moment, rien ne s'affiche et cela est tout à fait normal puisque nous n'avons pas encore précisé les variables pour construire le graphique et ni le type de graphique souhaité.
+
+```{r}
+ggplot(df_nb_tres_freq) #rien
+```
+
+**Etape 2 : Indiquer les variables retenues pour les axes des abscisses et des ordonnées**
+
+Maintenant, il faut indiquer les variables retenues pour les axes des abscisses et des ordonnées dans l'argument aes(). Ici, il faut remplir *nb_tres_freq* pour x et *Effectif* pour y. Pour le moment, toujours rien ne s'affiche puisqu'il manque d'informer le type de graphique à dessiner.
+
+```{r}
+ggplot(df_nb_tres_freq)+aes(x=nb_tres_freq,y=Effectif) #rien
+```
+
+**Etape 3 : Indiquer les variables retenues pour les axes des abscisses et des ordonnées**
+
+A l'aide de l'argument geom_bar() nous traçons le diagramme en barres. Par défaut, dans geom_bar(stat = "bin"), cela signifie que pour chaque valeur de x, les barres seront toutes dessinées à la même hauteur. De plus, le "bins" est incompatible avec des valeurs présentes sur l'axe des y, ce qui est notre cas ici. Il faut donc remplacer "bins" par le bon argument adéquate à savoir "identity". En effet, cela répond à notre besoin de représenter les hauteurs des barres qui prennent en compte les valeurs de y. Ainsi, nous obtenons le premier diagramme en barres qui s'affiche à l'écran.
+
+```{r}
+ggplot(df_nb_tres_freq)+aes(x=nb_tres_freq,y=Effectif)+geom_bar(stat = "identity") # Bon
+```
+
+**Etape 4 : Personnalisation du graphique**
+
+Le graphique de l'étape précédente est correcte mais pas "complet". En fonction des besoin de l'utilisateurs, il est tout à fait possible par exemple d'ajouter un titre, changer le nom des axes x et y de colorier les barres, de changer le fond d'écran et pleins d'autres choses encore. Il existe différentes manières de procéder. En ce lieu, nous proposerons une façon de personnaliser le diagramme en barres.
+
+1.  Ajouter un titre : Avec labs(title = "")
+
+2.  Changer le nom des axes x et y : Avec labs(x="", y ="")
+
+3.  Colorier les barres : Avec geom_bar(fill = ""). On peut soit écrire le nom de couleurs en brut comme red, orange ou bien encore plus personnalisé le graphique en utilisant le code hexadéciamal des couleurs. Pour trouver les codes hexadéciamux des couleurs, on peut se rendre par exemple sur le site internet suivant : [**https://htmlcolorcodes.com/**]{.underline}
+
+```{r}
+ggplot(df_nb_tres_freq)+aes(x=nb_tres_freq,y=Effectif)+geom_bar(stat = "identity",fill = "#FF6666") + 
+  labs(title = "Répartition des lieux très fréquentés par les consommateurs", 
+       x = "Nombre de lieux très fréquentés",y = "Effectif")
+```
+
+### 4.Nombre de lieux fréquentés régulièrement (réponses 1/2/3/4) en moyenne
+
+```{r}
+dt_nb_moy <- data %>% # selection des bonnes colonnes
+  select(Q6_1:Q6_12)
+
+nb_rgl_freq <- rowSums(dt_nb_moy == 1 | dt_nb_moy == 2 | dt_nb_moy == 3 | dt_nb_moy == 4) # On compte le nombre de lieu régulièrement fréquenté par individu
+
+print(paste("Les répondants fréquentent en moyenne ",round(mean(nb_rgl_freq),1)," lieux régulièrement (au moins une fois par mois)"))
+```
+
+### 5. Répartition des répondants selon le nombre de lieux fréquentés régulièrement
+
+```{r}
+
+df_nb_rgl_freq <- as.data.frame(table(nb_rgl_freq)) # On compte le nombre d'occurence par nb de lieux régulièrement fréquenté
+
+dt_nb_rgl_freq_pourcent <- round(prop.table(table(nb_rgl_freq))*100,2) # On tranforme la fréquence en %
+
+names(dimnames(dt_nb_rgl_freq_pourcent)) <- "Nombre de lieux régulièrement fréquenté"
+
+kable(dt_nb_rgl_freq_pourcent)  #  mise en forme du tableau
+
+
+
+ggplot(df_nb_rgl_freq, aes(x = nb_rgl_freq, y = Freq)) +
+  geom_bar(stat = "identity")+
+  labs(title = "fréquence par nombre lieux régulièrement fréquenté", x = "Nombre de lieux régulièrement fréquenté")
+
+```
+
+### 6.Pour ceux qui n’ont qu’1 lieu régulier (au moins une fois par mois): lequel ? part des répondants concernés
+
+#### Avec R natif
+
+(1) Création d'un vecteur qui sincrémente de 1 jusqu'à 12 via le symbole `:`
+(2) Concatener deux expressions avec `paste()` notez que `sep=` précise le séparateur entre les expressions
+(3) Selection de colonnes en utilisant les crochets `[ligne, variables]`
+(4) Faire la somme par ligne des cellules qui vérifie la ou les condition(s) dans `rowSums()`, En effet si la cellule vérifie alors elle vaut 1 sinon 0
+(5) Realiser un filtre en spécifiant la colonne et la condition
+(6) Arroundir la proportion calculé à deux chiffres après la virgule `round()`
+
+```{r}
+num_var <- 1:12
+noms_var <- paste("Q6_", num_var, sep="")
+df_vars <- data[,noms_var]
+df_vars$freq <- rowSums(df_vars==1 | df_vars==2 | df_vars==3 | df_vars==4)
+df_vars_filter <- df_vars[df_vars$freq==1,]
+proportion <- (count(df_vars_filter)/count(df_vars))*100
+arrondir_proportion <- round(proportion, 2)
+```
+
+#### Avec usage de library
+
+(1) Sélection des variables spécifiques à la question : `select()`
+(2) Appliquer à toutes les cellules des variables une ou des condition(s) : `across(everything(), ~ condition)`
+(3) Pour chaque ligne ou individu faire la somme des cellules qui respectent le ou les conditions `rowSums()` puis la stocker dans une nouvelle variable qu'on ajoutera à la base de donnée
+(4) Compter le nombre de français disponible dans la base via `count()` puis la stocker dans une variable intermédiaire qui sera definie à l'intérieur de `{{}}`. L'opérateur utilisé avant doit être "%T\>%"
+(5) Filtrer le jeu de donné avec `filter()` pour ne retenir que les individus ayant qu'un lieu régulier
+(6) Utiliser summarise pour calculer la proportion et ne garder qu'elle
+
+```{r}
+(Frequence_regulier <- data %>% 
+  select(Q6_1:Q6_12) %>%
+  mutate(freq = rowSums(across(everything(), ~ .x==1 | .x==2 | .x==3 | .x==4))) %T>%
+  {{nombre_francais <<- count(.)}} %>%
+  filter(freq==1) %>%
+  summarise(round((count(.)/nombre_francais)*100,2)))
+```
+
+
+### 7.Pour chaque lieu unique fréquenté quel est leur profil ? (socio + motivations
+
+#### Avec R natif
+
+(1) Création des $12$ jeux de données par lieu d'achat filtrés par variables d'intérêt pour le profil sociologique ainsi que pour les motivations grâce à la fonction `subset()`
+(2) Développement d'une fonction avec `function()` pour automatiser les tâches suivantes. Pour chaque lieu d'achat, affichons la valeur la plus fréquente de chaque variable `avec which.max()` et de `names()`, modifions le nom de la colonne avec `names()` et attribuons un nom à la colonne (contenant le libellé des questions) avec `rownames_to_column()` qui n'en possède pas par défaut.
+(3) Application de la fonction sur tous les lieux d'achat
+(4) On renomme le contenu du tableau en transformant en facteur avec `factor()` et en affectant le bon renommage avec `<-`
+(5) Afficher les tableaux avec `print()`.
+
+```{r}
+# (1) 
+
+data_hypermarche <- subset(data1,select=-c(1,3,5,7:16,18:46,58:400)) 
+data_Hard_discount <- subset(data1,select=-c(1,3,5,7:16,17,19:46,58:400)) 
+data_Epiceries_inde <- subset(data1,select=-c(1,3,5,7:16,17,18,20:46,58:400)) 
+data_magains_surgele <- subset(data1,select=-c(1,3,5,7:19,21:46,58:400)) 
+data_Bio <- subset(data1,select=-c(1,3,5,7:20,22:46,58:400)) 
+data_Marche <- subset(data1,select=-c(1,3,5,7:21,23:46,58:400)) 
+data_agriculteur <- subset(data1,select=-c(1,3,5,7:22,24:46,58:400))
+data_Paniers_ligne <- subset(data1,select=-c(1,3,5,7:23,25:46,58:400))
+data_artisans_commerce_spe <- subset(data1,select=-c(1,3,5,7:24,26:46,58:400))
+data_Epicerie_participative <- subset(data1,select=-c(1,3,5,7:25,27:46,58:400))
+data_Magasin_alimentaire_spe_vrac <- subset(data1,select=-c(1,3,5,7:26,28:46,58:400))
+data_Magasin_aide_alimentaire <- subset(data1,select=-c(1,3,5,7:27,29:46,58:400))
+
+
+noms_colonnes <- c("Q1", "recode_age", "recode_csp", "Hypermarché", "Q10", "Q11", "Q12", "Q13", "Q14", "Q15", "Q16", "Q17", "Q18", "Q19", "Q20", "Q235",  "Q236", "Q237","Q238", "Q239", "Q240")
+
+
+mode_data <- function(data) {
+  res <- list()
+  for (col in noms_colonnes) {
+    res[[col]] <- names(which.max(table(data[[col]])))
+  }
+  res <- as.data.frame(do.call(rbind, res))
+  names(res) <- c("Valeur la plus fréquente")
+  res <- rownames_to_column(res, var = "Question posée")
+  return(res)
+}
+
+# (3)
+modes_hypermarche <- mode_data(data_hypermarche)
+# modes_Hard_discount <- mode_data(data_Hard_discount)
+# modes_Epiceries_inde <- mode_data(data_Epiceries_inde)
+# modes_magains_surgele <- mode_data(data_magains_surgele)
+# modes_Bio <- mode_data(data_Bio)
+# modes_Marche <- mode_data(data_Marche )
+# modes_agriculteur <- mode_data(data_agriculteur)
+# modes_Paniers_ligne <- mode_data(data_Paniers_ligne)
+# modes_artisans_commerce_spe <- mode_data(data_artisans_commerce_spe)
+# modes_Epicerie_participative <- mode_data(data_Epicerie_participative)
+# modes_Magasin_alimentaire_spe_vrac <- mode_data(data_Magasin_alimentaire_spe_vrac)
+# modes_Magasin_aide_alimentaire <- mode_data(data_Magasin_aide_alimentaire)
+
+# (4)
+
+modes_hypermarche$`Question posée` <- factor(modes_hypermarche$`Question posée`,
+                               levels = c("Q1","recode_age", "recode_csp", "Hypermarché", "Q10", "Q11", "Q12", "Q13", "Q14", "Q15", "Q16", "Q17",  "Q18", "Q19",   "Q20", "Q235",      
+"Q236", "Q237", "Q238", "Q239", "Q240"),
+                               labels = c("Sexe", "Tranches d'âge","Catégorie Socio-Professionnelle","Hypermarché",
+	"Raison principale de non-achat en grande surface", "Raison principale de non-achat en hard discount",
+"Raison principale de non-achat en épiceries indépendantes (y compris en ligne)",
+"Raison principale de non-achat en magasin de surgelés (y compris en ligne)", "Raison principale de non-achat en magasin bio spécialisé (y compris en ligne)", "Raison principale de non-achat sur les marchés", "Raison principale de non-achat auprès d’agriculteurs en direct (hors marchés, y compris en ligne)", "Raison principale de non-achat de paniers via un intermédiaire en ligne", "Raison principale de non-achat auprès d’artisans ou commerçants spécialisés", "Raison principale de non-achat en épicerie participative ou supermarché coopératif", "Raison principale de non-achat en magasin vrac ou local spécialisé","Nombre d'adultes dans le foyer", "Nombre d'enfants dans le foyer", "Age de l'enfant","Age des enfants",
+"Tranche de revenus nets mensuels du foyer","Niveau de diplôme"))
+
+
+modes_hypermarche$`Valeur la plus fréquente` <- as.factor(modes_hypermarche$`Valeur la plus fréquente`)
+
+levels(modes_hypermarche$`Valeur la plus fréquente`)[levels(modes_hypermarche$`Valeur la plus fréquente`) == 2] <- "Femme"
+
+levels(modes_hypermarche$`Valeur la plus fréquente`)[levels(modes_hypermarche$`Valeur la plus fréquente`) == "6"] <- "65 ans et plus"
+
+levels(modes_hypermarche$`Valeur la plus fréquente`)[levels(modes_hypermarche$`Valeur la plus fréquente`) == "4"] <- "Employé et Ouvrier"
+
+# (5)
+
+print(modes_hypermarche)
+# print(modes_Hard_discount)
+# print(modes_Epiceries_inde)
+# print(modes_magains_surgele)
+# print(modes_Bio)
+# print(modes_Marche)
+# print(modes_agriculteur)
+# print(modes_Paniers_ligne)
+# print(modes_artisans_commerce_spe)
+# print(modes_Epicerie_participative)
+# print(modes_Magasin_alimentaire_spe_vrac)
+# print(modes_Magasin_aide_alimentaire)
+```
+
+#### Avec usage de library
+
+(1) Creation des sous-ensembles avec `dplyr::select()`. La notation `::` permet de faire appel uniquement à une fonction spécifique de la librairie au lieu de la télécharger entièrement avec l'ensemble des fonctions contenues à l'intérieur.
+(2) Création d'une fonction pour calculer la valeur la plus fréquente
+    (1) `lapply()` : applique une fonction à chaque élément d’une liste (ici, chaque nom de colonne dans noms_colonnes) et retourne une liste des résultats.
+    (2) `%in%` : teste si un élément (ici, le nom de colonne) appartient à un vecteur (ici, les noms des colonnes du data).
+    (3) `table()` : calcule la fréquence d'apparition de chaque valeur dans une variable (colonne).
+    (4) `which.max()` : retourne l’indice de la valeur maximale (utilisé ici pour trouver la modalité la plus fréquente).
+    (5) `names()` : ici, permet d’extraire le nom (valeur) associé à la fréquence maximale dans la table.
+    (6) `do.call(rbind, ...)` : empile les résultats de la liste (res) en un tableau (data.frame) ligne par ligne.
+    (7) `as.data.frame()` : convertit l'objet obtenu en un data.frame.
+    (8) `names() (assignation)` : renomme la colonne du data frame avec le nom "Valeur la plus fréquente".
+    (9) `tibble::rownames_to_column()` : transforme les noms de lignes en une vraie colonne, ici appelée "Question posée".
+(3) Application de la fonction sur tous les lieux d'achat
+(4) On renomme le contenu du tableau en transformant en facteur avec `factor()` et en affectant le bon renommage avec `<-`
+(5)  On affiche le résultat de façon élégante avec `kable()`
+
+```{r}
+
+# (1)
+
+data_hypermarche <- data1 %>% select(-c(1,3,5,7:16,18:46,58:400))
+data_Hard_discount <- data1 %>% select(-c(1,3,5,7:16,17,19:46,58:400))
+data_Epiceries_inde <- data1 %>% select(-c(1,3,5,7:16,17,18,20:46,58:400))
+data_magains_surgele <- data1 %>% select(-c(1,3,5,7:19,21:46,58:400))
+data_Bio <- data1 %>% select(-c(1,3,5,7:20,22:46,58:400))
+data_Marche <- data1 %>% select(-c(1,3,5,7:21,23:46,58:400))
+data_agriculteur <- data1 %>% select(-c(1,3,5,7:22,24:46,58:400))
+data_Paniers_ligne <- data1 %>% select(-c(1,3,5,7:23,25:46,58:400))
+data_artisans_commerce_spe <- data1 %>% select(-c(1,3,5,7:24,26:46,58:400))
+data_Epicerie_participative <- data1 %>% select(-c(1,3,5,7:25,27:46,58:400))
+data_Magasin_alimentaire_spe_vrac <- data1 %>% select(-c(1,3,5,7:26,28:46,58:400))
+data_Magasin_aide_alimentaire <- data1 %>% select(-c(1,3,5,7:27,29:46,58:400))
+
+noms_colonnes <- c("Q1", "recode_age", "recode_csp", "Hypermarché", "Q10", "Q11", "Q12", "Q13", "Q14", "Q15", "Q16", "Q17", "Q18", "Q19", "Q20", "Q235",  "Q236", "Q237","Q238", "Q239", "Q240")
+
+# (2) 
+mode_data <- function(data) {
+  res <- lapply(noms_colonnes, function(col) {
+    if (col %in% colnames(data)) {
+      val <- names(which.max(table(data[[col]])))
+    } else {
+      val <- NA
+    }
+    return(val)
+  })
+  res <- as.data.frame(do.call(rbind, res))
+  names(res) <- "Valeur la plus fréquente"
+  res <- tibble::rownames_to_column(res, var = "Question posée")
+  return(res)
+}
+
+# (3)
+modes_hypermarche <- mode_data(data_hypermarche)
+# modes_Hard_discount <- mode_data(data_Hard_discount)
+# modes_Epiceries_inde <- mode_data(data_Epiceries_inde)
+# modes_magains_surgele <- mode_data(data_magains_surgele)
+# modes_Bio <- mode_data(data_Bio)
+# modes_Marche <- mode_data(data_Marche)
+# modes_agriculteur <- mode_data(data_agriculteur)
+# modes_Paniers_ligne <- mode_data(data_Paniers_ligne)
+# modes_artisans_commerce_spe <- mode_data(data_artisans_commerce_spe)
+# modes_Epicerie_participative <- mode_data(data_Epicerie_participative)
+# modes_Magasin_alimentaire_spe_vrac <- mode_data(data_Magasin_alimentaire_spe_vrac)
+# modes_Magasin_aide_alimentaire <- mode_data(data_Magasin_aide_alimentaire)
+
+# (4)
+
+modes_hypermarche$`Question posée` <- factor(modes_hypermarche$`Question posée`,
+                               levels = c(1:21),
+                               labels = c("Sexe", "Tranches d'âge","Catégorie Socio-Professionnelle","Hypermarché",
+	"Raison principale de non-achat en grande surface", "Raison principale de non-achat en hard discount",
+"Raison principale de non-achat en épiceries indépendantes (y compris en ligne)",
+"Raison principale de non-achat en magasin de surgelés (y compris en ligne)", "Raison principale de non-achat en magasin bio spécialisé (y compris en ligne)", "Raison principale de non-achat sur les marchés", "Raison principale de non-achat auprès d’agriculteurs en direct (hors marchés, y compris en ligne)", "Raison principale de non-achat de paniers via un intermédiaire en ligne", "Raison principale de non-achat auprès d’artisans ou commerçants spécialisés", "Raison principale de non-achat en épicerie participative ou supermarché coopératif", "Raison principale de non-achat en magasin vrac ou local spécialisé","Nombre d'adultes dans le foyer", "Nombre d'enfants dans le foyer", "Age de l'enfant","Age des enfants",
+"Tranche de revenus nets mensuels du foyer","Niveau de diplôme"))
+
+
+modes_hypermarche$`Valeur la plus fréquente` <- as.factor(modes_hypermarche$`Valeur la plus fréquente`)
+
+levels(modes_hypermarche$`Valeur la plus fréquente`)[levels(modes_hypermarche$`Valeur la plus fréquente`) == 2] <- "Femme"
+
+levels(modes_hypermarche$`Valeur la plus fréquente`)[levels(modes_hypermarche$`Valeur la plus fréquente`) == "6"] <- "65 ans et plus"
+
+levels(modes_hypermarche$`Valeur la plus fréquente`)[levels(modes_hypermarche$`Valeur la plus fréquente`) == "4"] <- "Employé et Ouvrier"
+
+# (5)
+
+kable(modes_hypermarche) %>% 
+  kable_styling(latex_options = "striped")
+
+```
+
+### 8.Créer un sous échantillon appelé les acheteurs très réguliers de produits locaux et ou en circuits courts
+
+#### Avec R natif
+
+1.  Dans un premier vecteur on met les colonnes que l'on va vérifier.
+
+2.  À l'aide de la fonction `apply()` je vérifie par ligne s'il y a au moins une valeur égal à 1 ou 2 sur une des colonnes à tester.
+
+3.  On sélectionne les lignes colonnes que l'on souhaite et on empile les colonnes de notre nouveau data frame df_cc dans df_cc_comp avec la fonction `stack()`.
+
+4.  On fait un tableau de fréquence avec `table()`en fonction des catégories croisée. (valeur de 1 à 6 croisé aux questions). Et on change le nom des colonnes avec `dimnames()`.
+
+5.  On calcule la proportion par question à l'aide de la fonction `prop.table()` et de largumentt 2 dans margin. On calcule le pourcentage en multipliant par 100 et on arrondi le résultat avec `round()`.
+
+6.  On calcule le pourcentage des individus qui achètent très régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multiplie par 100 avec `sum()` et `nrow()`.
+
+```{r}
+
+#1
+
+col_a_tester <- c("Q27", "Q35", "Q43", "Q50", "Q59", "Q67", "Q81", "Q89", "Q97", "Q104", "Q111",
+                  "Q118", "Q125", "Q133", "Q142", "Q149", "Q157", "Q165", "Q173", "Q181", "Q189",
+                  "Q200", "Q208", "Q216", "Q224")
+
+#2
+
+lignes_a_garder <- apply(data[, col_a_tester], MARGIN = 1, function(x) any(x == 1 | x == 2))
+
+#3
+
+df_cc <- data[lignes_a_garder,c("Q1","recode_age","recode_csp")]
+
+df_cc_comp <- stack(df_cc)
+
+#4
+
+tb_cc <- table(df_cc_comp)
+dimnames(tb_cc)[[2]] <- c("Sexe", "Tranche d'âge","CSP")
+
+#5
+
+tb_cc_freq <- round(prop.table(tb_cc, margin = 2)*100, 2)
+
+tb_cc_freq
+
+#6
+
+print(paste("Il y a",round(sum(lignes_a_garder, na.rm = T)/nrow(data)*100),"pourcent des acheteurs qui achètent en très régulièrement en circuit court"))
+
+```
+
+#### Avec usage de library
+
+-   Pour chaque fonction utiliser on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+
+1.  On calcule le filtre des lignes qui nous intéresse avec `filter`.
+2.  On sélectionne les colonnes qui nous intéressent avec la fonction `select`.
+3.  On fait une mise au format long du notre dataframe en deux colonnes Questions et Réponses à l'aide de la fonction `pivot_longer`.
+4.  Avec la `table()` on calcule les fréquences croisées et on calcule la proportion par ligne avec `prop.table()`.
+5.  On termine avec une mise en forme avec `kable()` pour un tableau propre que l'on peut modifier de différentes manières.
+6.  On calcule le pourcentage des individus qui achètent très régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multiplie par 100 avec `sum()` et `nrow()`.
+
+```{r}
+#1
+
+df_cc <- data %>% filter(rowSums(across(all_of(col_a_tester), ~ .x %in% c(1, 2))) >= 1) %>% 
+  
+#2
+  
+  select(Q1,recode_age,recode_csp) %>% 
+  
+#3 
+  
+  pivot_longer(cols = everything(),
+               names_to = "Questions",
+               values_to = "Réponses") %>% 
+
+#4
+  
+  table() %>% prop.table(margin = 1)*100
+dimnames(df_cc)[[1]] <- c("Sexe", "Tranche d'âge","CSP")
+
+#5
+
+kable(round(df_cc, 2), caption = "Répartition des acheteurs réguliers de produits locaux et ou en circuits courts (%)")%>% 
+  kable_styling(latex_options = "striped")
+
+#6
+
+print(paste("Il y a",round(sum(lignes_a_garder, na.rm = T)/nrow(data)*100),"pourcent des acheteurs qui achètent en très régulièrement en circuit court"))
+
+```
+
+### 9.Créer un sous échantillon appelé les acheteurs réguliers de produits locaux et ou en circuits courts
+
+#### Avec R natif
+
+1.  Dans un premier vecteur on met les colonnes que l'on va vérifier.
+
+2.  À l'aide de la fonction `apply()` je vérifie par ligne s'il y a au moins une valeur égal à 3 ou 4 sur une des colonnes à tester.
+
+3.  On sélectionne les lignes colonnes que l'on souhaite et on empile les colonnes de notre nouveau data frame df_cc dans df_cc_comp avec la fonction `stack()`.
+
+4.  On fait un tableau de fréquence avec `table()`en fonction des catégories croisée. (valeur de 1 à 6 croisé aux questions). Et on change le nom des colonnes avec `dimnames()`.
+
+5.  On calcule la proportion par question à l'aide de la fonction `prop.table()` et de largumentt 2 dans margin. On calcule le pourcentage en multipliant par 100 et on arrondi le résultat avec `round()`.
+
+6.  On calcule le pourcentage des individus qui achètent régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multiplie par 100 avec `sum()` et `nrow()`.
+
+```{r}
+
+#1
+
+col_a_tester <- c("Q27", "Q35", "Q43", "Q50", "Q59", "Q67", "Q81", "Q89", "Q97", "Q104", "Q111",
+                  "Q118", "Q125", "Q133", "Q142", "Q149", "Q157", "Q165", "Q173", "Q181", "Q189",
+                  "Q200", "Q208", "Q216", "Q224")
+
+#2
+
+lignes_a_garder <- apply(data[, col_a_tester], MARGIN = 1, function(x) any(x == 3 | x == 4))
+
+#3
+
+df_cc <- data[lignes_a_garder,c("Q1","recode_age","recode_csp")]
+
+df_cc_comp <- stack(df_cc)
+
+#4
+
+tb_cc <- table(df_cc_comp)
+dimnames(tb_cc)[[2]] <- c("Sexe", "Tranche d'âge","CSP")
+
+#5
+
+tb_cc_freq <- round(prop.table(tb_cc, margin = 2)*100, 2)
+
+#6
+
+print(paste("Il y a",round(sum(lignes_a_garder, na.rm = T)/nrow(data)*100),"pourcent des acheteurs qui achètent en très régulièrement en circuit court"))
+
+tb_cc_freq
+
+```
+
+#### Avec usage de library
+
+-   Pour chaque fonction utiliser on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+
+1.  On calcule le filtre des lignes qui nous intéresse avec `filter`.
+2.  On sélectionne les colonnes qui nous intéressent avec la fonction `select`.
+3.  On fait une mise au format long du notre dataframe en deux colonnes Questions et Réponses à l'aide de la fonction `pivot_longer`.
+4.  Avec la `table()` on calcule les fréquences croisées et on calcule la proportion par ligne avec `prop.table()`. Et on change le nom des colonnes avec `dimnames`.
+5.  On termine avec une mise en forme avec `kable()` pour un tableau propre que l'on peut modifier de différentes manières.
+6.  On calcule le pourcentage des individus qui achètent régulièrement en circuit court en calculant et le nombre d'individus sur le nombre d'individus total que l'on multiplie par 100 avec `sum()` et `nrow()`.
+
+```{r}
+#1
+
+df_cc <- data %>% filter(rowSums(across(all_of(col_a_tester), ~ .x %in% c(3, 4))) >= 1) %>% 
+  
+#2
+  
+  select(Q1,recode_age,recode_csp) %>% 
+  
+#3 
+  
+  pivot_longer(cols = everything(),
+               names_to = "Questions",
+               values_to = "Réponses") %>% 
+
+#4
+  
+  table() %>% prop.table(margin = 1)*100
+dimnames(df_cc)[[1]] <- c("Sexe", "Tranche d'âge","CSP")
+
+#5
+
+kable(round(df_cc, 2), caption = "Répartition des acheteurs réguliers de produits locaux et ou en circuits courts (%)")%>% 
+  kable_styling(latex_options = "striped")
+
+#6
+
+print(paste("Il y a",round(sum(lignes_a_garder, na.rm = T)/nrow(data)*100),"pourcent des acheteurs qui achètent en très régulièrement en circuit court"))
+```
+
+### 10. Sous échantillon appelé les acheteurs très réguliers de produits locaux et ou en circuits courts achetant directement aux producteurs
+
+#### Avec R natif
+
+1. Pour chaque question, repérer les personnes qui ont répondu 1 ou 2.
+2. Garder uniquement les lignes du tableau (jeu de données) qui correspondent à cette condition.
+3. Compter combien de personnes ont été gardées avec `nrow()`, puis diviser ce nombre par le nombre total de personnes pour obtenir une proportion.
+4. Trouver le numéro de la question, puis afficher les réponses possibles avec la fonction table() pour voir combien de personnes ont donné chaque réponse.
+5. Ajouter les totaux par ligne ou par colonne avec la fonction `addmargins()` :
+  mettre 2 pour avoir les totaux des lignes,
+  mettre 1 pour avoir les totaux des colonnes.
+
+```{r echo=FALSE}
+data$Q1 <- factor(data$Q1, levels = 1:3, labels = c("Homme", "Femme", "Autre"))
+data$Q2 <- ifelse(data$Q2<24, "[20-24 ans[",
+                              ifelse(data$Q2<34, "[25-34 ans[",
+                                     ifelse(data$Q2<44, "[35-44 ans[",
+                                            ifelse(data$Q2<54, "[45-54 ans[",
+                                                   ifelse(data$Q2<64, "[55-64 ans[","[65 ans et plus[")))))
+data$Q3 <- factor(data$Q3, levels = 1:14, labels = c("Agriculteur", "Artisan", "Commerçant", "Chef d’entreprise", "Profession libérale",
+                                         "Cadre ou profession intellectuelle supérieure", "Profession intermédiaire", "Employé", "Ouvrier",
+                                         "Retraité", "Demandeur d’emploi", "Homme ou Femme au foyer", "Etudiant, lycéen", "Autre"))
+data$Q240 <- factor(data$Q240, levels = 1:8, labels = c("Sans diplôme", "BEPC, brevet élémentaire, brevet des collèges, DNB",
+                                                                                "CAP, BEP ou diplôme de niveau équivalent", "Baccalauréat, brevet professionnel", "BTS, DUT, Deug, Deust, diplôme de la santé ou du social de niveau bac+2, diplôme équivalent", "Licence, licence professionnelle, maîtrise, diplôme équivalent de niveau bac+3 ou bac+4", "Master, DEA, DESS, diplôme de grande école de niveau bac+5, doctorat de santé", "Doctorat de recherche (hors santé)"))
+data$Q236 <- factor(data$Q236, levels = 1:7, labels = c("0", "1", "2", "3", "4", "5", "Plus de 5"))
+data$Q235 <- factor(data$Q235, levels = 1:6, labels = c("1 personne (je vis seul.e)", "2", "3", "4", "5", "Plus de 5 personnes"))
+```
+
+```{r}
+condition <- data$Q27 %in% c(1, 2) | data$Q35 %in% c(1, 2) | data$Q43 %in% c(1, 2) | data$Q50 %in% c(1, 2) | data$Q59 %in% c(1, 2) # Conditionn de la question
+sous_echantillon <- data[condition, ]
+pourcentage <- nrow(sous_echantillon)/nrow(data) * 100
+arrondir_pourcentage <- round(pourcentage,2) # Arrondir le pourcentage à 2 chiffres après la virgule
+arrondir_pourcentage
+
+table(sous_echantillon$Q2) # selon l'âge
+table(sous_echantillon$Q1) # selon le genre
+table(sous_echantillon$Q3) # selon la CSP
+table(cut(sous_echantillon$Q8, breaks = c(0, 199, 399, 599, 799, 999, 1499, Inf),
+                    labels = c("[0 – 199[", "[200 – 399[", "[400 – 599[", "[600 – 799[", "[800 – 999[", "[1000 – 1499[", "[1500 et plus["),
+                    right = FALSE))
+table(sous_echantillon$Q240) # selon le niveau de diplôme
+# table(sous_echantillon$Q5_taille) # selon la taille de l'agglomeration
+table(sous_echantillon$Q236) # nb d'enfants
+addmargins(table(sous_echantillon$Q235, sous_echantillon$Q236), 2)  # taille du foyer
+```
+
+#### Avec usage de library
+
+1. Créer une nouvelle colonne dans le tableau : elle vaudra 1 si la condition est vraie, et 0 sinon.
+2. Garder uniquement les personnes (les lignes) pour lesquelles cette nouvelle colonne vaut 1.
+3. Utiliser la fonction tbl_summary() (du package {gtsummary}) pour obtenir un tableau résumé avec des statistiques descriptives pour cette variable.
+
+```{r}
+filter_data <- data %>%
+  mutate(condition = ifelse((Q27 %in% c(1,2) | Q35 %in% c(1,2) | Q43 %in% c(1,2) | Q50 %in% c(1,2) |  Q59 %in% c(1,2)),1,0)) %>%
+  filter(condition==1)
+
+# le pourcentage
+pourcentage_lib <-  filter_data %T>%
+  {{nombre_individu <<- nrow(data)}} %>%
+  summarise(prop = n()) %>%
+  pull()/nombre_individu*100
+
+pourcentage_lib
+
+filter_data %>%
+  tbl_summary(include = c(Q1, Q2, Q8, Q240, Q236, Q235))
+```
+
+### 11 Sous échantillon appelé les acheteurs réguliers de produits locaux et ou en circuits courts achetant directement aux producteurs
+
+#### Avec R natif
+
+```{r}
+condition <- data$Q27 %in% c(3, 4) | data$Q35 %in% c(3, 4) | data$Q43 %in% c(3, 4) | data$Q50 %in% c(3, 4) | data$Q59 %in% c(3, 4) # Conditionn de la question
+sous_echantillon <- data[condition, ]
+pourcentage <- nrow(sous_echantillon)/nrow(data) * 100
+arrondir_pourcentage <- round(pourcentage,2) # Arrondir le pourcentage à 2 chiffres après la virgule
+arrondir_pourcentage
+
+table(sous_echantillon$Q2) # selon l'âge
+table(sous_echantillon$Q1) # selon le genre
+table(sous_echantillon$Q3) # selon la CSP
+table(cut(sous_echantillon$Q8, breaks = c(0, 199, 399, 599, 799, 999, 1499, Inf),
+                    labels = c("[0 – 199[", "[200 – 399[", "[400 – 599[", "[600 – 799[", "[800 – 999[", "[1000 – 1499[", "[1500 et plus["),
+                    right = FALSE))
+table(sous_echantillon$Q240) # selon le niveau de diplôme
+# table(sous_echantillon$Q5_taille) # selon la taille de l'agglomeration
+table(sous_echantillon$Q236) # nb d'enfants
+addmargins(table(sous_echantillon$Q235, sous_echantillon$Q236), 2)  # taille du foyer
+```
+
+#### Avec usage de library
+
+```{r}
+filter_data <- data %>%
+  mutate(condition = ifelse((Q27 %in% c(3,4) | Q35 %in% c(3,4) | Q43 %in% c(3,4) | Q50 %in% c(3,4) |  Q59 %in% c(3,4)),1,0)) %>%
+  filter(condition==1)
+
+# le pourcentage
+pourcentage_lib <-  filter_data %T>%
+  {{nombre_individu <<- nrow(data)}} %>%
+  summarise(prop = n()) %>%
+  pull()/nombre_individu*100
+
+pourcentage_lib
+
+filter_data %>%
+  tbl_summary(include = c(Q1, Q2, Q8, Q240, Q236, Q235))
+```
+
+### 12. X % des répondants achètent des produits locaux et/ou en circuits courts sur les marchés
+
+1. Sélectionner le jeu de données avec les variables qui nous permettent de répondre à la question posée.
+2. Créer une variable qui est égale à TRUE si la personne a répondu à au moins une des questions (utiliser `apply()`, avec 1 pour indiquer qu'on travaille ligne par ligne, c’est-à-dire par individu).
+3. Calculer la proportion de TRUE, ce qui correspond à la moyenne des répondants : utiliser `mean()`.
+
+#### Avec R natif
+
+```{r}
+questions <- c("Q27", "Q35", "Q43", "Q50", "Q59", "Q67", "Q81", "Q89", "Q97", "Q104", "Q111", "Q118", "Q125", "Q133", "Q142", "Q149", "Q157", "Q165", "Q173", "Q181", "Q189", "Q200", "Q208", "Q216", "Q224")
+data_filter <- data[,questions]
+data_filter$condition <- apply(data_filter, 1, function(x) any(!is.na(x)))
+pourcentage <- round(mean(data_filter$condition, na.rm = TRUE) * 100, 2)
+
+# Tableau de répartion
+
+tableau_croise_generalise <- function(df, variable, questions) {
+  df %>%
+    mutate(achat_local = apply(select(., all_of(questions)), 1, function(x) any(!is.na(x)))) %>%
+    filter(achat_local == TRUE) %>%
+    group_by(.data[[variable]]) %>%
+    summarise(n = n()) %>%
+    mutate(pourc = round(n / sum(n) * 100, 1))
+}
+
+tableau_croise_generalise(data, "Q2", questions)        # selon l'âge
+tableau_croise_generalise(data, "Q1", questions)      # selon le genre
+tableau_croise_generalise(data, "Q3", questions)        # selon la CSP
+tableau_croise_generalise(data, "Q8", questions)         # selon le budget alimentaire
+tableau_croise_generalise(data, "Q240", questions)    # selon le niveau de diplôme
+tableau_croise_generalise(data, "Q236", questions) # selon le nombre d'enfants
+```
+
+### 13. Quelles combinaisons de lieux fréquentés régulièrement possibles (fréquentés au moins une fois par mois)
+
+#### Avec R natif
+
+(1) Sélection des colonnes des lieux d'achat
+(2) Calcul du % de fréquentation (modalités 1 à 4) pour chaque lieu. Utilisation de `sapply()` pour appliquer l'opération du calcul de pourcentage sur les colonnes de lieux d'achat.
+(3) Trier du lieu le plus fréquenté au moins fréquenté grâce à `sort()` et l'agument `decreasing = TRUE`
+(4) Sélection des 10 lieux les plus fréquentés avec `head()`
+(5) On renomme les colonnes avec `names()` pour obtenir leur nom 
+(6) Affichage de la table des 10 lieux d'achat les plus fréquentés avec `print()`
+
+```{r}
+# (1) 
+lieux_data <- data[17:28]
+
+# (2) 
+freq_percent <- sapply(lieux_data, function(col) {
+  sum(col %in% 1:4, na.rm = TRUE) / sum(!is.na(col)) * 100
+})
+
+# (3) 
+freq_sorted <- sort(freq_percent, decreasing = TRUE)
+
+# (4)
+top10_freq <- head(freq_sorted, 10)
+
+# (5) 
+
+names(top10_freq) <- c("Hypermarché", "Hard discount","Epiceries indépendante",
+                            "Magains de surgelé","Magasins spécialisés Bio", "Marché","Directement aux agriculteur",
+                            "Paniers en ligne", "Artisans et commerçants spécialisés", "Epicerie participative")
+# (6) 
+print(round(top10_freq, 1))
+
+```
+
+#### Avec usage de library
+
+(1) Création de la table des 10 lieux les plus fréquentés
+    (1) On sélectionne les colonnes (lieux d'achat) avec `select()`.
+    (2) On crée une table au format long avec `pivot_longer()`
+    (3) On regroupe par lieu d'achat avec `group_by()`
+    (4) On calcule les pourcentage avec `summarise()` en s'assurant de ne pas comptabiliser les valeurs manquantes `!is.na()`. A noter que le `!` correspond à l'évènement contraire.
+    (5) On trie avec `arrange()` par ordre décroissant à l'aide de l'argument `desc()`
+    (6) On ne retient que les 10 premiers lieux les plus fréquentés avec `slice_head()`
+    (7) On ajoute dans le tableau final, la colonne des pourcentages des lieux fréquéntés avec `mutate()`
+(2) On renomme le contenu du tableau en transformant en facteur avec `factor()` et en affectant le bon renommage avec `<-`
+(3) Affichage de la table des 10 lieux d'achat les plus fréquentés de façon élégante avec `kable()`
+
+```{r}
+# (1) 
+top10_freq <- data %>%
+  select(17:28) %>%
+  pivot_longer(cols = everything(), names_to = "lieu", values_to = "frequence") %>%
+  filter(frequence %in% 1:4) %>%
+  group_by(lieu) %>%
+  summarise(
+    nb = n(),
+    total = sum(!is.na(data[[unique(lieu)]])),
+    pourcentage = nb / total * 100
+  ) %>%
+  arrange(desc(pourcentage)) %>%
+  slice_head(n = 10) %>%
+  mutate(pourcentage = round(pourcentage, 1))
+
+# (2)
+
+top10_freq$lieu <- factor(top10_freq$lieu,
+                               levels = c("Q6_1","Q6_2","Q6_9","Q6_6","Q6_4","Q6_3","Q6_5","Q6_7","Q6_11","Q6_10"),
+                               labels = c("Hypermarché", "Hard discount","Epiceries indépendante",
+                            "Magains de surgelé","Magasins spécialisés Bio", "Marché","Directement aux agriculteur",
+                            "Paniers en ligne", "Artisans et commerçants spécialisés", "Epicerie participative"))
+
+
+
+# (3)
+kable(top10_freq) %>% 
+  kable_styling(latex_options = "striped")
+
+```
+
+### 14. Pour chaque combinaison, quel profil de répondants ? Voir quelles sont les variables explicatives de cette nouvelle variable "combinaison"
+
+#### Avec R natif
+
+(1) Sélection des variables nécessaires pour le tableau de synthèse (Age, CSP, Sexe etc.) à l'aide de l'opérateur `[]`
+(2) Création de la variable "taille_foyer" (somme de Q235 + Q236). On supprime les potentiels messages d'avertissements de R au moment de la conversion au format numérique (`as.numeric()`) avec `suppressWarnings()`
+(3) Fonction pour trouver la modalité la plus fréquente (valeur majoritaire). A l'intérieur, on conserve les valeurs non manquantes avec `!is.na()`. A noter que le `!` correspond à la négation en R. Puis, on tri (`sort()`) par ordre décroissant (`decreasing = TRUE)`) afin d'obtenir la modalité majoritaire en première ligne.
+(4) On stocke le nom des colonnes utilent pour notre tableau de synthèse dans une liste
+(5) Boucle `for()` pour créer un tableau avec les modalités majoritaires
+(6) On ajoute la colonne du pourcentage des répondants par modalité. Pour calculer le pourcentage on utilise les opérateurs classiques de R (`/` pour la division et `sum()` pour la somme) qu'on arrondie à 2 chiffres après la virgule à l'aide de `round()`
+(7) Réorganisation des colonnes. On place la colonne contenant le pourcentage de répodnants en 2ème position
+(8) On transforme au format dataframe pour un meilleur affichage avec `as.data.frame()`
+(9) On renomme les colonnes avec `names()` pour obtenir leur nom 
+(10) On renomme le contenu du tableau en transformant en facteur avec `factor()` et en affectant le bon renommage avec `<-`
+(11) On affiche le tableau de résultat `print()`
+
+```{r}
+
+# (1) 
+vars <- c("Q6_1", "Q6_2", "Q6_3", "Q6_4", "Q6_5", "Q6_6", "Q6_7", "Q6_8", "Q6_9", "Q6_10", "Q6_11", "Q6_12", 
+          "recode_age", "Q1", "recode_csp", "Q8", "Q240", "Q5_taille", "Q236", "Q235")
+data_subset <- data[, vars]
+
+# (2)
+data_subset$taille_foyer <- suppressWarnings(as.numeric(data$Q235)) + suppressWarnings(as.numeric(data$Q236))
+
+# (3) Fonction pour trouver la modalité la plus fréquente (valeur majoritaire)
+get_mode <- function(x) {
+  x <- x[!is.na(x)]  # on enlève les NA
+  if (length(x) == 0) return(NA)
+  as.character(names(sort(table(x), decreasing = TRUE))[1])
+}
+
+# (4) 
+col_a_resumer <- c("recode_age", "Q1", "recode_csp", "Q8", "Q240", "Q5_taille", "Q236", "taille_foyer")
+
+# (5) Initialisation d'un tableau vide
+Q6_vars <- paste0("Q6_", 1:12)
+resultat <- data.frame(Q6_variable = Q6_vars)
+
+for (var in col_a_resumer) {
+  majoritaire_par_Q6 <- sapply(Q6_vars, function(q6) {
+    sous_echantillon <- data_subset[data_subset[[q6]] == 1, ]
+    get_mode(sous_echantillon[[var]])
+  })
+  resultat[[var]] <- majoritaire_par_Q6
+}
+
+# (6) Pourcentage de répondants par Q6_i
+pct_repondants <- sapply(Q6_vars, function(q6) {
+  sum(data_subset[[q6]] == 1, na.rm = TRUE) / nrow(data_subset) * 100
+})
+resultat$`% répondants` <- round(pct_repondants, 2)
+
+# (7) Réorganisation des colonnes
+resultat <- resultat[, c("Q6_variable", "% répondants", col_a_resumer)]
+
+# (8)
+resultat <- as.data.frame(resultat)
+
+# (9)
+
+names(resultat) <-  c("Lieu d'achat","Pourcentage de répondants", " Tranche d'âges" , "Sexe", 
+                  "Catégorie Socio-Professionnelle", "Dépenses moyennes mensuelles pour les achats alimentaires", "Niveau de diplôme", "Nombre d'habitants","Nombre d'enfants dans le foyer"
+                  ,"Nombre de personnes dans le foyer")
+
+# (10)
+resultat$`Lieu d'achat` <- factor(resultat$`Lieu d'achat`,
+                               levels = c("Q6_1","Q6_2","Q6_9","Q6_6","Q6_4","Q6_3","Q6_5","Q6_7","Q6_11","Q6_10"),
+                               labels = c("Hypermarché", "Hard discount","Epiceries indépendante",
+                            "Magains de surgelé","Magasins spécialisés Bio", "Marché","Directement aux agriculteur",
+                            "Paniers en ligne", "Artisans et commerçants spécialisés", "Epicerie participative"))
+
+
+resultat$` Tranche d'âges`<- as.factor(resultat$` Tranche d'âges`)
+
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 1] <- "20-24 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 2] <- "25-34 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 3] <- "35-44 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 4] <- "45-54 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 5] <- "55-64 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 6] <- "65 ans et plus"
+
+resultat$Sexe<- as.factor(resultat$Sexe)
+
+levels(resultat$Sexe)[levels(resultat$Sexe) == 1] <- "Homme"
+levels(resultat$Sexe)[levels(resultat$Sexe) == 2] <- "Femme"
+
+resultat$`Catégorie Socio-Professionnelle`<- as.factor(resultat$`Catégorie Socio-Professionnelle`)
+
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 1] <- "Agriculteur, Artisan, Commerçant, Chef d’entreprise"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 2] <- "Profession libérale, Cadre ou profession intellectuelle supérieure"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 3] <- "Profession intermédiaire"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 4] <- "Employé, Ouvrier"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 5] <- "Retraité"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 6] <- "Demandeur d’emploi, Homme ou Femme au foyer, Etudiant, lycéen, Autre"
+
+resultat$`Niveau de diplôme` <- as.factor(resultat$`Niveau de diplôme`)
+
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 1] <- "Sans diplôme"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 2] <- "BEPC, brevet élémentaire, brevet des collèges, DNB "
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 3] <- "CAP, BEP ou diplôme de niveau équivalent"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 4] <- "Baccalauréat, brevet professionnel"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 5] <- "BTS, DUT, Deug, Deust, diplôme de la santé ou du social de niveau bac+2, diplôme équivalent "
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 6] <- "Licence, licence professionnelle, maîtrise, diplôme équivalent de niveau bac+3 ou bac+4"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 7] <- "Master, DEA, DESS, diplôme de grande école de niveau bac+5, doctorat de santé "
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 1] <- "Doctorat de recherche (hors santé)"
+
+# (11)
+
+print(resultat)
+
+
+```
+
+#### Avec usage de library
+
+(1) Sélection des variables nécessaires pour le tableau de synthèse (Age, CSP, Sexe, etc.) à l’aide de `select()` de `dplyr` qui permet de sélectionner des colonnes de manière concise
+
+(2) Création de la variable taille_foyer en sommant Q235 et Q236. Ici, on utilise `mutate()` pour créer une nouvelle variable dans un data frame, et `suppressWarnings()` pour éviter les messages d’avertissement lors de la conversion avec `as.numeric()`
+
+(3) Définition d’une fonction get_mode() qui calcule la modalité majoritaire en excluant les NA, grâce à `table()` et `sort()`, comme en R natif
+
+(4) Stockage du nom des colonnes d’intérêt dans un vecteur
+
+(5) Utilisation de `group_by()` pour grouper les données par Q227, puis `summarise()` combiné avec `across()` et la fonction get_mode pour calculer la modalité majoritaire pour chaque variable.
+
+(6) Calcul du pourcentage de répondants par modalité avec `count()` et `mutate()` pour faire les opérations mathématiques de base avec division (`/`) et `round()`
+
+(7) Réorganisation des colonnes avec `select()` pour mettre % répondants en deuxième position
+
+(8) On transforme au format dataframe pour un meilleur affichage avec `as.data.frame()`
+
+(9) On renomme les colonnes avec `names()` pour obtenir leur nom 
+
+(10) On renomme le contenu du tableau en transformant en facteur avec `factor()` et en affectant le bon renommage avec `<-`
+
+(11) On affiche le résultat de façon élégante avec `kable()`
+
+```{r}
+
+# (1)
+vars <- c(paste0("Q6_", 1:12), "recode_age", "Q1", "recode_csp", "Q8", "Q240", "Q5_taille", "Q236", "Q235")
+data_subset <- data %>% select(all_of(vars))
+
+# (2)
+data_subset <- data_subset %>%
+  mutate(taille_foyer = suppressWarnings(as.numeric(Q235)) + suppressWarnings(as.numeric(Q236)))
+
+# (3)
+get_mode <- function(x) {
+  x <- x[!is.na(x)]
+  if (length(x) == 0) return(NA)
+  as.character(names(sort(table(x), decreasing = TRUE))[1])
+}
+
+# (4)
+col_a_resumer <- c("recode_age", "Q1", "recode_csp", "Q8", "Q240", "Q5_taille", "Q236", "taille_foyer")
+Q6_vars <- paste0("Q6_", 1:12)
+
+# (5)
+resultat <- lapply(Q6_vars, function(q6) {
+  data_subset %>%
+    filter(.data[[q6]] == 1) %>%
+    summarise(across(all_of(col_a_resumer), get_mode)) %>%
+    mutate(Q6_variable = q6)
+}) %>%
+  bind_rows() %>%
+  relocate(Q6_variable)
+
+# (6)
+pct_repondants <- lapply(Q6_vars, function(q6) {
+  data_subset %>%
+    summarise(Q6_variable = q6,
+              `% répondants` = round(100 * sum(.data[[q6]] == 1, na.rm = TRUE) / n(), 2))
+}) %>%
+  bind_rows()
+
+# (7)
+resultat <- resultat %>%
+  left_join(pct_repondants, by = "Q6_variable") %>%
+  select(Q6_variable, `% répondants`, all_of(col_a_resumer))
+
+# (8)
+resultat <- as.data.frame(resultat)
+
+# (9)
+
+names(resultat) <-  c("Lieu d'achat","Pourcentage de répondants", " Tranche d'âges" , "Sexe", 
+                  "Catégorie Socio-Professionnelle", "Dépenses moyennes mensuelles pour les achats alimentaires", "Niveau de diplôme", "Nombre d'habitants","Nombre d'enfants dans le foyer"
+                  ,"Nombre de personnes dans le foyer")
+
+# (10)
+resultat$`Lieu d'achat` <- factor(resultat$`Lieu d'achat`,
+                               levels = c("Q6_1","Q6_2","Q6_9","Q6_6","Q6_4","Q6_3","Q6_5","Q6_7","Q6_11","Q6_10"),
+                               labels = c("Hypermarché", "Hard discount","Epiceries indépendante",
+                            "Magains de surgelé","Magasins spécialisés Bio", "Marché","Directement aux agriculteur",
+                            "Paniers en ligne", "Artisans et commerçants spécialisés", "Epicerie participative"))
+
+
+resultat$` Tranche d'âges`<- as.factor(resultat$` Tranche d'âges`)
+
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 1] <- "20-24 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 2] <- "25-34 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 3] <- "35-44 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 4] <- "45-54 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 5] <- "55-64 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 6] <- "65 ans et plus"
+
+resultat$Sexe<- as.factor(resultat$Sexe)
+
+levels(resultat$Sexe)[levels(resultat$Sexe) == 1] <- "Homme"
+levels(resultat$Sexe)[levels(resultat$Sexe) == 2] <- "Femme"
+
+resultat$`Catégorie Socio-Professionnelle`<- as.factor(resultat$`Catégorie Socio-Professionnelle`)
+
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 1] <- "Agriculteur, Artisan, Commerçant, Chef d’entreprise"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 2] <- "Profession libérale, Cadre ou profession intellectuelle supérieure"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 3] <- "Profession intermédiaire"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 4] <- "Employé, Ouvrier"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 5] <- "Retraité"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 6] <- "Demandeur d’emploi, Homme ou Femme au foyer, Etudiant, lycéen, Autre"
+
+resultat$`Niveau de diplôme` <- as.factor(resultat$`Niveau de diplôme`)
+
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 1] <- "Sans diplôme"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 2] <- "BEPC, brevet élémentaire, brevet des collèges, DNB "
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 3] <- "CAP, BEP ou diplôme de niveau équivalent"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 4] <- "Baccalauréat, brevet professionnel"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 5] <- "BTS, DUT, Deug, Deust, diplôme de la santé ou du social de niveau bac+2, diplôme équivalent "
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 6] <- "Licence, licence professionnelle, maîtrise, diplôme équivalent de niveau bac+3 ou bac+4"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 7] <- "Master, DEA, DESS, diplôme de grande école de niveau bac+5, doctorat de santé "
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 1] <- "Doctorat de recherche (hors santé)"
+
+# (11)
+kable(resultat, caption = "Profil des répondants en fonction du lieu d'achat") %>%
+  kable_styling(latex_options = "striped")
+
+```
+
+### 15.Budget moyen
+
+#### Avec R natif
+
+1.  On selectionne la colonne Q8 avec `$` et on fait la moyenne avec la fonction `mean()`.
+2.  On affiche le résultat arrondi avec `round()` que l'on colle avec un texte avec la fonction `paste()`
+
+```{r}
+
+#1
+
+moy_budget <- mean(data$Q8, na.rm = T)
+
+#2
+
+print(paste("Le budget alimentaire moyen est de",round(moy_budget),"euros"))
+```
+
+### 16. Budget médian
+
+#### Avec R natif
+
+1. On sélectionne la colonne Q8 avec $, puis on calcule la médiane avec la fonction `median()`.
+
+```{r}
+median_budget <- median(data$Q8)
+median_budget
+```
+
+#### Avec usage de library
+
+```{r}
+median_budget2 <- data %>%
+summarise(mediane = median(Q8))
+median_budget2
+```
+
+### 17. Mise en classe et répartition statistique des répondants par classe de budget
+
+#### Avec R natif
+
+1. Découper le budget en 5 catégories égales avec `quantile()`, puis spécifier le pourcentage de répondants dans chaque catégorie avec `seq()`.
+2. Afficher les catégories de budget avec `print()`.
+3. Analyser la répartition des catégories de budget avec `table()`.
+
+```{r}
+# Création des 5 classes basées sur les quintiles
+breaks <- quantile(data$Q8, probs = seq(0, 1, 0.2), na.rm = TRUE)
+print(breaks)
+data$decouper_budget <- cut(data$Q8,
+                       breaks = breaks,
+                       include.lowest = FALSE,
+                       labels = c("[1 - 250[", "[250 - 350[", "[350 - 450[", "[450 - 600[", "[600 - 4000["))
+
+table(data$decouper_budget)
+```
+
+### 18.Budget moyen consacré a chaque modalité de lieu
+
+#### Avec R natif
+
+1.  On sélectionne les colonnes Q9_1 à Q9_13. On utilise `paste()` pour simplifier les noms de colonne.
+2.  On remplace les valeurs manquantes 0 que l'on repère avec `is.na()` avec `replace()`.
+3.  On calcule les moyennes par colonne avec `colMeans()` que l'on arrondi avec `round()`.
+4.  On renomme les noms avec `names()` et on affiche le résultat dans un dataframe avec `as.data.frame()`.
+
+```{r}
+
+#1
+
+df_rep_b <- data[,paste("Q9_", 1:13, sep = "")]
+
+#2
+
+df_rep_b <- replace(df_rep_b, is.na(df_rep_b), 0)
+
+#3
+
+moy_rep_b <- round(colMeans(df_rep_b), 2)
+
+#4
+
+names(moy_rep_b) <- c("Hypermarché, Supermarché","Hard discount","Epiceries indépendantes, de quartier, épiceries fines","Magasins de surgelés","Magasins spécialisés Bio","Marché","Directement aux agriculteurs","Paniers en ligne réalisés par un intermédiaire","Artisans et commerçants spécialisés","Epicerie participative, associative, supermarché coopératif","Magasin alimentaire spécialisé dans le vrac ou les produits locaux","Magasin d’aide alimentaire","Autre")
+
+as.data.frame(moy_rep_b)
+
+```
+
+#### Avec usage de library
+
+-   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+
+1.  On sélectionne les colonnes qui nous intéressent avec `select()`.
+2.  On modifie notre nouveau dataframe en remplaçant toute les valeur NA par 0 avec `mutate` et on calcule la moyenne par col avec `colMeans()`.
+3.  On modifie les noms des lieux d'achat et on affiche le tableau avec `kable()`.
+
+```{r}
+#1
+
+moy_rep_b <- data %>% select(Q9_1:Q9_13) %>% 
+  
+#2
+  
+  mutate(across(everything(), ~replace_na(., 0))) %>% 
+  
+  colMeans()
+
+#3
+
+names(moy_rep_b) <- c("Hypermarché, Supermarché","Hard discount","Epiceries indépendantes, de quartier, épiceries fines","Magasins de surgelés","Magasins spécialisés Bio","Marché","Directement aux agriculteurs","Paniers en ligne réalisés par un intermédiaire","Artisans et commerçants spécialisés","Epicerie participative, associative, supermarché coopératif","Magasin alimentaire spécialisé dans le vrac ou les produits locaux","Magasin d’aide alimentaire","Autre")
+
+kable(round(moy_rep_b,2), caption = "Moyenne de la répartition du budget en fonction du lieu d'achat", col.names = c("Lieux d'achat","Moyenne de la répartition du budget (%)")) %>% 
+  kable_styling(latex_options = "striped")
+  
+```
+
+### 21.part du budget consacré aux modalités 6/7/8
+
+#### Avec R natif
+
+1.  On sélectionne les lignes pour notre critère de sélection à laide de `paste()`.
+2.  À l'aide de la fonction `apply()` on regarde pour chaque valeur si elle est inférieure à 7 et non manquante (lieu fréquenté) et on retourne le booléen TRUE avec `all()` si la condition est respectée sur toute la ligne (tout les lieux) ou FALSE sinon.
+3.  On sélectionne les lignes et colonnes qui nous intéressent et on remplace les valeurs manquantes par 0 avec `replace()`.
+4.  On fait la moyenne par colonne avec `colMeans` et on retransforme en dataframe avec `as.data.frame`.
+5.  On modifie les noms avec `dimnames()`.
+
+```{r}
+#1
+
+df_678 <- data[,paste("Q6_", 6:8, sep = "")]
+
+#2
+
+lignes_a_conserver <- apply(df_678, MARGIN = 1, function(x) all(x < 7 & !is.na(x)))
+
+#3
+
+df_678_b <- data[lignes_a_conserver,paste("Q9_", 6:8, sep = "")]
+df_678_b <- replace(df_678_b, is.na(df_678_b), 0)
+
+#4
+
+moy_b_678 <- round(colMeans(df_678_b),2)
+moy_b_678 <- as.data.frame(moy_b_678)
+
+#5
+
+dimnames(moy_b_678)[[1]] <- c("Marché","Directement aux agriculteurs","Paniers en ligne réalisés par un intermédiaire")
+dimnames(moy_b_678)[[2]] <- "Moyenne du budget dédié pour ceux qui fréquentes ces lieux (%)"
+
+moy_b_678
+
+```
+
+#### Avec usage de library
+
+-   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+
+1.  On sélectionne les lignes avec toutes les valeurs de la question Q9_6 à Q9_8 qui sont inférieur à 7 et non manquantes avec `filter()`.
+2.  On sélectionne les colonnes qui nous intéressent avec `select()` et on fait la moyenne par colonne avec `colMeans()`.
+3.  On fait la mise en forme du tableau avec `kablee()`.
+
+```{r}
+moy_b_678 <- data %>% filter(apply(across(Q6_6:Q6_8, ~ .x < 7 & !is.na(.x)),1,all) ) %>% 
+  select(Q9_6:Q9_8) %>% 
+  mutate(across(Q9_6:Q9_8, ~replace_na(., 0))) %>% 
+  colMeans() 
+
+
+names(moy_b_678) <- c("Marché","Directement aux agriculteurs","Paniers en ligne réalisés par un intermédiaire")
+
+kable(round(moy_b_678,2), caption = "Moyenne du budget dédié par ceux qui fréquentent tous ces lieux d’achat.", col.names = c("Lieux d'achat","Moyenne de la répartition du budget (%)")) %>% 
+  kable_styling(latex_options = "striped")
+  
+```
+
+### 22. Le budget médian consacré aux modalités 6/7/8 par les acheteurs
+
+#### Avec R natif
+
+(1) On sélectionne les colonnes pour notre critère de sélection à laide de `paste()`
+(2) On remplace les valeurs manquantes par des 0 grâce à `replace()` et l'utilisation de `is.na()` pour les détecter
+(3) À l'aide de la fonction `apply()` on applique la médiane sur l'ensemble des colonnes
+(4) On modifie les noms des colonnes avec `names()`
+(5) On transforme au format 'dataframe' le tableau et on le transpose afin d'obtenir les résultats dans le bon sens avec `t()`
+(6) On garde uniquement les colonnes 6 à 8 car se sont les modalités de la question 9 du questionnaire qui nous intéressent avec l'opérateur de sélection `[]`
+(7) On affiche le tableau de résultat avec `print()`
+
+```{r}
+# (1)
+
+data_question_9 <- data[,paste("Q9_", 1:13, sep = "")]
+
+# (2)
+
+data_question_9 <- replace(data_question_9, is.na(data_question_9), 0)
+
+# (3)
+
+mediane_question_9 <- apply(data_question_9, 2, median, na.rm = TRUE)
+
+# (4)
+
+names(mediane_question_9) <- c("Hypermarché, Supermarché","Hard discount","Epiceries indépendantes, de quartier, épiceries fines","Magasins de surgelés","Magasins spécialisés Bio","Marché","Directement aux agriculteurs","Paniers en ligne réalisés par un intermédiaire","Artisans et commerçants spécialisés","Epicerie participative, associative, supermarché coopératif","Magasin alimentaire spécialisé dans le vrac ou les produits locaux","Magasin d’aide alimentaire","Autre")
+
+# (5)
+
+mediane_question_9 <- as.data.frame(t(mediane_question_9))  # Transpose pour avoir les valeurs en colonnes
+
+# (6)
+
+mediane_question_9 <- mediane_question_9[, 6:8]
+
+# (7)
+
+print(mediane_question_9)
+
+```
+
+#### Avec usage de library
+
+(1) On sélectionne les colonnes correspondant aux questions Q9 à l’aide de `select(starts_with("Q9_"))` puis on remplace les valeurs manquantes par des zéros grâce à `mutate()` combiné à `across()` et `replace_na()`
+
+(2) On calcule la médiane pour chaque colonne (chaque type de lieu) à l’aide de `summarise()` et `across()`, puis on renomme chaque colonne avec des libellés explicites correspondant aux types de lieux via `rename_with()`.
+
+(3) On sélectionne uniquement les colonnes 6 à 8 car ce sont celles qui nous intéressent dans le cadre de l’analyse de la question 9 du questionnaire, à l’aide de la fonction `select()`
+
+(4) On affiche la table des résultats de façon élégante avec `kable()`
+
+```{r}
+
+# (1)  
+data_question_9 <- data %>%
+  select(starts_with("Q9_")) %>%
+  mutate(across(everything(), ~replace_na(., 0)))
+
+# (2) 
+
+mediane_question_9 <- data_question_9 %>%
+  summarise(across(everything(), ~median(.x, na.rm = TRUE))) %>%
+  rename_with(~c(
+    "Hypermarché, Supermarché",
+    "Hard discount",
+    "Epiceries indépendantes, de quartier, épiceries fines",
+    "Magasins de surgelés",
+    "Magasins spécialisés Bio",
+    "Marché",
+    "Directement aux agriculteurs",
+    "Paniers en ligne réalisés par un intermédiaire",
+    "Artisans et commerçants spécialisés",
+    "Epicerie participative, associative, supermarché coopératif",
+    "Magasin alimentaire spécialisé dans le vrac ou les produits locaux",
+    "Magasin d’aide alimentaire",
+    "Autre"
+  ))
+
+# (3)
+mediane_question_9 <- mediane_question_9 %>%
+  select(6:8)
+
+# (4) 
+
+kable(mediane_question_9) %>% 
+  kable_styling(latex_options = "striped")
+
+```
+
+### 23. Part (en %) de votre budget alimentaire global consacrez-vous aux achats de produits locaux et/ou en circuit court ?
+
+#### Avec R natif
+
+1. Donner des noms clairs (labels) aux différentes réponses possibles (modalités).
+2. Transformer la variable Q230 en variable catégorielle avec la fonction `factor()` en précisant les niveaux (valeurs possibles) et leurs étiquettes (labels).
+3. Créer un tableau de fréquence croisé avec la fonction `table()` pour voir combien de personnes ont donné chaque réponse. Pour inclure les réponses manquantes (NA), ajoute useNA = "ifany".
+4. Convertir ce tableau en pourcentages avec la fonction `prop.table()`.
+
+```{r}
+modalite_labels <- c("Moins de 5% de mon budget alimentaire", "Entre 5 et 9%",
+"Entre 10 et 24%", "Entre 25 et 49%", "Entre 50 et 75%",
+"Plus de 75% de mon budget alimentaire", "Je n’en ai aucune idée")
+
+data$Q230 <- factor(data$Q230, levels = 1:7, labels=modalite_labels)
+
+genre <- prop.table(table(data$Q230, data$Q1, useNA = "ifany"), 1)  # Selon le genre
+round(genre*100,2)
+
+age <- prop.table(table(data$Q230, data$Q2, useNA = "ifany"),1) # selon l'âge
+round(age*100,2)
+
+CSP <- prop.table(table(data$Q230, data$Q3, useNA = "ifany"), 1) # Selon la CSP
+round(CSP*100,2)
+
+alimentaire <- prop.table(table(data$Q230, data$Q8, useNA = "ifany"),1) # selon le budget alimentaire
+round(alimentaire*100,2)
+
+niveau <- prop.table(table(data$Q230, data$Q240, useNA = "ifany"),1) # selon le niveau de diplôme
+round(alimentaire*100,2)
+
+enfants <- prop.table(table(data$Q230, data$Q236, useNA = "ifany"),1) # selon le nombre d'enfants
+round(enfants*100,2)
+```
+
+### 24.Produits achetés auprès d'un agriculteur ou non?
+
+#### Avec R natif
+
+1.  On la colonne qui nous intéresse.
+2.  On fait le tableau de proportion de la table de fréquence d'occurrences de réponse de la question 22 avec `table()` et `prop.table()`. On multiplie par 100 pour avoir un pourcentage.
+3.  On change le nom des valeurs avec `names()`.
+4.  On transforme en dataframe avec `as.data.frame()` et on change le nom de la colonne des valeurs avec `dimnames()`.
+
+```{r}
+#1
+
+df_Q22 <- data[,"Q22"]
+
+#2
+
+tb_Q22 <- prop.table(table(df_Q22))*100
+
+#4
+
+names(tb_Q22) <- c("Oui, et j’en ai acheté au cours du mois de Septembre","Oui, mais je n’en ai pas acheté au cours du mois de Septembre","Non, j’en ai déjà acheté de cette façon mais ce n’est plus le cas","Non, je n’en ai jamais acheté de cette façon")
+
+#4
+
+df_Q22 <- as.data.frame(round(tb_Q22,2))
+dimnames(df_Q22)[[2]] <- c("Achetez-vous des produits vendus directement par l’agriculteur ?","Répartition (%)")
+
+df_Q22
+```
+
+#### Avec usage de library
+
+-   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+
+1.  On sélectionne la colonne qui nous intéresse avec `select()`.
+2.  On fait le tableau de proportion de la table de fréquence d'occurrences de réponse de la question 22 avec `table()` et `prop.table()`. On multiplie par 100 pour avoir un pourcentage.
+3.  On change le nom des valeurs avec `names()`.
+4.  On met en forme avec `kable()`.
+
+```{r}
+tb_Q22 <- data %>% select(Q22) %>% 
+  table() %>% 
+  prop.table()*100
+names(tb_Q22) <- c("Oui, et j’en ai acheté au cours du mois de Septembre","Oui, mais je n’en ai pas acheté au cours du mois de Septembre","Non, j’en ai déjà acheté de cette façon mais ce n’est plus le cas","Non, je n’en ai jamais acheté de cette façon")
+
+kable(round(tb_Q22, 2), col.names = c("Achetez-vous des produits vendus directement par l’agriculteur ?","Répartition (%)")) %>% 
+  kable_styling(latex_options = "striped")
+
+```
+
+### 25. Quelles motivations à fréquenter le marché
+
+#### Avec R natif
+
+(1) On sélectionne les colonnes pour notre critère de sélection à laide de `subset()` et de l'agument `select()`
+(2) On initialise les trois tableaux pour les 3 premières motivations
+(3) On crée les 3 tableaux de pourcentages pour les motivations des clients
+    (1) On crée une boucle `for()`
+    (2) On convertit en numérique au cas où par précaution avec `as.numeric()` et on retire les potentiels messages d'avertissements générés par R avec s`uppressWarnings()`
+    (3) On garde les lignes qui n'ont pas de valeurs manquantes au moyen de is.na() auquel on ajoute un `!` devant pour obtenir `!is.na()`. Le `!` est la négation en langage R
+    (4) On crée la table des effectifs avec `table()`
+    (5) On transforme cette table en table de pourcentages avec les opérateurs classiques de R (`/` pour la division et `sum()` pour la somme) qu'on arrondie à 2 chiffres après la virgule à l'aide de `round()`
+    (6) On effectue un trie décroissant avec `sort()` et l'argument d`ecreasing = TRUE`
+    (7) On affiche avec `cat()`, la modalité la plus fréquente avec `which.max()`. La fonction `paste0()` permet de concaténer
+    (8) On affecte au bon tableau les opérations précédentes avec `if()` et `<-`
+(4) On transforme en dataframe avec `as.data.frame()`
+(5) On renomme les colonnes avec `names()` pour obtenir leur nom 
+(6) On renomme le contenu du tableau en transformant en facteur avec `factor()` et en affectant le bon renommage avec `<-`
+(7) On affiche le tableau de résultat avec `print()`
+
+```{r,}
+# (1)
+data_question_21 <- subset(data, select = 58:60)
+
+# (2) 
+motivation_1 <- NULL
+motivation_2 <- NULL
+motivation_3 <- NULL
+
+# (3)
+for (i in 1:3) {
+  
+  Motivation <- data_question_21[[i]]
+  
+  Motivation <- suppressWarnings(as.numeric(Motivation))
+  
+
+  Motivation <- Motivation[!is.na(Motivation)]
+
+  freq <- table(Motivation)
+  
+
+  pct <- round(100 * freq / sum(freq), 1)
+  
+
+  pct_sorted <- sort(pct, decreasing = TRUE)
+  
+
+  cat(paste0("Modalité la plus fréquente pour Motivation_", i, " : ", 
+             names(which.max(pct)), " (", max(pct), "%)\n\n"))
+  
+  if (i == 1) motivation_1 <- pct_sorted
+  if (i == 2) motivation_2 <- pct_sorted
+  if (i == 3) motivation_3 <- pct_sorted
+}
+
+# (4)
+motivation_1 <- as.data.frame(motivation_1)
+motivation_2 <- as.data.frame(motivation_2)
+motivation_3 <- as.data.frame(motivation_3)
+
+# (5)
+
+names(motivation_1) <- c("Raisons d’achat sur les marchés","Pourcentages")
+names(motivation_2) <- c("Raisons d’achat sur les marchés","Pourcentages")
+names(motivation_3) <- c("Raisons d’achat sur les marchés","Pourcentages")
+
+# (6)
+
+motivation_1$`Raisons d’achat sur les marchés` <- as.factor(motivation_1$`Raisons d’achat sur les marchés`)
+
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 0] <- "Na"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 1] <- "Pour y découvrir des nouveautés"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 2] <- "Pour pouvoir flâner dans les rayons"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 3] <- "Pour y trouver des produits de grandes marques"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 4] <- "Pour y acheter des produits locaux "
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 5] <- "Pour soutenir les agriculteurs et l’économie locale"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 6] <- "Pour rencontrer des gens, discuter, échanger"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 7] <- "Pour la diversité et le large choix de produits alimentaires"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 8] <- "Pour la possibilité de faire toutes mes courses dans le même lieu de vente"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 9] <- "Pour y acheter des produits Bio"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 10] <- "Pour la proximité du lieu d’achat (ou de retrait)"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 11] <- "Pour la praticité d’accès (situé sur un trajet régulier)"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 12] <- "Pour le prix, les promotions"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 13] <- "Pour la qualité nutritionnelle des produits"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 14] <- "Pour le goût des produits"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 15] <- "Pour y acheter des produits en circuit court"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 16] <- "Pour les services associés (carte de fidélité, service après vente, caisses libre service..)"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 17] <- "Pour y acheter des produits que je ne trouve pas ailleurs"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 18] <- "Autre"
+
+
+motivation_2$`Raisons d’achat sur les marchés` <- as.factor(motivation_2$`Raisons d’achat sur les marchés`)
+
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 0] <- "Na"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 1] <- "Pour y découvrir des nouveautés"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 2] <- "Pour pouvoir flâner dans les rayons"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 3] <- "Pour y trouver des produits de grandes marques"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 4] <- "Pour y acheter des produits locaux "
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 5] <- "Pour soutenir les agriculteurs et l’économie locale"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 6] <- "Pour rencontrer des gens, discuter, échanger"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 7] <- "Pour la diversité et le large choix de produits alimentaires"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 8] <- "Pour la possibilité de faire toutes mes courses dans le même lieu de vente"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 9] <- "Pour y acheter des produits Bio"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 10] <- "Pour la proximité du lieu d’achat (ou de retrait)"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 11] <- "Pour la praticité d’accès (situé sur un trajet régulier)"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 12] <- "Pour le prix, les promotions"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 13] <- "Pour la qualité nutritionnelle des produits"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 14] <- "Pour le goût des produits"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 15] <- "Pour y acheter des produits en circuit court"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 16] <- "Pour les services associés (carte de fidélité, service après vente, caisses libre service..)"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 17] <- "Pour y acheter des produits que je ne trouve pas ailleurs"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 18] <- "Autre"
+
+
+motivation_3$`Raisons d’achat sur les marchés` <- as.factor(motivation_3$`Raisons d’achat sur les marchés`)
+
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 0] <- "Na"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 1] <- "Pour y découvrir des nouveautés"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 2] <- "Pour pouvoir flâner dans les rayons"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 3] <- "Pour y trouver des produits de grandes marques"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 4] <- "Pour y acheter des produits locaux "
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 5] <- "Pour soutenir les agriculteurs et l’économie locale"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 6] <- "Pour rencontrer des gens, discuter, échanger"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 7] <- "Pour la diversité et le large choix de produits alimentaires"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 8] <- "Pour la possibilité de faire toutes mes courses dans le même lieu de vente"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 9] <- "Pour y acheter des produits Bio"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 10] <- "Pour la proximité du lieu d’achat (ou de retrait)"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 11] <- "Pour la praticité d’accès (situé sur un trajet régulier)"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 12] <- "Pour le prix, les promotions"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 13] <- "Pour la qualité nutritionnelle des produits"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 14] <- "Pour le goût des produits"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 15] <- "Pour y acheter des produits en circuit court"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 16] <- "Pour les services associés (carte de fidélité, service après vente, caisses libre service..)"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 17] <- "Pour y acheter des produits que je ne trouve pas ailleurs"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 18] <- "Autre"
+
+
+# (7)
+
+print(motivation_1)
+print(motivation_2)
+print(motivation_3)
+
+```
+
+#### Avec usage de library
+
+(1) On sélectionne les colonnes pour notre critère de sélection à l’aide de `select()`du package `dplyr()`, qui permet une syntaxe plus claire et concise que `subset()`
+(2) On crée les 3 tableaux de pourcentages pour les motivations des clients
+    (1) On crée une boucle `for()`
+    (2) On convertit en numérique au cas où par précaution avec `as.numeric()` et on retire les potentiels messages d'avertissements générés par R avec s`uppressWarnings()`
+    (3) On garde les lignes qui n'ont pas de valeurs manquantes au moyen de is.na() auquel on ajoute un `!` devant pour obtenir `!is.na()`. Le `!` est la négation en langage R
+    (4) On crée la table des effectifs avec `table()`
+    (5) On transforme cette table en table de pourcentages avec les opérateurs classiques de R (`/` pour la division et `sum()` pour la somme) qu'on arrondie à 2 chiffres après la virgule à l'aide de `round()`
+    (6) On effectue un trie décroissant avec `sort()` et l'argument d`ecreasing = TRUE`
+    (7) On affiche avec `cat()`, la modalité la plus fréquente avec `which.max()`. La fonction `paste0()` permet de concaténer
+    (8) On affecte au bon tableau les opérations précédentes avec `if()` et `<-`
+(3) On transforme en dataframe avec `as.data.frame()`
+(4) On renomme les colonnes avec `names()` pour obtenir leur nom 
+(5) On renomme le contenu du tableau en transformant en facteur avec `factor()` et en affectant le bon renommage avec `<-`
+(6) On affiche le tableau de résultat avec `cat()`et de façon élégante avec `kable()`
+
+```{r}
+
+# (1) 
+data_question_21 <- data %>%
+  select(58:60)
+
+# (2) 
+motivation_1 <- NULL
+motivation_2 <- NULL
+motivation_3 <- NULL
+
+for (i in 1:3) {
+  
+  Motivation <- data_question_21[[i]]
+  
+  Motivation <- suppressWarnings(as.numeric(Motivation))
+  
+  Motivation <- Motivation[!is.na(Motivation)]
+  
+  freq <- table(Motivation)
+  
+  pct <- round(100 * freq / sum(freq), 1)
+  
+  pct_sorted <- sort(pct, decreasing = TRUE)
+
+  cat(paste0("Modalité la plus fréquente pour Motivation_", i, " : ", 
+             names(which.max(pct)), " (", max(pct), "%)\n\n"))
+  
+  if (i == 1) motivation_1 <- pct_sorted
+  if (i == 2) motivation_2 <- pct_sorted
+  if (i == 3) motivation_3 <- pct_sorted
+}
+
+# (3)
+motivation_1 <- as.data.frame(motivation_1)
+motivation_2 <- as.data.frame(motivation_2)
+motivation_3 <- as.data.frame(motivation_3)
+
+# (4)
+
+names(motivation_1) <- c("Raisons d’achat sur les marchés","Pourcentages")
+names(motivation_2) <- c("Raisons d’achat sur les marchés","Pourcentages")
+names(motivation_3) <- c("Raisons d’achat sur les marchés","Pourcentages")
+
+# (5)
+
+motivation_1$`Raisons d’achat sur les marchés` <- as.factor(motivation_1$`Raisons d’achat sur les marchés`)
+
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 0] <- "Na"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 1] <- "Pour y découvrir des nouveautés"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 2] <- "Pour pouvoir flâner dans les rayons"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 3] <- "Pour y trouver des produits de grandes marques"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 4] <- "Pour y acheter des produits locaux "
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 5] <- "Pour soutenir les agriculteurs et l’économie locale"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 6] <- "Pour rencontrer des gens, discuter, échanger"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 7] <- "Pour la diversité et le large choix de produits alimentaires"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 8] <- "Pour la possibilité de faire toutes mes courses dans le même lieu de vente"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 9] <- "Pour y acheter des produits Bio"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 10] <- "Pour la proximité du lieu d’achat (ou de retrait)"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 11] <- "Pour la praticité d’accès (situé sur un trajet régulier)"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 12] <- "Pour le prix, les promotions"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 13] <- "Pour la qualité nutritionnelle des produits"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 14] <- "Pour le goût des produits"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 15] <- "Pour y acheter des produits en circuit court"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 16] <- "Pour les services associés (carte de fidélité, service après vente, caisses libre service..)"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 17] <- "Pour y acheter des produits que je ne trouve pas ailleurs"
+levels(motivation_1$`Raisons d’achat sur les marchés`)[levels(motivation_1$`Raisons d’achat sur les marchés`) == 18] <- "Autre"
+
+
+motivation_2$`Raisons d’achat sur les marchés` <- as.factor(motivation_2$`Raisons d’achat sur les marchés`)
+
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 0] <- "Na"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 1] <- "Pour y découvrir des nouveautés"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 2] <- "Pour pouvoir flâner dans les rayons"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 3] <- "Pour y trouver des produits de grandes marques"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 4] <- "Pour y acheter des produits locaux "
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 5] <- "Pour soutenir les agriculteurs et l’économie locale"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 6] <- "Pour rencontrer des gens, discuter, échanger"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 7] <- "Pour la diversité et le large choix de produits alimentaires"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 8] <- "Pour la possibilité de faire toutes mes courses dans le même lieu de vente"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 9] <- "Pour y acheter des produits Bio"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 10] <- "Pour la proximité du lieu d’achat (ou de retrait)"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 11] <- "Pour la praticité d’accès (situé sur un trajet régulier)"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 12] <- "Pour le prix, les promotions"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 13] <- "Pour la qualité nutritionnelle des produits"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 14] <- "Pour le goût des produits"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 15] <- "Pour y acheter des produits en circuit court"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 16] <- "Pour les services associés (carte de fidélité, service après vente, caisses libre service..)"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 17] <- "Pour y acheter des produits que je ne trouve pas ailleurs"
+levels(motivation_2$`Raisons d’achat sur les marchés`)[levels(motivation_2$`Raisons d’achat sur les marchés`) == 18] <- "Autre"
+
+
+motivation_3$`Raisons d’achat sur les marchés` <- as.factor(motivation_3$`Raisons d’achat sur les marchés`)
+
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 0] <- "Na"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 1] <- "Pour y découvrir des nouveautés"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 2] <- "Pour pouvoir flâner dans les rayons"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 3] <- "Pour y trouver des produits de grandes marques"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 4] <- "Pour y acheter des produits locaux "
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 5] <- "Pour soutenir les agriculteurs et l’économie locale"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 6] <- "Pour rencontrer des gens, discuter, échanger"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 7] <- "Pour la diversité et le large choix de produits alimentaires"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 8] <- "Pour la possibilité de faire toutes mes courses dans le même lieu de vente"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 9] <- "Pour y acheter des produits Bio"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 10] <- "Pour la proximité du lieu d’achat (ou de retrait)"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 11] <- "Pour la praticité d’accès (situé sur un trajet régulier)"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 12] <- "Pour le prix, les promotions"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 13] <- "Pour la qualité nutritionnelle des produits"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 14] <- "Pour le goût des produits"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 15] <- "Pour y acheter des produits en circuit court"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 16] <- "Pour les services associés (carte de fidélité, service après vente, caisses libre service..)"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 17] <- "Pour y acheter des produits que je ne trouve pas ailleurs"
+levels(motivation_3$`Raisons d’achat sur les marchés`)[levels(motivation_3$`Raisons d’achat sur les marchés`) == 18] <- "Autre"
+
+# (6)
+cat("Motivation 1\n")
+
+kable(motivation_1) %>% 
+  kable_styling(latex_options = "striped")
+
+cat("Motivation 2\n")
+kable(motivation_2) %>% 
+  kable_styling(latex_options = "striped")
+
+cat("Motivation 3\n")
+kable(motivation_3) %>% 
+  kable_styling(latex_options = "striped")
+
+```
+
+### 27.Quels produits achetés?
+
+#### Avec R natif
+
+1.  On sélectionne la colonne qui nous intéresse pour répondre à la question.
+2.  On a un format qui n'est pas exploitable. On split chaque chaine de caractère pour avoir une liste des nombres à l'aide de la fonction `strsplit()` dans `lapply()`.
+3.  Le format n'est toujours pas exploitable, car on a des vecteurs dans des éléments de notre liste. Avec `unlist()`, on peut créer une seule liste.
+4.  On supprime les éléments qui n'ont pas de valeur en cherchant leurs indices avec `which()`.
+5.  On transforme en facteur avec des niveaux allant de 1 à 19 avec `factor()` puis on les renomme.
+6.  On fait la table des fréquences des niveaux avec `table()` que l'on divise par le nombre de personnes qui achètent en comptant le nombre de valeur qui n'est pas NA avec `is.na()` et `sum()`. On multiplie par 100 et on arrondi avec `round()`.
+7.  On transforme en dataframe avec `as.data.frame()` et on renomme les colonnes avec `names()`.
+
+```{r}
+#1
+
+dt_Q26 <- data$Q26
+
+#2
+
+dt_split <- lapply(dt_Q26,FUN = function(dt) strsplit(dt,"/")[[1]])
+
+#3
+
+dt_unlist <- unlist(dt_split)
+
+#4
+
+i <- which(dt_unlist=="")
+dt_unlist <- dt_unlist[-i]
+
+#5
+
+dt_unlist <- factor(dt_unlist, levels = 1:19)
+levels(dt_unlist) <- c("Fruits frais","Légumes frais","Miel","Produits de la Mer","Œufs","Volailles","Viande fraîche (Bœuf, Mouton, Porc, Agneau)","Charcuterie","Fromage","Yaourts","Autres produits laitiers","Pain","Farine","Pâtes","Olives, huile d’olive","Huiles (hors huile d’olive)","Boissons non alcoolisées","Produits d’épicerie salée (bocaux de légumes, plats cuisinés, etc...)","Produits d’épicerie sucrée (biscuits, confitures, compotes, etc...)")
+
+#6
+
+tb_freq <- round(table(dt_unlist)/sum(!is.na(dt_Q26))*100,2)
+
+#7
+tb_freq <- as.data.frame(tb_freq)
+names(tb_freq) <- c("Produits","Fréquences d'achat (%)")
+
+tb_freq
+
+```
+
+#### Avec usage de library
+
+-   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+
+1.  On sélectionne la bonne colonne avec `select()`.
+2.  On transforme les valeurs en valeurs utilisables avec `strsplit()`, `apply()` (on a encore un dataframe) et `unlist()`.
+3.  On enlève les éléments `""` qui ne sont pas des valeurs.
+4.  On transforme en facteur avec des niveaux allant de 1 à 19 avec les labels associé à chaque niveau avec `factor()`.
+5.  On fait la table des fréquences avec `table()` que l'on divise par le nombre de personnes qui ont acheté des produits en comptant le nombre de valeurs non manquante avec `is.na()` et `sum` et on multiplie par 100.
+6.  On fait la mise en forme du tableau arrondi avec `round()` et `kable()`.
+
+```{r}
+#1
+
+dt_unlist <- data %>% 
+  select(Q26) %>%
+
+#2
+  
+  apply(FUN = function(dt) strsplit(dt,"/")[[1]], MARGIN = 1) %>% 
+  unlist()
+
+#3
+  
+i <- which(dt_unlist=="")
+dt_unlist <- dt_unlist[-i]
+
+#4
+
+tb_freq <- dt_unlist %>% factor(levels = 1:19, labels = c("Fruits frais","Légumes frais","Miel","Produits de la Mer","Œufs","Volailles","Viande fraîche (Bœuf, Mouton, Porc, Agneau)","Charcuterie","Fromage","Yaourts","Autres produits laitiers","Pain","Farine","Pâtes","Olives, huile d’olive","Huiles (hors huile d’olive)","Boissons non alcoolisées","Produits d’épicerie salée (bocaux de légumes, plats cuisinés, etc...)","Produits d’épicerie sucrée (biscuits, confitures, compotes, etc...)")) %>% 
+  
+#5
+  
+  table()/sum(!is.na(data$Q26))*100
+
+#6
+
+kable(round(tb_freq,2), caption = "Fréquences des produits achetés", col.names = c("Produits", "Fréquences (%)")) %>%
+  kable_styling(latex_options = "striped")
+  
+```
+
+### 28. Fréquences d'achat auprès d’un ou plusieurs agriculteurs sur un marché
+
+#### Avec R natif
+
+(1) On sélectionne les colonnes pour notre critère de sélection à laide de `subset()` et de l'agument `select()`
+(2) On remplace les valeurs manquantes par des 0 grâce à `replace()` et l'utilisation de `is.na()` pour les détecter
+(3) On extrait la colonne Q27 comme vecteur à l'aide de l'opétrateur de sélection `[[]]`
+(4) On crée la table des effectifs avec `table()`
+(5) On transforme cette table en table de pourcentages avec les opérateurs classiques de R (`/` pour la division et `sum()` pour la somme) qu'on arrondie à 2 chiffres après la virgule à l'aide de `round()`
+(6) On transforme au format dataframe pour un meilleur affichage avec `as.data.frame()`
+(7) On renomme les colonnes avec `names()` pour obtenir leur nom 
+(8) On renomme le contenu du tableau en transformant en facteur avec `factor()` et en affectant le bon renommage avec `<-` 
+(9) On affiche le tableau de pourcentages avec `print()`
+
+```{r}
+# (1) 
+
+data_question_27 <- subset(data, select = 68)
+
+# (2) 
+
+data_question_27 <- replace(data_question_27, is.na(data_question_27), 0)
+
+# (3) 
+
+q27 <- data_question_27[[1]]
+
+# (4) 
+
+freq_q27 <- table(q27)
+
+# (5) 
+
+pct_q27 <- round(100 * freq_q27 / sum(freq_q27), 2)
+
+# (6) 
+
+pct_q27 <- as.data.frame(pct_q27)
+
+# (7)
+
+names(pct_q27) <- c("Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés",
+                    "Pourcentages")
+# (8)
+
+pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`<- as.factor(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 0] <- "Na"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 1] <- "Plusieurs fois par semaine"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 2] <- "1 fois par semaine"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 3] <- "2 à 3 fois par mois"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 4] <- "1 fois par mois"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 5] <- "Plusieurs fois par an"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 6] <- "1 fois par an ou moins"
+
+# (9) 
+
+print(pct_q27)
+
+```
+
+#### Avec usage de library
+
+(1) On sélectionne la colonne pour notre critère de sélection à l’aide de `select()` du package dplyr
+(2) On remplace les valeurs manquantes par des 0 grâce à `mutate()` et `replace_na()` de `tidyr`
+(3) On extrait la colonne Q27 comme vecteur à l'aide de l'opérateur de sélection `[[]]`
+(4) On crée la table des effectifs avec `table()`
+(5) On transforme cette table en table de pourcentages avec les opérateurs classiques de R (`/` pour la division et `sum()` pour la somme) qu’on arrondit à 2 chiffres après la virgule à l’aide de `round()`
+(6) On transforme au format dataframe pour un meilleur affichage avec `as.data.frame()`
+(7) On renomme les colonnes avec `names()` pour obtenir leur nom 
+(8) On renomme le contenu du tableau en transformant en facteur avec `factor()` et en affectant le bon renommage avec `<-`
+(9) On affiche le tableau de résultat de façon élégante avec `kable()`
+
+```{r}
+# (1) 
+data_question_27 <- data %>% 
+  select(Q27)
+
+# (2) 
+data_question_27 <- data_question_27 %>%
+  mutate(Q27 = replace_na(Q27, 0))
+
+# (3) 
+q27 <- data_question_27[["Q27"]]
+
+# (4) 
+freq_q27 <- table(q27)
+
+# (5) 
+pct_q27 <- round(100 * freq_q27 / sum(freq_q27), 2)
+
+# (6) 
+pct_q27 <- as.data.frame(pct_q27)
+
+
+# (7)
+
+names(pct_q27) <- c("Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés",
+                    "Pourcentages")
+# (8)
+
+pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`<- as.factor(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 0] <- "Na"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 1] <- "Plusieurs fois par semaine"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 2] <- "1 fois par semaine"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 3] <- "2 à 3 fois par mois"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 4] <- "1 fois par mois"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 5] <- "Plusieurs fois par an"
+
+levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`)[levels(pct_q27$`Fréquence annuelle d’achat direct auprès d’agriculteurs sur les marchés`) == 6] <- "1 fois par an ou moins"
+
+# (9) 
+kable(pct_q27) %>% 
+  kable_styling(latex_options = "striped")
+```
+
+### 29. Ancienneté
+
+#### R natif
+
+1.  Recoder les modalités de la variable Q28 avec `factor()`
+2.  Realiser le tableau de repartition en effectif avec `table()`
+3.  Faire la somme des repondants de chaque modalité avec `sum()`
+4.  Arrondir le pourcentage à deux chiffres après la virgule avec `round()`
+
+```{r}
+modalite_labels1 <- c(
+"Depuis moins d’un an",
+"De 1 à 2 ans",
+"De 2 à 5 ans",
+"De 5 à 10 ans",
+"Depuis plus de 10 ans")
+
+data$Q28 <- factor(data$Q28, levels = 1:5, labels = modalite_labels1)
+table_repartition <- table(data$Q28)
+pourcentage <- table_repartition/sum(table_repartition)*100
+round(pourcentage, 2)
+```
+
+#### Avec library
+
+1.  Tableau de répartion avec `freq()`
+
+```{r}
+freq(data$Q28)
+```
+
+### 30. Budget
+
+#### Avec R natif
+
+1.  On sélectionne la colonne qui nous intéresse.
+2.  On calcule la moyenne avec `mean()` en retirant les valeurs manquantes et on arrondi avec `round()`.
+3.  On affiche le résultat que l'on colle à une phrase avec `paste`.
+
+```{r}
+#1
+
+df_Q29 <- data$Q29
+
+#2
+
+moy_Q29 <- round(mean(df_Q29, na.rm = T))
+
+#3
+
+paste("Le budget alimentaire moyen dépensé sur les marchés  est de", moy_Q29, "euros")
+
+```
+
+#### Avec usage de library
+
+-   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+
+1.  On sélectionne la colonne qui nous intéresse avec `select()`
+2.  On calcule la moyenne de la colonne avec `mean()` sans rendre en compte les valeurs manquantes et on arrondi avec `round()`
+3.  On affiche le résultat que l'on colle à une phrase avec `paste`.
+
+```{r}
+moy_Q29 <- data %>% select(Q29) %>%
+  mean(Q29, na.rm = T) %>% round()
+
+paste("Le budget alimentaire moyen dépensé sur les marchés  est de", moy_Q29, "euros")
+
+```
+
+### 31. Le budget moyen dépensé sur les marchés
+
+#### Avec R natif
+
+(1) On sélectionne les colonnes pour notre critère de sélection à laide de `subset()` et de l'agument `select()`
+(2) On remplace les valeurs manquantes par des 0 grâce à `replace()` et l'utilisation de `is.na()` pour les détecter
+(3) On calcule la médiane avec la fonction `median()`
+(4) On transforme au format dataframe pour stocker le résultat avec `as.data.frame()`
+(5) On renomme les colonnes avec `names()` pour obtenir leur nom 
+(6) On affiche le résultat avec `print()`
+
+```{r}
+
+# (1) 
+
+data_question_29 <- subset(data, select = 70)
+
+# (2) 
+
+data_question_29 <- replace(data_question_29, is.na(data_question_29), 0)
+
+# (3) 
+
+moy_budget_marches <- mean(data_question_29$Q29)
+
+# (4) 
+moy_budget_marches <- as.data.frame(moy_budget_marches)
+
+# (5) 
+names(moy_budget_marches) <- c("Montant moyen dépensé pour des achats à des agriculteurs sur les marchés")
+
+# (6) 
+print(moy_budget_marches)
+```
+
+#### Avec usage de library
+
+(1) On sélectionne les colonnes pour notre critère de sélection à l’aide de `select()` du package `dplyr`
+(2) On remplace les valeurs manquantes par des 0 grâce à `mutate()` et `replace_na()` de `tidyr`
+(3) On calcule la médiane avec la fonction `median()`. On intègre cette fonction dans la fonction `summarise()`. Cette dernière permet de créer un nouveau tableau contenant des résumés (moyenne, médiane, total, minimum, etc.) à partir d’un data frame ou d’un tibble. Enfin, on utilise la fonction `pull()` de `dplyr` qui permet d’extraire une colonne d’un data frame ou d’un tibble sous forme de vecteur
+(4) On transforme au format dataframe pour stocker le résultat avec `as.data.frame()`
+(5) On renomme les colonnes avec `names()` pour obtenir leur nom 
+(6) On affiche le résultat de façon élégante avec `kable()`
+
+```{r}
+# (1) 
+data_question_29 <- data %>%
+  select(Q29)
+
+# (2) 
+data_question_29 <- data_question_29 %>%
+  mutate(Q29 = replace_na(Q29, 0))
+
+# (3)
+moy_budget_marches <- data_question_29 %>%
+  summarise(moye = mean(Q29)) %>%
+  pull(moye)
+
+# (4) 
+moy_budget_marches <- as.data.frame(moy_budget_marches)
+
+# (5) 
+names(moy_budget_marches) <- c("Montant moyen dépensé pour des achats à des agriculteurs sur les marchés")
+
+# (6) 
+kable(moy_budget_marches) %>% 
+  kable_styling(latex_options = "striped")
+```
+
+### 31. Le budget médian dépensé sur les marchés
+
+#### Avec R natif
+
+(1) On sélectionne les colonnes pour notre critère de sélection à laide de `subset()` et de l'agument `select()`
+(2) On remplace les valeurs manquantes par des 0 grâce à `replace()` et l'utilisation de `is.na()` pour les détecter
+(3) On calcule la médiane avec la fonction `median()`
+(4) On transforme au format dataframe pour stocker le résultat avec `as.data.frame()`
+(5) On renomme les colonnes avec `names()` pour obtenir leur nom 
+(6) On affiche le résultat avec `print()`
+
+```{r}
+
+# (1) 
+
+data_question_29 <- subset(data, select = 70)
+
+# (2) 
+
+data_question_29 <- replace(data_question_29, is.na(data_question_29), 0)
+
+# (3) 
+
+median_budget_marches <- median(data_question_29$Q29)
+
+# (4) 
+median_budget_marches <- as.data.frame(median_budget_marches)
+
+# (5) 
+
+names(median_budget_marches) <- c("Montant médian dépensé pour des achats à des agriculteurs sur les marchés")
+
+# (6) 
+print(median_budget_marches)
+```
+
+#### Avec usage de library
+
+(1) On sélectionne les colonnes pour notre critère de sélection à l’aide de `select()` du package `dplyr`
+(2) On remplace les valeurs manquantes par des 0 grâce à `mutate()` et `replace_na()` de `tidyr`
+(3) On calcule la médiane avec la fonction `median()`. On intègre cette fonction dans la fonction `summarise()`. Cette dernière permet de créer un nouveau tableau contenant des résumés (moyenne, médiane, total, minimum, etc.) à partir d’un data frame ou d’un tibble. Enfin, on utilise la fonction `pull()` de `dplyr` qui permet d’extraire une colonne d’un data frame ou d’un tibble sous forme de vecteur
+(4) On transforme au format dataframe pour stocker le résultat avec `as.data.frame()`
+(5) On renomme les colonnes avec `names()` pour obtenir leur nom 
+(6) On affiche le résultat de façon élégante avec `kable()`
+
+```{r}
+# (1) 
+data_question_29 <- data %>%
+  select(Q29)
+
+# (2) 
+data_question_29 <- data_question_29 %>%
+  mutate(Q29 = replace_na(Q29, 0))
+
+# (3)
+median_budget_marches <- data_question_29 %>%
+  summarise(mediane = median(Q29)) %>%
+  pull(mediane)
+
+# (4) 
+median_budget_marches <- as.data.frame(median_budget_marches)
+
+# (5)
+names(median_budget_marches) <- c("Montant médian dépensé pour des achats à des agriculteurs sur les marchés")
+
+# (6) 
+kable(median_budget_marches) %>% 
+  kable_styling(latex_options = "striped")
+```
+
+### 32. X% des personnes achetant sur les marchés dépensent entre X et X euros
+
+### Avec R natif
+
+1.  On creer les tranches de budget pour les dépenses avec `quantile()` si l'on veut 5 catégories
+2.  On affiche ces catégories pour visualiser les 5 catégories obtenues
+3.  On creer une nouvelle variable catégorielle qui est égal à la tranche si le budget appartient à cette catégorie avec `cut()`
+4.  On realise le tableau de répartition de cette nouvelle variable avec `table()`
+5.  On calcul le pourcentage en divisant la valeur de chaque catégorie avec la somme des valeurs de toutes les catégories, utiliser `sum()` pour le calcul du total
+6.  On peut limité à deux chiffres après la virgule le résultat de la division avec `round()`
+
+```{r}
+breaks <- quantile(data$Q29, probs = seq(0, 1, 0.2), na.rm = TRUE)
+print(breaks)
+data$decouper_budget1 <- cut(data$Q29, breaks = breaks, include.lowest = TRUE, labels = c("[4 - 20[", "[20 - 30[", "[30 - 40[", "[40 - 50[", "[50 - 500["))
+tableau <- table(data$decouper_budget1)
+round(tableau/sum(tableau)*100,2)
+
+```
+
+### Avec library
+
+1.  On creer les tranches de budget pour les dépenses avec `quantile()` si l'on veut 5 catégories
+2.  On utilise `mutate()` pour creer une nouvelle variable avec les différents catégories
+3.  on sélectionne la nouvelle variable cree avec `mutate()`
+4.  On applique la fonction `freq()` pour afficher les pourcentages
+5.  On utilise `kable()` pour embellir le tableau des pourcentages
+
+```{r}
+breaks <- quantile(data$Q29, probs = seq(0, 1, 0.2), na.rm = TRUE)
+pourcentage <- data %>%
+  mutate(decouper_budget1 = cut(Q29, breaks = breaks, include.lowest = TRUE, labels = c("[4 - 20[", "[20 - 30[", "[30 - 40[", "[40 - 50[", "[50 - 500["))) %>%
+  select(decouper_budget1) %>%
+  questionr::freq()
+
+kable(pourcentage) %>% 
+  kable_styling(latex_options = "striped")
+```
+
+### 33. Pour les suivants il y a une question en plus: ces magasins proposent ils des produits locaux et/ou en circuits courts
+
+#### Avec R natif
+
+1.  On sélectionne les colonnes qui nous intéressent à l'aide de `paste()` pour avoir le vecteur de toutes les colonnes.
+2.  On fait une mise au format long de notre dataframe avec la fonction `stack()` qui empile nos colonnes.
+3.  On fait la table des fréquences croisées entre les questions et les réponses avec `table()`, puis on calcule les proportions de par réponse en fonction du lieu avec `prop.table()` et l'argument `margin = 1` pour faire la proportion par ligne. On multiplie par 100 et on arrondi avec `round`.
+4.  On change les noms des dimensions avec la fonction `dimnames()`.
+
+```{r}
+#1
+
+df_l_cc <- data[,paste("Q",c(78, 86,95,102,109,116,123,130, 139,146,154,162,170,178,186,193), sep = "")]
+
+#2
+
+df_l_cc <- stack(df_l_cc)
+
+#3
+
+tb_l_cc <- round(prop.table(table(df_l_cc$ind, df_l_cc$values),margin = 1)*100,2)
+
+#4
+
+dimnames(tb_l_cc)[[2]] <- c("Oui, au moins certains d’entre eux, et j’en ai acheté", "Oui, au moins certains d’entre eux, mais je n’en ai pas acheté", "Non","Je ne sais pas")
+dimnames(tb_l_cc)[[1]] <- c("Artisans et revendeurs sur les marchés", "Paniers en ligne avec un intermédiaire", "Bouchers", "Boulangers", "Fromagers", "Poissonniers", "Primeurs", "Hypermarchés", "Supermarchés", "Hard discount", "Epicerie", "Surgelés", "Magasins spécialisés Bio", "Epicerie participative", "Magasin spécialisé vrac ou bio", "Aide alimentaire")
+
+tb_l_cc
+
+```
+
+#### Avec usage de library
+
+-   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+
+1.  On sélectionne les colonnes qui nous intéressent avec `select()`.
+2.  On fait une mise au format long avec `pivot_longer()`.
+3.  On transforme les question en facteur pour qu'elles gardent le même ordre avec `factor()`.
+4.  On fait la table des fréquences croisées entre les questions et les réponses avec `table()`, puis on calcule les proportions de par réponse en fonction du lieu avec `prop.table()` et l'argument `margin = 1` pour faire la proportion par ligne. On multiplie par 100 pour avoir un pourcentage.
+5.  On change les noms des dimensions avec la fonction `dimnames()`.
+6.  On met en forme le tableau avec des valeurs arrondies avec `kable()` et `round`.
+
+```{r}
+#1
+
+df_l_cc <- data %>% 
+  select(paste("Q",c(78, 86,95,102,109,116,123,130, 139,146,154,162,170,178,186,193), sep = "")) %>% 
+
+#2
+  
+  pivot_longer(cols =everything(), names_to = "Questions", values_to = "Réponses") 
+
+#3
+
+df_l_cc$Questions <- factor(df_l_cc$Questions, levels = paste("Q",c(78, 86,95,102,109,116,123,130, 139,146,154,162,170,178,186,193), sep = ""),labels =c("Artisans et revendeurs sur les marchés", "Paniers en ligne avec un intermédiaire", "Bouchers", "Boulangers", "Fromagers", "Poissonniers", "Primeurs", "Hypermarchés", "Supermarchés", "Hard discount", "Epicerie", "Surgelés", "Magasins spécialisés Bio", "Epicerie participative", "Magasin spécialisé vrac ou bio", "Aide alimentaire") )
+
+#4
+
+tb_l_cc <- df_l_cc %>% table() %>% prop.table(margin = 1)*100
+
+
+#5
+
+dimnames(tb_l_cc)[[2]] <- c("Oui, au moins certains d’entre eux, et j’en ai acheté", "Oui, au moins certains d’entre eux, mais je n’en ai pas acheté", "Non","Je ne sais pas")
+
+#6
+
+kable(round(tb_l_cc,2), caption = "Ces magasins proposent ils des produits locaux et/ou en circuits courts ?") %>% 
+  kable_styling(latex_options = "striped")
+
+```
+
+### 34. produits de votre production
+
+#### Avec R natif
+
+(1) Sélection des variables nécessaires pour le tableau de synthèse (Age, CSP, Sexe etc.) à l'aide de l'opérateur `[]`
+(2) Création de la variable "taille_foyer" (somme de Q235 + Q236). On supprime les potentiels messages d'avertissements de R au moment de la conversion au format numérique (`as.numeric()`) avec `suppressWarnings()`
+(3) Fonction pour trouver la modalité la plus fréquente (valeur majoritaire). A l'intérieur, on conserve les valeurs non manquantes avec `!is.na()`. A noter que le `!` correspond à la négation en R. Puis, on tri (`sort()`) par ordre décroissant (`decreasing = TRUE)`) afin d'obtenir la modalité majoritaire en première ligne.
+(4) On stocke le nom des colonnes utilent pour notre tableau de synthèse dans une liste
+(5) Boucle `for()` pour créer un tableau avec les modalités majoritaires
+(6) On ajoute la colonne du pourcentage des répondants par modalité. Pour calculer le pourcentage on utilise les opérateurs classiques de R (`/` pour la division et `sum()` pour la somme) qu'on arrondie à 2 chiffres après la virgule à l'aide de `round()`
+(7) Réorganisation des colonnes. On place la colonne contenant le pourcentage de répodnants en 2ème position
+(8) On transforme au format dataframe pour un meilleur affichage avec `as.data.frame()`
+(9) On renomme les colonnes avec `names()` pour obtenir leur nom 
+(10) On renomme le contenu du tableau en transformant en facteur avec `factor()` et en affectant le bon renommage avec `<-`
+(11) On affiche le tableau de résultat `print()`
+
+```{r}
+# (1) 
+vars <- c("Q227", "recode_age", "Q1", "recode_csp", "Q8", "Q240", "Q5_taille", "Q236", "Q235")
+data_subset <- data[, vars]
+
+# (2)
+data_subset$taille_foyer <- suppressWarnings(as.numeric(data$Q235)) + suppressWarnings(as.numeric(data$Q236))
+
+# (3) Fonction pour trouver la modalité la plus fréquente (valeur majoritaire)
+get_mode <- function(x) {
+  x <- x[!is.na(x)]  # on enlève les NA
+  if (length(x) == 0) return(NA)
+  as.character(names(sort(table(x), decreasing = TRUE))[1])
+}
+
+# (4) 
+col_a_resumer <- c("recode_age", "Q1", "recode_csp", "Q8", "Q240", "Q5_taille", "Q236", "taille_foyer")
+
+# (5) 
+resultat <- data.frame(Q227 = 1:3)
+
+for (var in col_a_resumer) {
+  majoritaire_par_modalite <- tapply(data_subset[[var]], data_subset$Q227, get_mode)
+  resultat[[var]] <- majoritaire_par_modalite
+}
+
+# (6) 
+total <- table(data_subset$Q227)
+pct_repondants <- round(100 * total / sum(total), 2)
+resultat$`% répondants` <- pct_repondants
+
+# (7)
+resultat <- resultat[, c("Q227", "% répondants", col_a_resumer)]
+
+# (8) Affichage du tableau final
+
+resultat <- as.data.frame(resultat)
+
+# (9)
+
+names(resultat) <-  c("Consommation de produits issus de sa propre production","Pourcentage de répondants", " Tranche d'âges" , "Sexe", 
+                  "Catégorie Socio-Professionnelle", "Dépenses moyennes mensuelles pour les achats alimentaires", "Niveau de diplôme", "Nombre d'habitants","Nombre d'enfants dans le foyer"
+                  ,"Nombre de personnes dans le foyer")
+
+# (10)
+
+resultat$` Tranche d'âges`<- as.factor(resultat$` Tranche d'âges`)
+
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 1] <- "20-24 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 2] <- "25-34 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 3] <- "35-44 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 4] <- "45-54 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 5] <- "55-64 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 6] <- "65 ans et plus"
+
+resultat$Sexe<- as.factor(resultat$Sexe)
+
+levels(resultat$Sexe)[levels(resultat$Sexe) == 1] <- "Homme"
+levels(resultat$Sexe)[levels(resultat$Sexe) == 2] <- "Femme"
+
+resultat$`Catégorie Socio-Professionnelle`<- as.factor(resultat$`Catégorie Socio-Professionnelle`)
+
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 1] <- "Agriculteur, Artisan, Commerçant, Chef d’entreprise"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 2] <- "Profession libérale, Cadre ou profession intellectuelle supérieure"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 3] <- "Profession intermédiaire"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 4] <- "Employé, Ouvrier"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 5] <- "Retraité"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 6] <- "Demandeur d’emploi, Homme ou Femme au foyer, Etudiant, lycéen, Autre"
+
+resultat$`Niveau de diplôme` <- as.factor(resultat$`Niveau de diplôme`)
+
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 1] <- "Sans diplôme"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 2] <- "BEPC, brevet élémentaire, brevet des collèges, DNB "
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 3] <- "CAP, BEP ou diplôme de niveau équivalent"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 4] <- "Baccalauréat, brevet professionnel"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 5] <- "BTS, DUT, Deug, Deust, diplôme de la santé ou du social de niveau bac+2, diplôme équivalent "
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 6] <- "Licence, licence professionnelle, maîtrise, diplôme équivalent de niveau bac+3 ou bac+4"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 7] <- "Master, DEA, DESS, diplôme de grande école de niveau bac+5, doctorat de santé "
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 1] <- "Doctorat de recherche (hors santé)"
+
+resultat$`Consommation de produits issus de sa propre production`<- as.factor(resultat$`Consommation de produits issus de sa propre production`)
+
+levels(resultat$`Consommation de produits issus de sa propre production`)[levels(resultat$`Consommation de produits issus de sa propre production`) == 1] <- "Non, je n'ai pas de jardin, verger ou élevage"
+
+levels(resultat$`Consommation de produits issus de sa propre production`)[levels(resultat$`Consommation de produits issus de sa propre production`) == 2] <- "Oui, souvent"
+
+levels(resultat$`Consommation de produits issus de sa propre production`)[levels(resultat$`Consommation de produits issus de sa propre production`) == 3] <- "Oui, de temps en temps"
+
+# (11)
+
+print(resultat)
+
+```
+
+#### Avec usage de library
+
+(1) Sélection des variables nécessaires pour le tableau de synthèse (Age, CSP, Sexe, etc.) à l’aide de `select()` de `dplyr` qui permet de sélectionner des colonnes de manière concise
+
+(2) Création de la variable taille_foyer en sommant Q235 et Q236. Ici, on utilise `mutate()` pour créer une nouvelle variable dans un data frame, et `suppressWarnings()` pour éviter les messages d’avertissement lors de la conversion avec `as.numeric()`
+
+(3) Définition d’une fonction get_mode() qui calcule la modalité majoritaire en excluant les NA, grâce à `table()` et `sort()`, comme en R natif
+
+(4) Stockage du nom des colonnes d’intérêt dans un vecteur
+
+(5) Utilisation de `group_by()` pour grouper les données par Q227, puis `summarise()` combiné avec `across()` et la fonction get_mode pour calculer la modalité majoritaire pour chaque variable.
+
+(6) Calcul du pourcentage de répondants par modalité avec `count()` et `mutate()` pour faire les opérations mathématiques de base avec division (`/`) et `round()`
+
+(7) Réorganisation des colonnes avec `select()` pour mettre % répondants en deuxième position
+
+(8) On transforme au format dataframe pour un meilleur affichage avec `as.data.frame()`
+
+(9) On renomme les colonnes avec `names()` pour obtenir leur nom 
+
+(10) On renomme le contenu du tableau en transformant en facteur avec `factor()` et en affectant le bon renommage avec `<-`
+
+(11) On affiche le résultat de façon élégante avec `kable()`
+
+```{r}
+
+# (1)
+vars <- c("Q227", "recode_age", "Q1", "recode_csp", "Q8", "Q240", "Q5_taille", "Q236", "Q235")
+data_subset <- data %>% select(all_of(vars))
+
+# (2)
+data_subset <- data_subset %>%
+  mutate(taille_foyer = suppressWarnings(as.numeric(Q235)) + suppressWarnings(as.numeric(Q236)))
+
+# (3)
+get_mode <- function(x) {
+  x <- x[!is.na(x)]
+  if (length(x) == 0) return(NA)
+  as.character(names(sort(table(x), decreasing = TRUE))[1])
+}
+
+# (4)
+col_a_resumer <- c("recode_age", "Q1", "recode_csp", "Q8", "Q240", "Q5_taille", "Q236", "taille_foyer")
+
+# (5)
+resultat <- data_subset %>%
+  group_by(Q227) %>%
+  summarise(across(all_of(col_a_resumer), get_mode), .groups = "drop")
+
+# (6)
+pct_repondants <- data_subset %>%
+  count(Q227) %>%
+  mutate(`% répondants` = round(100 * n / sum(n), 2)) %>%
+  select(Q227, `% répondants`)
+
+# (7)
+resultat <- resultat %>%
+  left_join(pct_repondants, by = "Q227") %>%
+  select(Q227, `% répondants`, all_of(col_a_resumer))
+
+# (8) 
+
+resultat <- as.data.frame(resultat)
+
+
+# (9)
+
+names(resultat) <-  c("Consommation de produits issus de sa propre production","Pourcentage de répondants", " Tranche d'âges" , "Sexe", 
+                  "Catégorie Socio-Professionnelle", "Dépenses moyennes mensuelles pour les achats alimentaires", "Niveau de diplôme", "Nombre d'habitants","Nombre d'enfants dans le foyer"
+                  ,"Nombre de personnes dans le foyer")
+
+# (10)
+
+resultat$` Tranche d'âges`<- as.factor(resultat$` Tranche d'âges`)
+
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 1] <- "20-24 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 2] <- "25-34 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 3] <- "35-44 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 4] <- "45-54 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 5] <- "55-64 ans"
+levels(resultat$` Tranche d'âges`)[levels(resultat$` Tranche d'âges`) == 6] <- "65 ans et plus"
+
+resultat$Sexe<- as.factor(resultat$Sexe)
+
+levels(resultat$Sexe)[levels(resultat$Sexe) == 1] <- "Homme"
+levels(resultat$Sexe)[levels(resultat$Sexe) == 2] <- "Femme"
+
+resultat$`Catégorie Socio-Professionnelle`<- as.factor(resultat$`Catégorie Socio-Professionnelle`)
+
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 1] <- "Agriculteur, Artisan, Commerçant, Chef d’entreprise"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 2] <- "Profession libérale, Cadre ou profession intellectuelle supérieure"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 3] <- "Profession intermédiaire"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 4] <- "Employé, Ouvrier"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 5] <- "Retraité"
+levels(resultat$`Catégorie Socio-Professionnelle`)[levels(resultat$`Catégorie Socio-Professionnelle`) == 6] <- "Demandeur d’emploi, Homme ou Femme au foyer, Etudiant, lycéen, Autre"
+
+resultat$`Niveau de diplôme` <- as.factor(resultat$`Niveau de diplôme`)
+
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 1] <- "Sans diplôme"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 2] <- "BEPC, brevet élémentaire, brevet des collèges, DNB "
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 3] <- "CAP, BEP ou diplôme de niveau équivalent"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 4] <- "Baccalauréat, brevet professionnel"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 5] <- "BTS, DUT, Deug, Deust, diplôme de la santé ou du social de niveau bac+2, diplôme équivalent "
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 6] <- "Licence, licence professionnelle, maîtrise, diplôme équivalent de niveau bac+3 ou bac+4"
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 7] <- "Master, DEA, DESS, diplôme de grande école de niveau bac+5, doctorat de santé "
+levels(resultat$`Niveau de diplôme`)[levels(resultat$`Niveau de diplôme`) == 1] <- "Doctorat de recherche (hors santé)"
+
+resultat$`Consommation de produits issus de sa propre production`<- as.factor(resultat$`Consommation de produits issus de sa propre production`)
+
+levels(resultat$`Consommation de produits issus de sa propre production`)[levels(resultat$`Consommation de produits issus de sa propre production`) == 1] <- "Non, je n'ai pas de jardin, verger ou élevage"
+
+levels(resultat$`Consommation de produits issus de sa propre production`)[levels(resultat$`Consommation de produits issus de sa propre production`) == 2] <- "Oui, souvent"
+
+levels(resultat$`Consommation de produits issus de sa propre production`)[levels(resultat$`Consommation de produits issus de sa propre production`) == 3] <- "Oui, de temps en temps"
+
+
+# (11)
+kable(resultat) %>% 
+  kable_styling(latex_options = "striped")
+
+```
+
+### 35. X% des enquêtés se voient donner/vendre des produits par leurs proches
+
+#### Avec R natif
+
+1.  On labélise les modalités de la variable avec `factor()`
+2.  On réalise le tableau de répartition de la variable avec `table()`
+3.  On calcul le pourcentage en divisant la valeur de chaque catégorie avec la somme des valeurs de toutes les catégories, utiliser `sum()` pour le calcul du total
+4.  On peut limité à deux chiffres après la virgule le résultat de la division avec `round()`
+
+```{r}
+data$Q228 <- factor(data$Q228, levels = 1:3, labels = c("Non", "Oui, souvent", "Oui, de temps en temps"))
+tableau <- table(data$Q228)
+pourcentage <- tableau/sum(tableau)*100 
+round(pourcentage,2)
+```
+
+#### Avec usage de library
+
+1.  On réalise le tableau de fréquence de la directement avec `freq()`
+2.  On utilise `kable()` pour embéllir le tableau obtenue
+
+```{r}
+tableau_freq <- questionr::freq(data$Q228)
+kable(tableau_freq) %>% 
+  kable_styling(latex_options = "striped")
+```
+
+### 36.Chasse, pêche cueillette
+
+#### Avec R natif
+
+1.  On sélectionne la colonne qui nous intéresse.
+2.  On fait une table des fréquences avec `table()` puis on calcule la proportion que l'on multiplie par 100 avec `prop.table()`.
+3.  On arrondi avec `round()`.
+
+```{r}
+dt_Q229 <- data$Q229
+tb_Q229 <- prop.table(table(dt_Q229))*100
+names(tb_Q229) <- c("Oui", "Non")
+print("Consommez-vous des produits que vous-même ou un proche chassez, pêchez ou cueillez ?")
+round(tb_Q229,2)
+```
+
+#### Avec usage de library
+
+-   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+
+1.  On sélectionne la colonne que nous intéresse avec `select()`.
+2.  On fait une table des fréquences avec `table()` puis on calcule la proportion que l'on multiplie par 100 avec `prop.table()`. Et on change le nom des modalités de réponse avec `names()`.
+3.  On fait la mise en forme du tableau arrondi avec `kable` et `round()`.
+
+```{r}
+dt_Q229 <- data %>% 
+  select(Q229) %>% 
+  table() %>% 
+  prop.table()*100
+
+names(dt_Q229) <- c("Oui", "Non")
+
+kable(round(dt_Q229,2), caption = "Consommez-vous des produits que vous-même ou un proche chassez, pêchez ou cueillez ?", col.names = c("Réponses", "Fréquences (%)"))%>% 
+  kable_styling(latex_options = "striped")
+  
+```
+
+### 37. Modalités de vente que vous avez cessé de fréquenter
+
+#### Avec R natif
+
+1.  On sélectionne la colonne qui nous intéresse pour répondre à la question.
+2.  On a un format qui n'est pas exploitable. On split chaque chaine de caractère pour avoir une liste des nombres à l'aide de la fonction `strsplit()` dans `lapply()`.
+3.  Le format n'est toujours pas exploitable, car on a des vecteurs dans des éléments de notre liste. Avec `unlist()`, on peut créer une seule liste.
+4.  On supprime les éléments qui n'ont pas de valeur en cherchant leurs indices avec `which()`.
+5.  On transforme en facteur avec des niveaux allant de 1 à 19 avec `factor()` puis on les renomme.
+6.  On fait la table des fréquences des niveaux avec `table()` que l'on divise par le nombre de personnes qui achètent en comptant le nombre de valeur qui n'est pas NA avec `is.na()` et `sum()`. On multiplie par 100 et on arrondi avec `round()`.
+7.  On transforme en dataframe avec `as.data.frame()` et on renomme les colonnes avec `names()`.
+
+```{r}
+#1
+
+dt_Q231 <- data$Q231
+
+#2
+
+dt_split <- lapply(dt_Q231,FUN = function(dt) strsplit(dt,"/")[[1]])
+
+#3
+
+dt_unlist <- unlist(dt_split)
+
+#4
+
+i <- which(dt_unlist=="")
+dt_unlist <- dt_unlist[-i]
+
+#5
+
+dt_unlist <- factor(dt_unlist, levels = 1:12)
+levels(dt_unlist) <- c(
+  "Supermarché et Hypermarché et Supérette de grandes enseignes y compris en ligne",
+"Hard discount y compris en ligne ",
+"Epiceries indépendantes, de quartier, épiceries fines y compris en ligne",
+"Magasins de surgelés y compris en ligne",
+"Magasins spécialisés Bio y compris en ligne",
+"Marché   (auprès d’un agriculteur, artisan ou revendeur)",
+"Directement aux agriculteurs sous différentes formes (en dehors des marchés) y compris en ligne",
+"Paniers en ligne réalisés par un intermédiaire",
+"Artisans et commerçants de proximité ",
+"Epicerie participative, associative, supermarché coopératif, impliquant les consommateurs dans la gestion",
+"Magasin alimentaire spécialisé dans les produits en vrac ou les produits locaux",
+"Magasin d’aide alimentaire (épicerie sociale, épicerie solidaire)"
+)
+
+#6
+
+tb_freq <- round(table(dt_unlist)/sum(!is.na(dt_Q231))*100,2)
+
+#7
+tb_freq <- as.data.frame(tb_freq)
+names(tb_freq) <- c("Modalités de vente","Lieux délaissés (%)")
+
+tb_freq
+```
+
+#### Avec usage de library
+
+-   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+
+1.  On sélectionne la bonne colonne avec `select()`.
+
+2.  On transforme les valeurs en valeurs utilisables avec `strsplit()`, `apply()` (on a encore un dataframe) et `unlist()`.
+
+3.  On enlève les éléments `""` qui ne sont pas des valeurs.
+
+4.  On transforme en facteur avec des niveaux allant de 1 à 19 avec les labels associé à chaque niveau avec `factor()`.
+
+5.  On fait la table des fréquences avec `table()` que l'on divise par le nombre de personnes qui ont acheté des produits en comptant le nombre de valeurs non manquante avec `is.na()` et `sum` et on multiplie par 100.
+
+6.  On fait la mise en forme du tableau arrondi avec `round()` et `kable()`.
+
+7.  On sélectionne la colonne qui nous intéresse pour répondre à la question.
+
+8.  On a un format qui n'est pas exploitable. On split chaque chaine de caractère pour avoir une liste des nombres à l'aide de la fonction `strsplit()` dans `lapply()`.
+
+9.  Le format n'est toujours pas exploitable, car on a des vecteurs dans des éléments de notre liste. Avec `unlist()`, on peut créer une seule liste.
+
+10. On supprime les éléments qui n'ont pas de valeur en cherchant leurs indices avec `which()`.
+
+11. On transforme en facteur avec des niveaux allant de 1 à 19 avec `factor()` puis on les renomme.
+
+12. On fait la table des fréquences des niveaux avec `table()` que l'on divise par le nombre de personnes qui achètent en comptant le nombre de valeur qui n'est pas NA avec `is.na()` et `sum()`. On multiplie par 100 et on arrondi avec `round()`.
+
+13. On transforme en dataframe avec `as.data.frame()` et on renomme les colonnes avec `names()`.
+
+```{r}
+#1
+
+dt_unlist <- data %>% 
+  select(Q231) %>%
+  
+#2
+  
+apply(FUN = function(dt) strsplit(dt,"/")[[1]], MARGIN = 1) %>%  unlist()
+
+#3
+
+i <- which(dt_unlist=="")
+dt_unlist <- dt_unlist[-i]
+
+#4
+
+tb_freq <- dt_unlist %>% 
+  factor(levels = 1:12, 
+         labels = c("Supermarché et Hypermarché et Supérette de grandes enseignes y compris en ligne",
+                    "Hard discount y compris en ligne ",
+                    "Epiceries indépendantes, de quartier, épiceries fines y compris en ligne",
+                    "Magasins de surgelés y compris en ligne",
+                    "Magasins spécialisés Bio y compris en ligne",
+                    "Marché   (auprès d’un agriculteur, artisan ou revendeur)",
+                    "Directement aux agriculteurs sous différentes formes (en dehors des marchés) y compris en ligne",
+                    "Paniers en ligne réalisés par un intermédiaire",
+                    "Artisans et commerçants de proximité ",
+                    "Epicerie participative, associative, supermarché coopératif, impliquant les consommateurs dans la gestion",
+                    "Magasin alimentaire spécialisé dans les produits en vrac ou les produits locaux",
+                    "Magasin d’aide alimentaire (épicerie sociale, épicerie solidaire)")) %>% 
+  
+#5
+
+table()/sum(!is.na(data$Q231))*100
+
+#6
+
+kable(round(tb_freq,2), caption = "Fréquences des lieux délaissés par les consommateurs", col.names = c("Modalités de vente", "Lieux délaissés (%)")) %>%
+  kable_styling(latex_options = "striped")
+
+```
+
+
+### 39.modalités de vente que vous avez commencer à fréquenter
+
+#### Avec R natif
+
+1.  On sélectionne la bonne colonne avec `select()`.
+2.  On transforme les valeurs en valeurs utilisables avec `strsplit()`, `apply()` (on a encore un dataframe) et `unlist()`.
+3.  On enlève les éléments `""` qui ne sont pas des valeurs.
+4.  On transforme en facteur avec des niveaux allant de 1 à 14 avec les labels associé à chaque niveau avec `factor()`.
+5.  On fait la table des fréquences des niveaux avec `table()` que l'on divise par le nombre de personnes. On multiplie par 100 et on arrondi avec `round()`.
+6.  On affiche sous la forme d'un dataframe.
+
+```{r}
+#1
+
+dt_Q233 <- data$Q233
+
+#2
+  
+dt_split_Q233 <- lapply(dt_Q233,FUN = function(dt) strsplit(dt,"/")[[1]])
+dt_Q233 <- unlist(dt_split_Q233)
+
+#3
+  
+i <- which(dt_Q233=="")
+dt_Q233 <- dt_Q233[-i]
+
+#4
+
+dt_Q233 <- factor(dt_Q233, levels = 1:14, labels =c("Supermarché et Hypermarché et Supérette", "Hard discount","Epiceries indépendantes, de quartier, épiceries fines","Magasins de surgelés","Magasins spécialisés Bio", "Marché", "Directement aux agriculteurs", "Paniers en ligne réalisés par un intermédiaire", "Artisans et commerçants de proximité","Epicerie participative, associative, supermarché coopératif, impliquant les consommateurs dans la gestion", "Magasin alimentaire spécialisé dans les produits en vrac ou les produits locaux", "Magasin d’aide alimentaire", "Autre", "Non, aucun"))
+
+#5
+
+tb_Q233 <- round(table(dt_Q233)/length(dt_Q233)*100)
+
+#6
+
+as.data.frame(tb_Q233)
+
+```
+
+#### Avec usage de library
+
+-   Pour chaque fonction utiliser, on utilise `%>%` de dplyr pour incrémenter chaque fonction de manière fluide.
+
+1.  On sélectionne la bonne colonne avec `select()`.
+2.  On transforme les valeurs en valeurs utilisables avec `strsplit()`, `apply()` (on a encore un dataframe) et `unlist()`.
+3.  On enlève les éléments `""` qui ne sont pas des valeurs.
+4.  On transforme en facteur avec des niveaux allant de 1 à 14 avec les labels associé à chaque niveau avec `factor()`.
+5.  On fait la table des fréquences des niveaux avec `table()` que l'on divise par le nombre de personnes. On multiplie par 100 et on arrondi avec `round()`.
+6.  On affiche avec `kable()`.
+
+```{r}
+#1
+
+dt_Q233 <- data %>% 
+  select(Q233) %>%
+
+#2
+  
+  apply(FUN = function(dt) strsplit(dt,"/")[[1]], MARGIN = 1) %>% 
+  unlist()
+
+#3
+  
+i <- which(dt_Q233=="")
+dt_Q233 <- dt_Q233[-i]
+
+#4
+
+tb_Q233 <- dt_Q233 %>% 
+  factor( levels = 1:14, labels =c("Supermarché et Hypermarché et Supérette", "Hard discount","Epiceries indépendantes, de quartier, épiceries fines","Magasins de surgelés","Magasins spécialisés Bio", "Marché", "Directement aux agriculteurs", "Paniers en ligne réalisés par un intermédiaire", "Artisans et commerçants de proximité","Epicerie participative, associative, supermarché coopératif, impliquant les consommateurs dans la gestion", "Magasin alimentaire spécialisé dans les produits en vrac ou les produits locaux", "Magasin d’aide alimentaire", "Autre", "Non, aucun")) %>% 
+  
+#5
+  
+  table()/sum(!is.na(data$Q233))*100
+
+#6
+
+kable(round(tb_Q233,2), caption = "Modalités de vente que vous avez commencer à fréquenter", col.names = c("Lieux", "Fréquences (%)")) %>%
+  kable_styling(latex_options = "striped")
+```
 
