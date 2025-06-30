@@ -10,6 +10,9 @@ library("tidyverse")
 
 # Chargement du package writexl pour exporter des data frames au format Excel (.xlsx)
 library(writexl)
+
+# Chargement des fichiers Excel
+library(readxl)
 ```
 
 # II) Extraction des produits transformés trouvés par le modèle de langage
@@ -73,12 +76,12 @@ extraire_liste_produits <- function(texte_source) {
 
 ```{r}
 
-# Applique la fonction extraire_liste_produits() à chaque élément de 'res_40'
+# Applique la fonction extraire_liste_produits() à chaque élément de 'res_20'
 # Cela permet d'extraire, pour chaque réponse du LLM, la liste de produits transformés détectée
 vect_verifi_LLM_res_asp_20_1 <- lapply(res_asp_20_1, extraire_liste_produits)
 
 
-# Vérifie pour quels éléments de res_40 l'extraction a échoué (retourne NULL)
+# Vérifie pour quels éléments de res_20 l'extraction a échoué (retourne NULL)
 # sapply(..., is.null)' renvoie un vecteur logique indiquant quels éléments sont NULL
 # which(...)' retourne les indices correspondants. C'est utile pour identifier les cas problématiques
 which(sapply(res_asp_20_1, is.null))
@@ -200,7 +203,7 @@ produits_transfo_trouves_ms_bruts <- unlist(lapply(resultats_comparaison, functi
 
 ```{r}
 # On initialise le tableau d'indicateur d'impureté 
-table_indica_purete_asperge <- data.frame(chunck_traite = c(1:9),
+table_indica_purete_asperge <- data.frame(chunck_traite = c(1:length(resultats_comparaison)),
                                           nb_levels_initial = NA,
                                           nb_levels_llm = NA,
                                           nb_levels_commun = NA,
@@ -300,18 +303,40 @@ matrice_confusion_prompt_20$Positifs[[2]] <-table_indica_purete_asperge$nb_prod_
 
 ```
 
-# VII) Export de la liste des produits transformés non trouvés par le LLM et de la liste des produits considérés comme transformés mais qui sont en réalité des produits bruts 
 
+# VII) Suppresion des levels de produits transformés dans le jeu de données
 
 ```{r}
+# Importation du jeu de données des asperges
+data_asperge <- read_excel("data_asperge.xlsx")
+
+# Récupérer toute las liste des produits transformés trouvés par le llm
+liste_prod_transfo_llm <- sapply(resultats_comparaison, function(x) x$produit_transfo_llm)
+
+# On transforme la liste en vecteur 
+liste_prod_transfo_llm <- unlist(liste_prod_transfo_llm)
+
+# On vérifie que les levels de produits transformés sont bien uniques
+liste_prod_transfo_llm <- unique(liste_prod_transfo_llm)
+
+# On supprime les produits transformés pour le jeu de données des asperges 
+data_asperge_bruts <- data_asperge[!(data_asperge$productName %in% liste_prod_transfo_llm), ]
+```
+
+
+# VIII) Export de la liste des produits transformés non trouvés par le LLM et de la liste des produits considérés comme transformés mais qui sont en réalité des produits bruts 
+
+```{r}
+# Export de la liste des produits transformés non trouvés par le LLM
+write_xlsx(matrice_confusion_prompt_20,"matrice_confusion_prompt_20.xlsx")
+
 # Export de la liste des produits transformés non trouvés par le LLM
 write_xlsx(produits_transfo_pas_trouves,"data_produits_transfo_pas_trouves.xlsx")
 
 # Export de la liste des produits considérés comme transformés mais qui sont en réalité des produits bruts 
 write_xlsx(produits_transfo_trouves_ms_bruts,"data_produits_transfo_trouves_ms_bruts.xlsx")
+
+# Export du jeu de données bruts pour les asperges 
+write_xlsx(data_asperge_bruts,"data_asperge_bruts.xlsx")
+
 ```
-
-
-# VIII) Suppresion des levels de produits transformés dans le jeu de données
-
-
