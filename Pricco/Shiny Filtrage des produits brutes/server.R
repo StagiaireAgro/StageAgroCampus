@@ -19,7 +19,7 @@ function(input, output, session) {
   observeEvent(input$valide_file, {
     req(input$select_file)
     
-    path <- datasets_path[basename(datasets_path) == input$select_file]
+    path <- chemins_donnees[basename(chemins_donnees) == input$select_file]
     dt <- data.table::fread(path)
     dt[["clean_name"]] <- nettoyer_noms_produits(dt[["name"]])
     
