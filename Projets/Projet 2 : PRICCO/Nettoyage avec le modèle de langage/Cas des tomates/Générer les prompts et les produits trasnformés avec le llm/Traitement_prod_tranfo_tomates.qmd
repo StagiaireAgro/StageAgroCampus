@@ -83,6 +83,9 @@ base_prompt <- paste0(
 
 ```{r}
 # Test de la fonction pour 20 prompts 
+levels_tomates_permutes <- read_excel("level_tomate.xlsx") # à importer
+
+# On choisir la taille des tailles chuncks et en divisant le nombre de level par la taille des chuncks on obtient le nombre chunck
 liste_prompts_tomates <- 
   detecter_levels_prod_transfor(
     "tomate", levels_tomates_permutes, nb_chunck = 223,taille_chunck = 20)
@@ -134,4 +137,3 @@ Table_1_levels_commun_LLM_et_tomates <- Table_1_levels_commun_LLM_et_tomates %>%
   arrange(nchar(Levels_en_commun))
 
 ```
-
