@@ -269,6 +269,8 @@ table_indica_purete_asperge <- rbind(table_indica_purete_asperge, data_total_ind
 
 # On combine la ligne du total à table_indica_purete_asperge
 table_indica_purete_asperge <- rbind(table_indica_purete_asperge, data_moy_indicat_purete)
+
+view(table_indica_purete_asperge)
 ```
 
 # VI) Matrice de confiusion 
@@ -288,19 +290,21 @@ matrice_confusion_prompt_40 <-  matrice_confusion_prompt_40 |>
          )
 
 ###### On remplit la matrice de confusion 
-table_indica_purete_asperge$nb_prod_transfo_trouves_llm[[10]]
+table_indica_purete_asperge$nb_prod_transfo_trouves_llm[[length(resultats_comparaison)+1]]
 
 # Etape 1 : Vrais positifs : Les produits transformés trouvés par le llm qui sont des produits transformés 
-matrice_confusion_prompt_40$Positifs[[1]] <- table_indica_purete_asperge$nb_prod_transfo_trouves_llm[[10]]
+matrice_confusion_prompt_40$Positifs[[1]] <- table_indica_purete_asperge$nb_prod_transfo_trouves_llm[[length(resultats_comparaison)+1]]
 
 # Etape 2 : Faux positifs : Les produits transformés trouvés par le llm qui sont des produits bruts
-matrice_confusion_prompt_40$Negatifs[[1]] <- table_indica_purete_asperge$nb_levels_commun[[10]] - table_indica_purete_asperge$nb_prod_transfo_trouves_llm[[10]]
+matrice_confusion_prompt_40$Negatifs[[1]] <- table_indica_purete_asperge$nb_levels_commun[[length(resultats_comparaison)+1]] - table_indica_purete_asperge$nb_prod_transfo_trouves_llm[[length(resultats_comparaison)+1]]
 
 # Etape 3 : Vrais négatifs : Les produits bruts trouvés par le llm qui sont des produits bruts 
-matrice_confusion_prompt_40$Negatifs[[2]] <- matrice_confusion_prompt_40$Negatifs[[2]] <- table_indica_purete_asperge$nb_levels_commun[[10]] - table_indica_purete_asperge$nb_prod_transfo_trouves_llm[[10]]
+matrice_confusion_prompt_40$Negatifs[[2]] <- table_indica_purete_asperge$nb_levels_initial[length(resultats_comparaison)+1] - table_indica_purete_asperge$nb_levels_commun[[length(resultats_comparaison)+1]] - table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm[[length(resultats_comparaison)+1]]
 
 # Etape 4 : Faux négatifs : Les produits bruts trouvés par le llm qui sont des produits transformés 
-matrice_confusion_prompt_40$Positifs[[2]] <-table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm[[10]]
+matrice_confusion_prompt_40$Positifs[[2]] <- table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm[[length(resultats_comparaison)+1]]
+
+View(matrice_confusion_prompt_40)
 
 ```
 
