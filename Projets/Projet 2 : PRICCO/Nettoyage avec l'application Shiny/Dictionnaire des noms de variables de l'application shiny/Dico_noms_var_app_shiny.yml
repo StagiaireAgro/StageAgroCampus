@@ -1,1 +1,15 @@
+paths:
+  data_dir: data/
+  output_dir: output/
+
+datasets_cols:
+  Noms_du_produit: "productName"
+  mois: "Mois"
+  annee: "Année"
+  Produit_est_bio: "productIsOrganic"
+  unite_mesure: "productConditioningUnit"
+  Poids_dune_unite_de_produit: "productConditioningQuantity"
+  Code_postal: "distributionZipCode"
+  Plateformes_partenaires_du_projet_Pricco: "plateforme"
+  Nombre_dune_unite_de_produit_achete: "orderQuantity"
 
