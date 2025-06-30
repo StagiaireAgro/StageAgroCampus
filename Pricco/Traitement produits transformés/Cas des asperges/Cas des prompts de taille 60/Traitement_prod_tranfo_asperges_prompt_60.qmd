@@ -106,8 +106,8 @@ comparer_listes_produits <- function(prompts_attendus, reponses_llm, verite_terr
     extraire_liste_produits(texte_reponse)  # On utilise la fonction d'extraction de texte issu du LLM
   })
   
-  # Fonction pour supprimer les caractères spéciaux regex
-  remplacer_regex <- function(x) {
+  # Fonctionpour remplacer les caractères spéciaux regex
+  remplacer_caract_speci_regex <- function(x) {
     stringr::str_replace_all(x, "([\\^$.|?*+()\\[\\]{}])", "\\\\\\1")
   }
 
@@ -126,7 +126,7 @@ comparer_listes_produits <- function(prompts_attendus, reponses_llm, verite_terr
     # une fois les produits attendus retirés
     hallucinations_reelles <- pseudo_hallucinations[!sapply(pseudo_hallucinations, function(h) {
       mots <- strsplit(tolower(h), "\\s+")[[1]]
-      mots <- escape_regex(mots)
+      mots <- remplacer_caract_speci_regex(mots)
       if (length(mots) == 0) return(FALSE)  # cas vide
       pattern <- paste0(".*", paste(mots, collapse = ".*"), ".*")  # construction du regex : .*mot1.*mot2.*mot3.*
       any(grepl(pattern, tolower(liste_attendue)))
@@ -136,7 +136,7 @@ comparer_listes_produits <- function(prompts_attendus, reponses_llm, verite_terr
     
     hallucinations_corrige <- unlist(lapply(pseudo_hallucinations, function(h) {
       mots <- strsplit(tolower(h), "\\s+")[[1]]
-      mots <- escape_regex(mots)
+      mots <- remplacer_caract_speci_regex(mots)
       if (length(mots) == 0) return(NULL) 
       pattern <- paste0(".*", paste(mots, collapse = ".*"), ".*")
       
@@ -184,8 +184,8 @@ comparer_listes_produits <- function(prompts_attendus, reponses_llm, verite_terr
 
 verite_terrain <- readxl::read_excel("levels_asperge.xlsx")
 
-# Exemple d'exécution de la fonction pour les prompts de taille 20 des tomates
-resultats_comparaison <- comparer_listes_produits(prompts_20_levels_asperge_1, res_asp_20_1, verite_terrain)
+# Exemple d'exécution de la fonction pour les prompts de taille 60 des tomates
+resultats_comparaison <- comparer_listes_produits(prompts_60_levels_asperge_1, res_asp_60_1, verite_terrain)
 View(resultats_comparaison)
 
 ```
