@@ -189,11 +189,12 @@ verite_terrain <- readxl::read_excel("levels_asperge.xlsx")
 
 # Exemple d'exécution de la fonction pour les prompts de taille 40 des tomates
 resultats_comparaison <- comparer_listes_produits(prompts_40_levels_asperge_1, res_asp_40_1, verite_terrain)
+
 View(resultats_comparaison)
 
-produits_transfo_pas_trouves <- unlist(lapply(resultats_comparaison, function(x) x$prod_transfo_pas_trouver))
+# produits_transfo_pas_trouves <- unlist(lapply(resultats_comparaison, function(x) x$prod_transfo_pas_trouver))
 
-produits_transfo_trouves_ms_bruts <- unlist(lapply(resultats_comparaison, function(x) setdiff(x$levels_communs, x$prod_transfo_attendus)))
+# produits_transfo_trouves_ms_bruts <- unlist(lapply(resultats_comparaison, function(x) setdiff(x$levels_communs, x$prod_transfo_attendus)))
 
 
 ```
@@ -278,19 +279,12 @@ view(table_indica_purete_asperge)
 ```{r}
 # Créer une matrice de confusion vide avec des noms de colonnes
 matrice_confusion_prompt_40 <- data.frame(
-    Positive = c(NA, NA),
-    Negative = c(NA, NA),
-    row.names = c("Positifs", "Negatifs")
+    Positifs = c(NA, NA),
+    Negatifs = c(NA, NA),
+    row.names = c("Positifs_llm", "Negatifs_llm")
 )
 
-# On renomme les colonnes 
-matrice_confusion_prompt_40 <-  matrice_confusion_prompt_40 |> 
-  rename("Positifs" = Positive,
-         "Negatifs" = Negative,
-         )
-
 ###### On remplit la matrice de confusion 
-table_indica_purete_asperge$nb_prod_transfo_trouves_llm[[length(resultats_comparaison)+1]]
 
 # Etape 1 : Vrais positifs : Les produits transformés trouvés par le llm qui sont des produits transformés 
 matrice_confusion_prompt_40$Positifs[[1]] <- table_indica_purete_asperge$nb_prod_transfo_trouves_llm[[length(resultats_comparaison)+1]]
