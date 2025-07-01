@@ -149,7 +149,21 @@ comparer_listes_produits <- function(prompts_attendus, reponses_llm, verite_terr
       
       if (length(vrais_noms) == 0) return(NULL)
       return(vrais_noms)
-    }))
+      
+      # S'il y a plusieurs correspondances
+      if (length(vrais_noms) > 1) {
+        nom_llm <- tolower(h)
+        
+        # rechercher une correspondance exacte sans la caste
+        correspondance_exacte <- vrais_noms[tolower(vrais_noms) == nom_llm]
+        
+        if (length(correspondance_exacte) == 1) {
+          return(correspondance_exacte)
+        } else {
+          return(sample(vrais_noms, 1))  # un seul au hasard
+        }
+      }  
+}))
     
     hallucinations_corrige <- unique(hallucinations_corrige)
     
@@ -298,7 +312,7 @@ View(table_indica_purete_asperge)
 
 ```{r}
 # Créer une matrice de confusion vide avec des noms de colonnes
-matrice_confusion_prompt_40 <- data.frame(
+matrice_confusion_prompt_20 <- data.frame(
     Positifs = c(NA, NA),
     Negatifs = c(NA, NA),
     row.names = c("Positifs_llm", "Negatifs_llm"))
