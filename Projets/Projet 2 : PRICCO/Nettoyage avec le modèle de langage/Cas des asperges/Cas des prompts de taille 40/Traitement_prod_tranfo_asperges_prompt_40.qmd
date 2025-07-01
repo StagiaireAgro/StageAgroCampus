@@ -250,45 +250,25 @@ table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm <- sapply(resultats_
 table_indica_purete_asperge$nb_fausses_halluci_llm_st_prod_transfo <- sapply(resultats_comparaison, function(x) length(x$fausses_hallucina_prod_transfo))
 
 
-# On crée le jeu de données contenant le total de chacune des colonnes de 
-data_total_indicat_purete <- data.frame(
-  "Totale", 
-  sum(table_indica_purete_asperge$nb_levels_initial),
-  sum(table_indica_purete_asperge$nb_levels_llm), 
-  sum(table_indica_purete_asperge$nb_levels_commun), 
-  sum(table_indica_purete_asperge$nb_fausses_halluci_llm), 
-  sum(table_indica_purete_asperge$nb_vraies_halluci_llm), 
-  sum(table_indica_purete_asperge$nb_prod_attendus), 
-  sum(table_indica_purete_asperge$nb_prod_transfo_trouves_llm), 
-  sum(table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm), 
-  sum(table_indica_purete_asperge$nb_fausses_halluci_llm_st_prod_transfo))
+### Calcul des moyennes et totaux
 
+# Selectionner les noms des colonnes en retirant la colonne "chunck_traite" 
+cols_to_sum <- names(table_indica_purete_asperge)[-1]
 
-# On affecte les mêmes noms de colonnes que pour table_indica_purete_asperge
-names(data_total_indicat_purete) <- names(table_indica_purete_asperge)
+# Calcul des totaux et moyennes par colonne
+totaux <- colSums(table_indica_purete_asperge[, cols_to_sum], na.rm = TRUE)
+moyennes <- colMeans(table_indica_purete_asperge[, cols_to_sum], na.rm = TRUE)
 
-# On crée le jeu de données contenant le total de chacune des colonnes de 
-# table_indica_purete_asperge
-data_moy_indicat_purete <- data.frame(
-  "Moyenne",
-  NA,
-  round(mean(table_indica_purete_asperge$nb_levels_llm)),
-  round(mean(table_indica_purete_asperge$nb_levels_commun)),
-  round(mean(table_indica_purete_asperge$nb_fausses_halluci_llm)),
-  round(mean(table_indica_purete_asperge$nb_vraies_halluci_llm)),
-  round(mean(table_indica_purete_asperge$nb_prod_attendus)),
-  round(mean(table_indica_purete_asperge$nb_prod_transfo_trouves_llm)),
-  round(mean(table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm)),
-  round(mean(table_indica_purete_asperge$nb_fausses_halluci_llm_st_prod_transfo)))
+# Création des lignes à ajouter (ligne Total et Moyenne) et ajout de la colonne "chunck_traite"
+ligne_total <- c(chunck_traite = "Total", round(totaux))
+ligne_moyenne <- c(chunck_traite = "Moyenne", round(moyennes))
 
-# On affecte les mêmes noms de colonnes que pour table_indica_purete_asperge
-names(data_moy_indicat_purete) <- names(table_indica_purete_asperge)
+# On remplace la moyenne de levels_initial par un NA car ça n'a pas de sens
+ligne_moyenne[2] <- "NA"
 
-# On combine la ligne du total à table_indica_purete_asperge
-table_indica_purete_asperge <- rbind(table_indica_purete_asperge, data_total_indicat_purete)
-
-# On combine la ligne du total à table_indica_purete_asperge
-table_indica_purete_asperge <- rbind(table_indica_purete_asperge, data_moy_indicat_purete)
+# Ajout au tableau 
+table_indica_purete_asperge <- rbind( table_indica_purete_asperge,
+                                      ligne_total, ligne_moyenne)
 
 view(table_indica_purete_asperge)
 ```
