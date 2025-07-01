@@ -1,5 +1,5 @@
 ---
-title: "Traitement_prod_tranfo_tomates_prompt_60"
+title: "Traitement_prod_tranfo_asperges_prompt_60"
 format: html
 ---
 
@@ -76,22 +76,22 @@ extraire_liste_produits <- function(texte_source) {
 
 ```{r}
 
-# Applique la fonction extraire_liste_produits() à chaque élément de 'res_20'
+# Applique la fonction extraire_liste_produits() à chaque élément de 'res_40'
 # Cela permet d'extraire, pour chaque réponse du LLM, la liste de produits transformés détectée
-vect_verifi_LLM_res_tomates_60_1 <- lapply(prompts_60_levels_tomates_2, extraire_liste_produits)
+vect_verifi_LLM_res_asp_60_1 <- lapply(res_asp_60_1, extraire_liste_produits)
 
 
-# Vérifie pour quels éléments de res_20 l'extraction a échoué (retourne NULL)
+# Vérifie pour quels éléments de res_40 l'extraction a échoué (retourne NULL)
 # sapply(..., is.null)' renvoie un vecteur logique indiquant quels éléments sont NULL
 # which(...)' retourne les indices correspondants. C'est utile pour identifier les cas problématiques
-which(sapply(res_60, is.null))
+which(sapply(res_asp_60_1, is.null))
 
 ```
 
 # IV) Comparaison des produits listés dans les prompts avec ceux extraits par LLM
 
 ```{r}
-comparer_listes_produits <- function(prompts_attendus, reponses_llm) {
+comparer_listes_produits <- function(prompts_attendus, reponses_llm, verite_terrain) {
   
   # Étape 1 : Extraction des produits attendus depuis les prompts (niveau "level")
   produits_attendus <- lapply(prompts_attendus, function(texte_prompt) {
@@ -156,13 +156,27 @@ comparer_listes_produits <- function(prompts_attendus, reponses_llm) {
     produits_communs <- unique(c(produits_communs, hallucinations_corrige))
     
     
+    verite_terrain_produit_transfo <- verite_terrain$levels_asperge[verite_terrain$Prod_transfo_ou_non == "1"]
+    
+    prod_transfo_levels_initiaux <- intersect(verite_terrain_produit_transfo, liste_attendue)
+    
+    produit_transfo_llm <- intersect(prod_transfo_levels_initiaux, produits_communs)
+    
+    prod_transfo_pas_trouver <- setdiff(prod_transfo_levels_initiaux, produit_transfo_llm)
+    
+    # On regarde parmi les hallucinations qui sont des sous parties des produits initiaux lesquelles sont des sous parties des produits transformés attendus, et on récupère leur nom complet dans la liste des produits transformé attendus 
+    
+    
     # Structure des résultats par comparaison
     list(
       levels_initiaux = liste_attendue,
       levels_llm = liste_extraite,
       fausses_hallucina = pseudo_hallucinations,
       vraies_hallucina = hallucinations_reelles,
-      levels_communs = produits_communs
+      levels_communs = produits_communs,
+      prod_transfo_attendus = prod_transfo_levels_initiaux,
+      produit_transfo_llm = produit_transfo_llm,
+      prod_transfo_pas_trouver = prod_transfo_pas_trouver
     )
   })
   
@@ -171,19 +185,18 @@ comparer_listes_produits <- function(prompts_attendus, reponses_llm) {
 }
 
 
-# Exemple d'exécution de la fonction pour les prompts de taille 20 des tomates
-resultats_comparaison <- comparer_listes_produits(prompts_60_levels_tomates_2, res_60)
+verite_terrain <- read_excel("levels_asperge.xlsx")
+
+# Exemple d'exécution de la fonction pour les prompts de taille 60 des tomates
+resultats_comparaison <- comparer_listes_produits(prompts_60_levels_asperge_1, res_asp_60_1, verite_terrain)
 
 View(resultats_comparaison)
 
+### Voir la liste des produits transformés que le modèle n'a pas réussi à trouver
+# produits_transfo_pas_trouves <- unlist(lapply(resultats_comparaison, function(x) x$prod_transfo_pas_trouver))
 
-#produits_transfo_llm <- unlist(lapply(resultats_comparaison, function(x) x$levels_llm))
-
-#fausses_hallucina_llm <- unlist(lapply(resultats_comparaison, function(x) x$fausses_hallucina))
-
-#vraies_hallucina_llm <- unlist(lapply(resultats_comparaison, function(x) x$vraies_hallucina))
-
-#levels_communs_llm <- unlist(lapply(resultats_comparaison, function(x) x$levels_communs))
+### Voir la liste des produits transformés que le modèle a trouvé mais qui sont en réalité des produits brutes
+# produits_transfo_trouves_ms_bruts <- unlist(lapply(resultats_comparaison, function(x) setdiff(x$levels_communs, x$prod_transfo_attendus)))
 
 ```
 
@@ -195,14 +208,20 @@ View(resultats_comparaison)
 # On initialise le tableau d'indicateur d'impureté 
 table_indica_purete_asperge <- data.frame(
   chunck_traite = c(1:length(resultats_comparaison)),
-  nb_levels_initial = NA, 
+  nb_levels_initial = NA,
   nb_levels_llm = NA,
   nb_levels_commun = NA,
   nb_fausses_halluci_llm = NA,
-  nb_vraies_halluci_llm = NA)
+  nb_vraies_halluci_llm = NA,
+  nb_prod_attendus = NA, 
+  nb_prod_transfo_trouves_llm = NA,
+  nb_prod_transfo_pas_trouves_llm = NA,
+  nb_fausses_halluci_llm_st_prod_transfo = NA)
+
 
 
 # On remplit la colonne du nb_levels_initial
+table_indica_purete_asperge$nb_levels_initial <- sapply(resultats_comparaison, function(x) length(x$levels_initiaux))
 
 # On remplit la colonne du nb_levels_llm
 table_indica_purete_asperge$nb_levels_llm <- sapply(resultats_comparaison, function(x) length(x$levels_llm))
@@ -216,65 +235,100 @@ table_indica_purete_asperge$nb_fausses_halluci_llm <- sapply(resultats_comparais
 # On remplit la colonne du nb_vraies_halluci_llm
 table_indica_purete_asperge$nb_vraies_halluci_llm <- sapply(resultats_comparaison, function(x) length(x$vraies_hallucina))
 
+# On remplit la colonne du nb_prod_attendus
+table_indica_purete_asperge$nb_prod_attendus <- sapply(resultats_comparaison, function(x) length(x$vraies_hallucina))
 
-### Calcul des moyennes et totaux
+# On remplit la colonne du nb_prod_attendus
+table_indica_purete_asperge$nb_prod_attendus <- sapply(resultats_comparaison, function(x) length(x$prod_transfo_attendus))
 
-# Selectionner les noms des colonnes en retirant la colonne "chunck_traite" 
-cols_to_sum <- names(table_indica_purete_asperge)[-1]
+# On remplit la colonne du nb_prod_transfo_trouves_llm
+table_indica_purete_asperge$nb_prod_transfo_trouves_llm <- sapply(resultats_comparaison, function(x) length(x$produit_transfo_llm))
 
-# Calcul des totaux et moyennes par colonne
-totaux <- colSums(table_indica_purete_asperge[, cols_to_sum], na.rm = TRUE)
-moyennes <- colMeans(table_indica_purete_asperge[, cols_to_sum], na.rm = TRUE)
+# On remplit la colonne du nb_prod_transfo_pas_trouves_llm
+table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm <- sapply(resultats_comparaison, function(x) length(x$prod_transfo_pas_trouver))
 
-# Création des lignes à ajouter (ligne Total et Moyenne) et ajout de la colonne "chunck_traite"
-ligne_total <- c(chunck_traite = "Total", round(totaux))
-ligne_moyenne <- c(chunck_traite = "Moyenne", round(moyennes))
+# On remplit la colonne du nb_fausses_halluci_llm_st_prod_transfo
+table_indica_purete_asperge$nb_fausses_halluci_llm_st_prod_transfo <- sapply(resultats_comparaison, function(x) length(x$fausses_hallucina_prod_transfo))
 
-# On remplace la moyenne de levels_initial par un NA car ça n'a pas de sens
-ligne_moyenne[2] <- "NA"
 
-# Ajout au tableau 
-table_indica_purete_asperge <- rbind( table_indica_purete_asperge,
-                                      ligne_total, ligne_moyenne)
+# On crée le jeu de données contenant le total de chacune des colonnes de 
+# table_indica_purete_asperge
+data_total_indicat_purete <- data.frame(
+  "Totale", 
+  sum(table_indica_purete_asperge$nb_levels_initial),
+  sum(table_indica_purete_asperge$nb_levels_llm), 
+  sum(table_indica_purete_asperge$nb_levels_commun), 
+  sum(table_indica_purete_asperge$nb_fausses_halluci_llm), 
+  sum(table_indica_purete_asperge$nb_vraies_halluci_llm), 
+  sum(table_indica_purete_asperge$nb_prod_attendus), 
+  sum(table_indica_purete_asperge$nb_prod_transfo_trouves_llm), 
+  sum(table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm), 
+  sum(table_indica_purete_asperge$nb_fausses_halluci_llm_st_prod_transfo))
 
-view(table_indica_purete_asperge)
+
+# On affecte les mêmes noms de colonnes que pour table_indica_purete_asperge
+names(data_total_indicat_purete) <- names(table_indica_purete_asperge)
+
+# On crée le jeu de données contenant le total de chacune des colonnes de 
+# table_indica_purete_asperge
+data_moy_indicat_purete <- data.frame(
+  "Moyenne",
+  NA,
+  round(mean(table_indica_purete_asperge$nb_levels_llm)),
+  round(mean(table_indica_purete_asperge$nb_levels_commun)),
+  round(mean(table_indica_purete_asperge$nb_fausses_halluci_llm)),
+  round(mean(table_indica_purete_asperge$nb_vraies_halluci_llm)),
+  round(mean(table_indica_purete_asperge$nb_prod_attendus)),
+  round(mean(table_indica_purete_asperge$nb_prod_transfo_trouves_llm)),
+  round(mean(table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm)),
+  round(mean(table_indica_purete_asperge$nb_fausses_halluci_llm_st_prod_transfo)))
+
+# On affecte les mêmes noms de colonnes que pour table_indica_purete_asperge
+names(data_moy_indicat_purete) <- names(table_indica_purete_asperge)
+
+# On combine la ligne du total à table_indica_purete_asperge
+table_indica_purete_asperge <- rbind(table_indica_purete_asperge, data_total_indicat_purete)
+
+# On combine la ligne du total à table_indica_purete_asperge
+table_indica_purete_asperge <- rbind(table_indica_purete_asperge, data_moy_indicat_purete)
+
+View(table_indica_purete_asperge)
 ```
 
 # VI) Matrice de confiusion 
 
 ```{r}
 # Créer une matrice de confusion vide avec des noms de colonnes
-matrice_confusion_prompt_20 <- data.frame(
+matrice_confusion_prompt_60 <- data.frame(
     Positifs = c(NA, NA),
     Negatifs = c(NA, NA),
-    row.names = c("Positifs_llm", "Negatifs_llm")
-)
+    row.names = c("Positifs_llm", "Negatifs_llm"))
 
 ###### On remplit la matrice de confusion 
 table_indica_purete_asperge$nb_prod_transfo_trouves_llm[[length(resultats_comparaison)+1]]
 
 # Etape 1 : Vrais positifs : Les produits transformés trouvés par le llm qui sont des produits transformés 
-matrice_confusion_prompt_20$Positifs[[1]] <- table_indica_purete_asperge$nb_prod_transfo_trouves_llm[[length(resultats_comparaison)+1]]
+matrice_confusion_prompt_60$Positifs[[1]] <- table_indica_purete_asperge$nb_prod_transfo_trouves_llm[[length(resultats_comparaison)+1]]
 
 # Etape 2 : Faux positifs : Les produits transformés trouvés par le llm qui sont des produits bruts
-matrice_confusion_prompt_20$Negatifs[[1]] <- table_indica_purete_asperge$nb_levels_commun[[length(resultats_comparaison)+1]] - table_indica_purete_asperge$nb_prod_transfo_trouves_llm[[length(resultats_comparaison)+1]]
+matrice_confusion_prompt_60$Negatifs[[1]] <- table_indica_purete_asperge$nb_levels_commun[[length(resultats_comparaison)+1]] - table_indica_purete_asperge$nb_prod_transfo_trouves_llm[[length(resultats_comparaison)+1]]
 
 # Etape 3 : Vrais négatifs : Les produits bruts trouvés par le llm qui sont des produits bruts 
-matrice_confusion_prompt_20$Negatifs[[2]] <- table_indica_purete_asperge$nb_levels_initial[length(resultats_comparaison)+1] - table_indica_purete_asperge$nb_levels_commun[[length(resultats_comparaison)+1]] - table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm[[length(resultats_comparaison)+1]]
+matrice_confusion_prompt_60$Negatifs[[2]] <- table_indica_purete_asperge$nb_levels_initial[length(resultats_comparaison)+1] - table_indica_purete_asperge$nb_levels_commun[[length(resultats_comparaison)+1]] - table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm[[length(resultats_comparaison)+1]]
 
 # Etape 4 : Faux négatifs : Les produits bruts trouvés par le llm qui sont des produits transformés 
-matrice_confusion_prompt_20$Positifs[[2]] <-table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm[[length(resultats_comparaison)+1]]
+matrice_confusion_prompt_60$Positifs[[2]] <-table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm[[length(resultats_comparaison)+1]]
 
-view(matrice_confusion_prompt_20)
+view(matrice_confusion_prompt_60)
 
 ```
 
 
-# VII) Suppresion des levels de produits transforéms dans le jeu de données
+# VII) Suppresion des levels de produits transformés dans le jeu de données
 
 ```{r}
 # Importation du jeu de données des asperges
-data_tomate <- read_excel("data_tomate.xlsx")
+data_asperge <- read_excel("data_asperge.xlsx")
 
 # Récupérer toute las liste des produits transformés trouvés par le llm
 liste_prod_transfo_llm <- sapply(resultats_comparaison, function(x) x$produit_transfo_llm)
@@ -287,6 +341,7 @@ liste_prod_transfo_llm <- unique(liste_prod_transfo_llm)
 
 # On supprime les produits transformés pour le jeu de données des asperges 
 data_asperge_bruts <- data_asperge[!(data_asperge$productName %in% liste_prod_transfo_llm), ]
+
 ```
 
 
@@ -294,7 +349,7 @@ data_asperge_bruts <- data_asperge[!(data_asperge$productName %in% liste_prod_tr
 
 ```{r}
 # Export de la liste des produits transformés non trouvés par le LLM
-write_xlsx(matrice_confusion_prompt_20,"matrice_confusion_prompt_20.xlsx")
+write_xlsx(matrice_confusion_prompt_60,"matrice_confusion_prompt_60.xlsx")
 
 # Export de la liste des produits transformés non trouvés par le LLM
 write_xlsx(produits_transfo_pas_trouves,"data_produits_transfo_pas_trouves.xlsx")
