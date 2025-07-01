@@ -207,22 +207,18 @@ View(resultats_comparaison)
 
 ```{r}
 # On initialise le tableau d'indicateur d'impureté 
-data_total_indicat_purete <- data.frame(
-  "Totale", 
-  sum(table_indica_purete_asperge$nb_levels_initial),
-  sum(table_indica_purete_asperge$nb_levels_llm), 
-  sum(table_indica_purete_asperge$nb_levels_commun), 
-  sum(table_indica_purete_asperge$nb_fausses_halluci_llm), 
-  sum(table_indica_purete_asperge$nb_vraies_halluci_llm), 
-  sum(table_indica_purete_asperge$nb_prod_attendus), 
-  sum(table_indica_purete_asperge$nb_prod_transfo_trouves_llm), 
-  sum(table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm), 
-  sum(table_indica_purete_asperge$nb_fausses_halluci_llm_st_prod_transfo))
+table_indica_purete_asperge <- data.frame(
+  chunck_traite = c(1:length(resultats_comparaison)),
+  nb_levels_initial = NA,
+  nb_levels_llm = NA,
+  nb_levels_commun = NA,
+  nb_fausses_halluci_llm = NA,
+  nb_vraies_halluci_llm = NA,
+  nb_prod_attendus = NA, 
+  nb_prod_transfo_trouves_llm = NA,
+  nb_prod_transfo_pas_trouves_llm = NA,
+  nb_fausses_halluci_llm_st_prod_transfo = NA)
 
-
-
-# On remplit la colonne du nb_levels_initial
-table_indica_purete_asperge$nb_levels_initial <- sapply(resultats_comparaison, function(x) length(x$levels_initiaux))
 
 # On remplit la colonne du nb_levels_llm
 table_indica_purete_asperge$nb_levels_llm <- sapply(resultats_comparaison, function(x) length(x$levels_llm))
