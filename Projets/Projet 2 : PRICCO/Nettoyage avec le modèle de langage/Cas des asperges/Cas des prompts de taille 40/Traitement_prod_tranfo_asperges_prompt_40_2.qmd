@@ -13,6 +13,8 @@ library(writexl)
 
 # Chargement des fichiers Excel
 library(readxl)
+
+# Calcul de la distance de Levenshtein
 library(stringdist)
 ```
 
