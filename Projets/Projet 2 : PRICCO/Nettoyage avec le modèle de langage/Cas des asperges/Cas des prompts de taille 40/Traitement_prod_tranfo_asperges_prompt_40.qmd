@@ -219,6 +219,8 @@ table_indica_purete_asperge <- data.frame(
   nb_prod_transfo_pas_trouves_llm = NA,
   nb_fausses_halluci_llm_st_prod_transfo = NA)
 
+# On remplit la colonne du nb_levels_initial
+table_indica_purete_asperge$nb_levels_initial <- sapply(resultats_comparaison, function(x) length(x$levels_initiaux))
 
 # On remplit la colonne du nb_levels_llm
 table_indica_purete_asperge$nb_levels_llm <- sapply(resultats_comparaison, function(x) length(x$levels_llm))
