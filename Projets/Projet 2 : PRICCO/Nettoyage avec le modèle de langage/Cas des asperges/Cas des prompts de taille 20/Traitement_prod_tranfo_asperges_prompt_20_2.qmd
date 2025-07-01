@@ -209,8 +209,11 @@ comparer_listes_produits <- function(prompts_attendus, reponses_llm, verite_terr
   # Étape 4 : Retourne la liste complète des résultats de comparaison
   return(comparaison)
 }
+```
 
 
+
+```{r}
 verite_terrain <- read_excel("levels_asperge.xlsx")
 
 # Exemple d'exécution de la fonction pour les prompts de taille 40 des tomates
@@ -244,8 +247,6 @@ table_indica_purete_asperge <- data.frame(
   nb_prod_transfo_pas_trouves_llm = NA,
   nb_prod_llm_st_prod_transfo = NA)
 
-
-
 # On remplit la colonne du nb_levels_initial
 table_indica_purete_asperge$nb_levels_initial <- sapply(resultats_comparaison, function(x) length(x$levels_initiaux))
 
@@ -273,8 +274,9 @@ table_indica_purete_asperge$nb_prod_transfo_trouves_llm <- sapply(resultats_comp
 # On remplit la colonne du nb_prod_transfo_pas_trouves_llm
 table_indica_purete_asperge$nb_prod_transfo_pas_trouves_llm <- sapply(resultats_comparaison, function(x) length(x$prod_transfo_pas_trouver))
 
-# On remplit la colonne du nb_fausses_halluci_llm_st_prod_transfo
+# On remplit la colonne du nombre de produit llm qui sont des produits bruts
 table_indica_purete_asperge$nb_prod_llm_st_prod_transfo <- sapply(resultats_comparaison, function(x) (length(x$levels_communs) - length(x$produit_transfo_llm)))
+
 
 ### Calcul des moyennes et totaux
 
@@ -367,4 +369,3 @@ write_xlsx(produits_transfo_trouves_ms_bruts,"data_produits_transfo_trouves_ms_b
 write_xlsx(data_asperge_bruts,"data_asperge_bruts.xlsx")
 
 ```
-
