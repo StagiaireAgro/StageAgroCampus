@@ -1,1 +1,140 @@
+---
+title: "Génération_des_prompts_tomates"
+format: html
+editor: visual
+---
+
+# I) Importation des librairies
+
+```{r,message=FALSE}
+library("ollamar")
+
+library("tidyverse")
+```
+
+# II) Trouver les produits transformés avec gemma
+
+```{r}
+# On génère les prompts et on applique Gemma dessus
+detecter_levels_prod_transfor <- function(nom_prod, levels, nb_chunck, taille_chunck) {
+  
+  total_levels <- length(levels)
+
+  # Création des chunks de taille `taille_chunck` avec gestion du dernier chunk partiel
+  chunks <- split(levels, ceiling(seq_along(levels) / taille_chunck))
+
+  # Nombre total de chunks générés
+  total_chunks <- length(chunks)
+
+  # Limiter au nb_chunck demandé, mais sans dÃ©passer ceux disponibles
+  chunks <- chunks[1:min(nb_chunck, total_chunks)]
+
+  # Prompt de base (dynamique en fonction du produit)
+base_prompt <- paste0(
+  "Tu es un expert en alimentation et en classification des produits alimentaires.",
+  "Tu reçois une liste de produits à base de ", nom_prod, ". ", 
+  "Ta tâche est d’**identifier uniquement les produits transformés** dans cette liste.",
+  "---",
+  "### \uD83D\uDD36 Définition d’un **produit transformé** :",
+  "Un produit est considéré comme **transformé** s’il remplit **au moins un** des critères suivants :",
+  "- Il contient **d’autres ingrédients en plus de la ", nom_prod, "** (par exemple : chou, vinaigrette, gingembre, panais, quinoa, etc.)",
+  "- Il a subi une **transformation culinaire** (ex. cuit, râpé, assaisonné, mixé, fermenté, stérilisé…)",
+  "- Il est présenté ou conditionné comme un **plat préparé** (ex. soupe, purée, tartinade, chips, coleslaw, conserve, plat cuisiné, bocal, barquette, bouteille…)",
+  "- Il est destiné à un **usage spécifique** (ex. apéritif, snacking, bébé, mix de crudités, etc.)",
+  "---",
+  "### ⛔ À l’inverse, un **produit brut** est **non transformé** :",
+  "Tu dois **ignorer tous les produits bruts**, même s’ils sont variés ou bio.",  
+  "Un produit est brut s’il :",
+  "- est uniquement composé de **", nom_prod, "**, sans aucun autre ingrédient",
+  "- est présenté sous forme **naturelle** : entière, en botte, en vrac, en sac, lavée ou non, bio ou non, orange, jaune, violette, de différentes variétés",
+  "- n’a **subi aucune transformation culinaire**",
+  "- ne contient **aucune mention de préparation, de mélange ou de conditionnement culinaire**",
+  "\uD83D\uDC49 Exemples de produits **bruts à ignorer** :  ",
+  paste0(nom_prod, ", ", nom_prod, " vrac, ", nom_prod, " lavées, ", nom_prod, " bio, ", nom_prod, " en botte, ", nom_prod, " jaune, ", nom_prod, " non lavées, etc."),
+  "---",
+  "### \uD83D\uDCE4 Ce que tu dois faire :",
+  "- **Retourne uniquement** les **noms exacts** des produits transformés de la liste, **copiés tels quels**",
+  "- N’ajoute **aucune explication, aucun commentaire**",
+  "- Rends la sortie **exclusivement** au format R suivant :",
+  "c(\"produit transformé\", \"produit transformé\", \"produit transformé\")",
+  "Voici la liste de produits à analyser :"
+)
+
+
+
+  # Générer les prompts complets en y incorporant les levels
+  prompts <- lapply(chunks, function(chunk) {
+    paste0(base_prompt,paste(chunk, collapse = "\n"))
+    
+  })
+
+  # Générer les produits transformés en appelant Gemma3 pour chaque prompt
+  # resultats <- lapply(prompts, function(p) {
+  #   generate("gemma3", p, stream = FALSE, output = "text")
+  # })
+
+  # Résultats des prompts et de Gemma 3
+  #return(list(prompts = prompts, resultats = resultats))
+  
+  # Résultats des prompts
+  return(prompts = prompts)
+}
+```
+
+```{r}
+# Test de la fonction pour 20 prompts 
+levels_tomates_permutes <- read_excel("level_tomate.xlsx") # à importer
+
+# On choisir la taille des tailles chuncks et en divisant le nombre de level par la taille des chuncks on obtient le nombre chunck
+liste_prompts_tomates <- 
+  detecter_levels_prod_transfor(
+    "tomate", levels_tomates_permutes, nb_chunck = 223,taille_chunck = 20)
+
+# Exemple d'affichage correct 
+cat(liste_prompts_tomates$`1`)
+
+# On sauvegarde les 20 prompts dans un fichier RData
+save(liste_prompts_tomates, file = "liste_20_prompts_complets.RData")
+```
+
+# III) Indicateur d'hallucination du modèle de langage
+
+## a) 1er vecteur de résultat du LLM
+
+```{r}
+
+# On stocke dans une variable le 1er vecteur de résultat du modèle de langage
+# 972 levels au total
+produits_uniques_1 <- produits_uniques
+
+# S'assurer qu'on travaille avec des levels uniques
+levels_tomates_uniques <- unique(levels_tomates)
+produits_uniques_1_uniques <- unique(produits_uniques_1)
+
+# Calculs
+nb_levels_tomates <- length(levels_tomates_uniques)
+nb_levels_produits <- length(produits_uniques_1_uniques)
+nb_communs <- length(intersect(levels_tomates_uniques, produits_uniques_1_uniques))
+
+# Créer le tableau de comptage
+table_1_comptage_comparaison <- tibble::tibble(
+  nb_levels_tomates = nb_levels_tomates,
+  nb_levels_LLM = nb_levels_produits,
+  nb_en_commun = nb_communs
+)
+
+```
+
+```{r}
+# On visualise les levels en commun
+Table_1_levels_commun_LLM_et_tomates <- 
+  data.frame(Levels_en_commun = 
+               intersect(levels_tomates_uniques, produits_uniques_1_uniques))
+
+# On trie les levels du mot le plus court au plus long
+
+Table_1_levels_commun_LLM_et_tomates <- Table_1_levels_commun_LLM_et_tomates %>%
+  arrange(nchar(Levels_en_commun))
+
+```
 
