@@ -160,4 +160,24 @@ function(input, output, session) {
     }
   )
   
+  # --- Téléchargement des produits retirés ------------------------------------
+  output$download_removed_products <- downloadHandler(
+    filename = function() {
+      paste0("produits_retires_", Sys.Date(), ".csv")
+    },
+    content = function(file) {
+      # Lire les produits retirés du fichier YAML
+      if (file.exists("log_produits_retires.yml")) {
+        produits_retires <- yaml::read_yaml("log_produits_retires.yml")
+        
+        # Convertir en dataframe et télécharger
+        df_produits <- data.frame(Produits_retires = unlist(produits_retires), stringsAsFactors = FALSE)
+        write.csv(df_produits, file, row.names = FALSE)
+      } else {
+        # Aucun produit retiré
+        write.csv(data.frame(Produits_retires = character()), file, row.names = FALSE)
+      }
+    }
+  )
+  
 }
