@@ -62,7 +62,14 @@ fluidPage(
       
       h3("Téléchargement du jeu de données filtré", class = "text-primary font-weight-bold mb-3"),
       tags$hr(style = "border-top: 3px solid #4a90e2;"),
-      downloadButton("download", "Télécharger", class = "btn btn-info btn-block")
+      downloadButton("download", "Télécharger", class = "btn btn-info btn-block"),
+      
+      # Telecharger les noms de produits retirés --------------------------------
+      
+      h3("Téléchargement des noms de produits retirés", class = "text-primary font-weight-bold mb-3"),
+      tags$hr(style = "border-top: 3px solid #4a90e2;"),
+      downloadButton("download_removed_products", "Télécharger produits retirés", class = "btn btn-info btn-block"
+      )
     ),
     mainPanel(
       tabsetPanel(
