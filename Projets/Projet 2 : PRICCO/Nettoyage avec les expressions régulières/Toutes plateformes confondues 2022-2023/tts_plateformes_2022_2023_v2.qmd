@@ -183,7 +183,51 @@ names(liste_datasets_final) <- names(datasets)
 
 ```
 
-# V) Fusion de tous les jeux de données sauf cagette
+# V) Transformations des données de socleo
+
+## a) La fonction
+
+```{r}
+nettoyer_et_agreger <- function(df) {
+  # Suppression des lignes avec orderQuantity ou orderProductPrice <= 0
+  df <- df %>%
+    filter(orderQuantity > 0,
+           orderProductPrice > 0)
+  
+  df <- df %>%
+    mutate(orderProductPrice = orderProductPrice / orderQuantity)
+  
+  # Agrégation
+  df_aggrege <- df %>%
+    group_by(across(c(-orderQuantity))) %>% # Exclure orderQuantity des clés de groupement
+    summarise(
+      orderQuantity = sum(orderQuantity),
+      .groups = 'drop'
+    )
+  
+  return(df_aggrege)
+}
+
+```
+
+## b) Application de la fonction 
+
+```{r}
+
+liste_datasets_final[indices_socleo] <- lapply(
+  liste_datasets_final[indices_socleo],
+  function(d) {
+    if (!inherits(d, "data.frame")) {
+      d <- as.data.frame(d)
+    }
+    nettoyer_et_agreger(d)
+  }
+)
+
+```
+
+
+# VI) Fusion de tous les jeux de données sauf cagette
 
 Ce code sert à regrouper dans un seul tableau tous les jeux de données hors Cagette. En effet, les données de cagette étant déjà séparées en 37 tables de produit.
 
@@ -198,7 +242,7 @@ combinaison <- do.call(rbind, liste_datasets_final_sans_cagette)
 
 ```
 
-# VI) Associer le bon nom de produit
+# VII) Associer le bon nom de produit
 
 ## a) Définition de la liste de produits
 
@@ -530,8 +574,22 @@ data_prod_pas_tries <- resultats_2$data_pas_ok
 
 
 ```
+```{r}
+library(parallel)
+num_cores <- detectCores() - 1 # Utiliser tous les cœurs moins un
+cl <- makeCluster(num_cores)
 
-# VII) Fusion de tous les fichiers de cagette
+resultats_2 <- associer_noms_produits(
+    data = combinaison,  # Le jeu de données fusionné (sans Cagette)
+    liste_produits = liste_produits,  # Liste des noms de produits standardisés
+    liste_declinai_noms_produits = final_declinaisons  # Liste des déclinaisons textuelles pour chaque produit
+  )
+
+stopCluster(cl)
+```
+
+
+# VIII) Fusion de tous les fichiers de cagette
 
 Ce code permet de créer une sous-liste contenant uniquement les datasets de Cagette, pour les traiter à part des autres plateformes si nécessaire.
 
@@ -573,7 +631,7 @@ liste_datasets_cagette[["cagette_Pomme_2023"]] <- unique(liste_datasets_cagette[
 liste_finale_datasets_cagette <- do.call(rbind, liste_datasets_cagette)
 ```
 
-# VIII) On vérifie la pertinence des données déjà classées pour cagette
+# IX) On vérifie la pertinence des données déjà classées pour cagette
 
 Ce code utilise la fonction trouver_declinaisons_nom_produit() pour analyser les noms de produits et détecter les différentes variantes textuelles utilisées dans les données issues de Cagette. Cela permet ensuite de faciliter la normalisation ou le regroupement des produits.
 
@@ -615,7 +673,7 @@ cagette_prod_pas_tries <- liste_cagette_trie_et_pas_trie$data_pas_ok
 
 ```
 
-# IX) Fusion de tous les fichiers de produits triés issus de toutes les plateformes
+# X) Fusion de tous les fichiers de produits triés issus de toutes les plateformes
 
 Ce bloc permet de nettoyer les données en supprimant les colonnes intermédiaires et de construire un jeu de données consolidé contenant toutes les lignes correctement associées à un nom de produit standard, quelle que soit la plateforme d’origine.
 
@@ -635,7 +693,7 @@ datasets_tts_plateformes_prod_tries <- rbind(cagette_prod_tries, data_prod_tries
 ```
 
 
-# X) Fusion des fichiers de produits pas triés en un seul
+# XI) Fusion des fichiers de produits pas triés en un seul
 
 Ce code permet de rassembler tous les cas problématiques en une seule table, ce qui est utile pour une vérification manuelle, un traitement ultérieur ou pour suivre la qualité du matching produit.
 
@@ -652,7 +710,7 @@ data_prod_pas_tries_tts_platatefor <- rbind(cagette_prod_pas_tries, data_prod_pa
 ```
 
 
-# XI) Récupérer des noms de produits 
+# XII) Récupérer des noms de produits 
 
 ## a) La fonction 
 
@@ -661,7 +719,7 @@ Cette fonction permet de récupéer des donnnées pour des produits de data_prod
 Elle prend en paramètre le jeu de données, le nom de la colonne où rechercher les produits qu'on souhaite garder et un vecteur des noms de produit à récupérer (produits_cibles). Elle retourne un jeu de données des produits contenant dans leur noms tous les mots des noms de produits du vecteur produits_cibles.   
 
 ```{r}
-recuperer_produits <- function(df, colonne="productName", produits_cibles) {
+recuperer_produits <- function(df, colonne="productName", produits_cibles, cible=TRUE) {
   require(stringdist)
   require(stringr)
   
@@ -698,7 +756,11 @@ recuperer_produits <- function(df, colonne="productName", produits_cibles) {
   })
   
   # Les levels a retourner
+  if (cible) {
   noms_retour <- noms_prod_df_uniques[matched_levels]
+  } else{
+  noms_retour <- noms_prod_df_uniques[!matched_levels]
+  }
   
   # Filtrer le data frame
   res <- df[noms_prod_df %in% noms_retour, , drop = FALSE]
@@ -712,28 +774,19 @@ recuperer_produits <- function(df, colonne="productName", produits_cibles) {
 
 ```{r}
 # Liste de noms de référence
-produits_cibles <- c("tomate cerise", "tomate boeuf", "laitue pomme", "tomate oeuf")
+produits_cibles <- c("tomate cerise", "tomate boeuf", "laitue pomme", "tomate oeuf", "poivron tomate") 
 
-#c("poivrons tomate", "aubergines oeuf", "aubergines melongera", "carottes coeur boeuf", "cerises coeur boeuf", "chou fleur clémentine", "tomates clémentines", "boeuf joignon", "poire boeuf", "poivrons corne boeuf", "tomates prune", "tomate raisin", "tomates poire", "tomates pomme")
+#c("aubergine oeuf", "aubergine melongera", "carotte coeur boeuf", "cerise coeur boeuf", "chou fleur clémentine", "tomate clémentine", "boeuf joignon", "poire boeuf", "poivron corne boeuf", "tomate prune", "tomate raisin", "tomate poire", "tomate pomme")
 ```
 
 ## c) Application de la fonction 
 
 ```{r}
-# 30 min !!! 169.56 sec
-
-library(tictoc)
-tic("Temps de recherche produits")
-
-#data_recup <- recuperer_produits(data_prod_pas_tries_tts_platatefor, "productName", v_noms_produits)
 
 resultats <- recuperer_produits(data_prod_pas_tries_tts_platatefor, colonne = "productName", produits_cibles = produits_cibles)
 
-toc()
-
-length(levels(factor(resultats$productName)))#1087 lv, 54226 prod # 1143 +56levels
-head(resultats$productName, n=400L)
 ```
+
 ## d) Vérification et ajout au données datasets_tts_plateformes_prod_tries
 
 ```{r}
@@ -742,7 +795,7 @@ datasets_tts_plateformes_prod_tries <- rbind(datasets_tts_plateformes_prod_tries
 
 ```
 
-# XII) Ajout de la variable roduit déclassé
+# XIII) Ajout de la variable roduit déclassé
 
 ## a) La fonction
 
@@ -781,13 +834,11 @@ ajouter_colonne_solde <- function(df, col_nom="productName") {
 ## b) Application 
 
 ```{r}
-tic()
 datasets_tts_plateformes_prod_tries <- ajouter_colonne_solde(datasets_tts_plateformes_prod_tries)
-toc()
-length(levels(factor(datasets_tts_plateformes_prod_tries$solde)))
+
 ```
 
-# XIII) Standardiser l'écriture des unités
+# XIV) Standardiser l'écriture des unités
 
 ## a) Développement la fonction pour harmoniser l'écriture de unités
 
@@ -855,7 +906,7 @@ levels(factor(datasets_tts_plateformes_prod_tries$old_productConditioningUnit))
 ```
 
 
-# XIV) Garder les noms contenant des poids : Retirer les lignes pour lesquelles on ne peut pas calculer le prix au k
+# XV) Garder les noms contenant des poids : Retirer les lignes pour lesquelles on ne peut pas calculer le prix au k
 
 ```{r}
 # Récupérer les produits où l'unité correspond à Piece
@@ -873,7 +924,7 @@ datasets_tts_plateformes_prod_tries <- union(datasets_tts_plateformes_prod_tries
 ```
 
 
-# XV) Séparation des données en 37 tables selon le type de produit
+# XVI) Séparation des données en 37 tables selon le type de produit
 
 ## a) Développement de la fonction pour split en 37 tables
 
@@ -904,12 +955,18 @@ On teste la fonction de découpage sur l’ensemble des données triées. Ensuit
 # Test de la fonction split_data_ok_par_produit sur le data frame global trié
 liste_tables_37_produit_bruts <- split_data_ok_par_produit(datasets_tts_plateformes_prod_tries)
 
+```
+
+
+
+```{r}
+
 # Extraire le sous-dataframe correspondant au produit "asperge"
 data_asperge <- liste_tables_37_produit_bruts[["asperge"]]
 
 ```
 
-# XVI) Indicateur de pureté pour les produits triés
+# XVII) Indicateur de pureté pour les produits triés
 
 Cette fonction compte pour chaque produit standardisé combien de noms bruts (productName) lui correspondent, en évitant les chevauchements. Elle utilise une logique de priorité (plus long d’abord) pour attribuer les noms. Cela permet de calculer un indicateur de « pureté » des correspondances produits dans les données nettoyées.
 
@@ -975,7 +1032,7 @@ liste_table_indi_purete_prod_trie <- compter_occurrences_exclusives(datasets_tts
 ```
 
 
-# XVII) Ajouter une colonne type de produit plus fin à un jeu de données
+# XVIII) Ajouter une colonne type de produit plus fin à un jeu de données
 
 ## a) La fonction
 
@@ -1028,13 +1085,6 @@ types_fin_prod = c("Cerise", "Cocktail")
 
 ```{r}
 
-liste_tables_37_produit_bruts[["tomate"]] <- ajouter_types_fin_produit(liste_tables_37_produit_bruts[["tomate"]], col="productName", types_fin_prod, autre_type = "Tomate classique")
+liste_tables_37_produit_bruts$tomate <- ajouter_types_fin_produit(liste_tables_37_produit_bruts$tomate, col="productName", types_fin_prod, autre_type = "Classique")
 
 ```
-
-# XVII) Annexe
-
-```{r}
-
-```
-
