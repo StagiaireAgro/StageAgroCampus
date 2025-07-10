@@ -179,6 +179,8 @@ ui <- fluidPage(
   
 )
 
+options(shiny.maxRequestSize = 30 * 1024^2)  # 30 Mo
+
 server <- function(input, output, session) {
   
   data_select <- reactiveVal(NULL)
