@@ -165,8 +165,6 @@ ui <- fluidPage(
                  sliderInput("mult_EIQ", "Nombre d'intervalle(s) inter-quartile :", min = 0, max = 10, value = 1.5, step = 0.25),
                  dataTableOutput("prix_au_kilo"),
                  tags$hr(style = "border-top: 2px solid #999;"),
-                 h3("Moyenne valeurs aberrantes"),
-                 dataTableOutput("prix_au_kilo_ab"),
                  h4("Lignes inclues"),
                  dataTableOutput("dtout_v"),
                  h4("Lignes exclues"),
@@ -842,32 +840,6 @@ server <- function(input, output, session) {
         .groups = "drop"
       )
     
-    
-    # CALCUL MOYENNE PONDEREE PAR MOIS bio/non bio/total pour données aberrantes
-    
-    dt_m_ab <- dt_nclean %>%
-      group_by(.data[[name_product()]], month) %>%
-      summarise(
-        moy_tot = round(sum(pp_kilo * .data[[order_qt()]]*kg_condit, na.rm = TRUE) /
-          sum(.data[[order_qt()]]*kg_condit, na.rm = TRUE),2),
-        
-        qte_vendue = round(sum(.data[[order_qt()]]*kg_condit, na.rm = TRUE),2),
-        
-        moy_bio = round(sum(pp_kilo[as.logical(.data[[organic()]]) == TRUE] * .data[[order_qt()]][as.logical(.data[[organic()]]) == TRUE]*kg_condit[as.logical(.data[[organic()]]) == TRUE], na.rm = TRUE) /
-          sum(.data[[order_qt()]][as.logical(.data[[organic()]]) == TRUE]*kg_condit[as.logical(.data[[organic()]]) == TRUE], na.rm = TRUE),2),
-        
-        qte_vendue_bio = round(sum(.data[[order_qt()]][as.logical(.data[[organic()]]) == TRUE]*kg_condit[as.logical(.data[[organic()]]) == TRUE], na.rm = TRUE),2),
-        
-        moy_conv = round(sum(pp_kilo[as.logical(.data[[organic()]]) == FALSE] * .data[[order_qt()]][as.logical(.data[[organic()]]) == FALSE]*kg_condit[as.logical(.data[[organic()]]) == FALSE], na.rm = TRUE) /
-          sum(.data[[order_qt()]][as.logical(.data[[organic()]]) == FALSE]*kg_condit[as.logical(.data[[organic()]]) == FALSE], na.rm = TRUE),2),
-        
-        qte_vendue_conv = round(sum(.data[[order_qt()]][as.logical(.data[[organic()]]) == FALSE]*kg_condit[as.logical(.data[[organic()]]) == FALSE], na.rm = TRUE),2),
-        
-        .groups = "drop"
-      )
-    
-    dt_vab_m(dt_m_ab)
-    
     dt_months(data.frame(dt_m))
     
     DT::datatable(
@@ -890,18 +862,6 @@ server <- function(input, output, session) {
     })
   
   # Affichage MOYENNE PONDEREE PAR MOIS bio/non bio/total
-  
-  output$prix_au_kilo_ab <- renderDT({
-    req(dt_vab_m)
-    
-    DT::datatable(
-      dt_vab_m,
-      options = list(
-        pageLength = 12,
-        lengthMenu = list(c(12, 24, 36, 48, 60), c("12", "24", "36", "48", "60"))
-      )
-    )
-  })
   
   output$dtout_v <- renderDT({
     req(dt_v())
