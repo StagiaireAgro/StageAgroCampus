@@ -43,7 +43,8 @@ ui <- fluidPage(
                    actionButton("valide_file", "Valider le fichier sélectionné", 
                                 style = "background-color: #28a745; color: white; border: none; padding: 10px 20px; font-weight: bold;")
                  ),
-                 div(style = "text-align: center; margin-top: 10px;", textOutput("file_valide")),
+                 div(style = "text-align: center; margin-top: 10px;", uiOutput("file_valide")),
+                 br(),
                 
                  # Selection du prix et du nombre d'achat et date
                  
@@ -203,14 +204,15 @@ server <- function(input, output, session) {
     file_validated(TRUE)
   })
   
-  output$file_valide <- renderText({
+  output$file_valide <- renderUI({
     if (!validated_clicked()) {
-      return("")  # Rien si pas encore cliqué
+      return(NULL)  # Rien si pas encore cliqué
     }
+    
     if (!file_validated()) {
-      "Aucun fichier sélectionné"
+      tags$em("Aucun fichier sélectionné")  # Texte en italique
     } else {
-      "Fichier chargé"
+      tags$em("Fichier chargé")  # Texte en italique
     }
   })
   
@@ -368,8 +370,12 @@ server <- function(input, output, session) {
 
     dt <- data_select()
     choices <- names(dt)
-    default_choice <- choices[grepl("conditioningunit", choices, ignore.case = TRUE)]
-    selected_default <- if (length(default_choice) > 0) default_choice[1] else choices[1]
+    # On vérifie si la colonne "productConditioningUnit" existe
+    selected_default <- if ("productConditioningUnit" %in% choices) {
+      "productConditioningUnit"
+    } else {
+      choices[1]  # Fallback si la colonne n'existe pas
+    }
     
     div(style = "display: flex; align-items: center; gap: 10px;",
         tags$label("Unité du conditionnement :", `for` = "choices_trans_factor", style = "margin: 0; white-space: nowrap;"),
@@ -473,7 +479,7 @@ server <- function(input, output, session) {
     
     dt <- data_nc_direct()
     choices <- names(dt)
-    default_choice <- choices[grepl("productname", choices, ignore.case = TRUE)]
+    default_choice <- choices[grepl("productname", choices, ignore.case = TRUE)] #je voulais mettre clean_name à la place de productname mais ça ne fonctionne étrangement pas...
     selected_default <- if (length(default_choice) > 0) default_choice[1] else choices[1]
     div(
       style = "display: flex; align-items: center; gap: 10px;",
@@ -846,7 +852,8 @@ server <- function(input, output, session) {
       dt_m,
       options = list(
         pageLength = 12,
-        lengthMenu = list(c(12, 24, 36, 48, 60), c("12", "24", "36", "48", "60"))
+        lengthMenu = list(c(12, 24, 36, 48, 60), c("12", "24", "36", "48", "60")),
+        searching = FALSE  # enlève la barre de recherche
       )
     )
   })
